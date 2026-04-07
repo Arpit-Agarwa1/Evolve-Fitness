@@ -24,8 +24,10 @@ export default function Home() {
           <div className="hero-content">
             <h1>Transform Your Body</h1>
             <p>
-              Experience elite fitness with world-class trainers, premium
-              equipment, and a space designed to elevate your performance.
+              {/* Experience elite fitness with world-class trainers, premium
+              equipment, and a space designed to elevate your performance. */}
+              Jaipur’s Largest Gym Chain 20,000 sq. ft. of luxury & power
+              USA-grade equipment
             </p>
 
             <div className="hero-buttons">

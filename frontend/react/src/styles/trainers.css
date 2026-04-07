@@ -1,0 +1,76 @@
+.trainers-page {
+  background: #0d0d0d;
+  color: white;
+}
+
+/* HERO */
+
+.trainers-hero {
+  text-align: center;
+  padding: 120px 20px 80px;
+  background: linear-gradient(to bottom, #000, #111);
+}
+
+.trainers-hero h1 {
+  font-size: 3rem;
+  margin-bottom: 15px;
+}
+
+.trainers-hero p {
+  max-width: 600px;
+  margin: auto;
+  color: #b3b3b3;
+}
+
+/* GRID */
+
+.trainers-section {
+  padding: 80px 40px;
+}
+
+.trainers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+}
+
+/* CARD */
+
+.trainer-card {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.trainer-card img {
+  width: 100%;
+  height: 320px;
+  object-fit: cover;
+  transition: 0.4s;
+}
+
+/* OVERLAY INFO */
+
+.trainer-info {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  padding: 20px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+}
+
+.trainer-info h3 {
+  margin-bottom: 5px;
+}
+
+.trainer-info span {
+  font-size: 0.9rem;
+  color: #ff6a2b;
+}
+
+/* HOVER EFFECT */
+
+.trainer-card:hover img {
+  transform: scale(1.1);
+}
