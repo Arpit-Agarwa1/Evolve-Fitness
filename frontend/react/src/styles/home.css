@@ -1,0 +1,153 @@
+:root {
+  --bg-dark: #0d0d0d;
+  --bg-soft: #1a1a1a;
+  --accent: #ff6a2b;
+  --text-main: #ffffff;
+  --text-muted: #b3b3b3;
+}
+
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Poppins", sans-serif;
+  background: var(--bg-dark);
+  color: var(--text-main);
+}
+
+/* HERO */
+
+.hero {
+  min-height: 100vh;
+  background: url("/frontend/react/src/assets/gymBanner.png") center/cover
+    no-repeat;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 20px;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+}
+.hero-content {
+  position: relative;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  /* background: rgba(0, 0, 0, 0.65); */
+}
+
+.hero-content {
+  position: relative;
+  max-width: 900px;
+  animation: fadeUp 1s ease;
+}
+
+.hero-content h1 {
+  font-size: clamp(2.5rem, 7vw, 5rem);
+  margin-bottom: 20px;
+  letter-spacing: 2px;
+}
+
+.hero-content p {
+  color: var(--text-muted);
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+/* BUTTONS */
+
+.hero-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  padding: 12px 30px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #ff6a2b, #ff3c00);
+  border: none;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 5px 20px rgba(255, 106, 43, 0.4);
+  transition: 0.3s;
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px);
+}
+
+.btn-secondary {
+  padding: 12px 30px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid white;
+  color: white;
+  cursor: pointer;
+}
+
+/* SECTIONS */
+
+.features,
+.programs {
+  padding: 100px 20px;
+  text-align: center;
+}
+
+.features h2,
+.programs h2 {
+  font-size: 2.5rem;
+}
+
+/* GRID */
+
+.features-grid,
+.program-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 30px;
+  margin-top: 50px;
+}
+
+/* CARDS */
+
+.feature-card,
+.program-card {
+  padding: 30px;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #1a1a1a, #111);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: 0.3s;
+}
+
+.feature-card:hover,
+.program-card:hover {
+  transform: translateY(-8px);
+}
+
+/* ANIMATION */
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
