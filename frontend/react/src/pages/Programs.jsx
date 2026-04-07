@@ -2,6 +2,7 @@ import React from "react";
 import "../styles/programs.css";
 import Navbar from "../components/Navbar";
 import img1 from "../assets/image1.png";
+import Footer from "../components/Footer";
 
 export default function Programs() {
   return (
@@ -85,6 +86,7 @@ export default function Programs() {
           </div>
         </div>
       </section>
+      <Footer />
     </div>
   );
 }

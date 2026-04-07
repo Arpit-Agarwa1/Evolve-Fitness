@@ -3,6 +3,7 @@ import "../styles/home.css";
 import Navbar from "../components/Navbar";
 import gymBanner from "../assets/gymBanner.png";
 import img1 from "../assets/image1.png";
+import Footer from "../components/Footer";
 
 export default function Home() {
   return (
@@ -99,6 +100,7 @@ export default function Home() {
           </div>
         </section>
       </div>
+      <Footer />
     </>
   );
 }

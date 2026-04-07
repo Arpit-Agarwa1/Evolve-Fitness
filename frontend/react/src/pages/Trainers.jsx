@@ -2,6 +2,7 @@ import React from "react";
 import "../styles/trainers.css";
 import img1 from "../assets/image1.png";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 export default function Trainers() {
   return (
@@ -75,6 +76,7 @@ export default function Trainers() {
           </div>
         </div>
       </section>
+      <Footer />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import React from "react";
 import "../styles/membership.css";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 export default function Membership() {
   return (
@@ -61,6 +62,7 @@ export default function Membership() {
           </div>
         </div>
       </section>
+      <Footer />
     </div>
   );
 }
