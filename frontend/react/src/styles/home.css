@@ -336,6 +336,127 @@
   opacity: 0.85;
 }
 
+/* ——— Magazine gallery (Evolve Images) ——— */
+
+.evolve-gallery {
+  padding: clamp(3.5rem, 8vw, 5.5rem) clamp(1.25rem, 4vw, 2.5rem);
+  background: linear-gradient(
+    180deg,
+    var(--ev-bg) 0%,
+    var(--ev-bg-elevated) 50%,
+    var(--ev-bg) 100%
+  );
+  border-block: 1px solid var(--ev-border);
+}
+
+.evolve-gallery-header {
+  max-width: 40rem;
+  margin: 0 auto 2.5rem;
+  text-align: center;
+}
+
+.evolve-gallery-title {
+  font-family: var(--ev-serif);
+  font-size: clamp(1.85rem, 4vw, 2.5rem);
+  font-weight: 500;
+  color: var(--ev-text);
+  margin: 0 0 0.75rem;
+}
+
+.evolve-gallery-sub {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 300;
+  line-height: 1.65;
+  color: var(--ev-text-muted);
+}
+
+.evolve-gallery-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: clamp(0.5rem, 1.5vw, 0.85rem);
+}
+
+.evolve-gallery-cell {
+  margin: 0;
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--ev-radius);
+  border: 1px solid var(--ev-border);
+  background: var(--ev-bg-card);
+  box-shadow: var(--ev-shadow);
+  min-height: 120px;
+}
+
+.evolve-gallery-cell img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.55s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .evolve-gallery-cell:hover img {
+    transform: scale(1.04);
+  }
+}
+
+/* Bento layout — desktop */
+.evolve-gallery-cell--0 {
+  grid-column: span 6;
+  grid-row: span 2;
+  min-height: 280px;
+}
+
+.evolve-gallery-cell--1,
+.evolve-gallery-cell--2 {
+  grid-column: span 3;
+  min-height: 136px;
+}
+
+.evolve-gallery-cell--3,
+.evolve-gallery-cell--4 {
+  grid-column: span 3;
+  min-height: 128px;
+}
+
+.evolve-gallery-cell--5,
+.evolve-gallery-cell--6 {
+  grid-column: span 6;
+  min-height: 200px;
+}
+
+@media (max-width: 767px) {
+  .evolve-gallery-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .evolve-gallery-cell--0 {
+    grid-column: span 2;
+    grid-row: span 1;
+    min-height: 200px;
+  }
+
+  .evolve-gallery-cell--1,
+  .evolve-gallery-cell--2,
+  .evolve-gallery-cell--3,
+  .evolve-gallery-cell--4,
+  .evolve-gallery-cell--5,
+  .evolve-gallery-cell--6 {
+    grid-column: span 1;
+    min-height: 140px;
+  }
+
+  .evolve-gallery-cell--5,
+  .evolve-gallery-cell--6 {
+    grid-column: span 2;
+    min-height: 160px;
+  }
+}
+
 /* ——— Experience section ——— */
 
 .experience {

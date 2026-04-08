@@ -2,58 +2,53 @@ import React from "react";
 import "../styles/programs.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import servicePilatesYoga from "../assets/service-pilates-yoga.png";
-import serviceRecovery from "../assets/service-recovery.png";
-import serviceSmartTraining from "../assets/service-smart-training.png";
-import serviceEliteEquipment from "../assets/service-elite-equipment.png";
-import serviceMassiveSpace from "../assets/service-massive-space.png";
-import serviceCafe from "../assets/service-cafe.png";
+import { evolveProgramImages } from "../assets/evolveMagazine";
 
 /**
- * Training programs aligned with Evolve facilities and coaching.
+ * Training programs — each card uses Evolve magazine photography.
  */
 const programs = [
   {
     title: "Smart Training",
     body:
       "Structured strength and conditioning with certified coaches and data-informed progressions.",
-    image: serviceSmartTraining,
-    alt: "Smart training at Evolve Fitness",
+    image: evolveProgramImages[0],
+    alt: "Evolve Fitness — smart training and coaching",
   },
   {
     title: "Pilates & Yoga",
     body:
       "Balance meets strength — flow, stretch, and align your body in dedicated sessions.",
-    image: servicePilatesYoga,
-    alt: "Pilates and yoga at Evolve Fitness",
+    image: evolveProgramImages[1],
+    alt: "Evolve Fitness — Pilates and yoga studio",
   },
   {
     title: "Recovery & Mobility",
     body:
       "Complement hard training with recovery protocols, mobility work, and our Recovery Zone amenities.",
-    image: serviceRecovery,
-    alt: "Recovery and mobility at Evolve Fitness",
+    image: evolveProgramImages[2],
+    alt: "Evolve Fitness — recovery and mobility",
   },
   {
     title: "Elite Strength",
     body:
       "USA-imported equipment and progressive overload programs built for serious lifters.",
-    image: serviceEliteEquipment,
-    alt: "Strength training on elite equipment",
+    image: evolveProgramImages[3],
+    alt: "Evolve Fitness — strength training floor",
   },
   {
     title: "Conditioning & HIIT",
     body:
       "High-output sessions on our expansive floor — space to move without limits.",
-    image: serviceMassiveSpace,
-    alt: "Conditioning on the main gym floor",
+    image: evolveProgramImages[4],
+    alt: "Evolve Fitness — conditioning and cardio zone",
   },
   {
     title: "Nutrition & Fuel",
     body:
       "Support your goals with clean nutrition from our Healthy Café and coach guidance.",
-    image: serviceCafe,
-    alt: "Healthy café nutrition at Evolve Fitness",
+    image: evolveProgramImages[5],
+    alt: "Evolve Fitness — café and nutrition",
   },
 ];
 

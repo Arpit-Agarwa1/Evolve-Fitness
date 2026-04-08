@@ -1,15 +1,10 @@
 /**
- * Evolve Fitness — luxury service lineup for marketing sections.
- * Images live in `src/assets/` (branded photography).
+ * Evolve Fitness — luxury service lineup (copy + magazine photography).
  */
-import serviceValet from "../assets/service-valet.png";
-import serviceMassiveSpace from "../assets/service-massive-space.png";
-import serviceEliteEquipment from "../assets/service-elite-equipment.png";
-import serviceSmartTraining from "../assets/service-smart-training.png";
-import servicePilatesYoga from "../assets/service-pilates-yoga.png";
-import serviceRecovery from "../assets/service-recovery.png";
-import serviceAmenities from "../assets/service-amenities.png";
-import serviceCafe from "../assets/service-cafe.png";
+import { evolveMagazineImages } from "../assets/evolveMagazine";
+
+/** Eight service images: magazine indices 1–8 */
+const s = evolveMagazineImages.slice(1, 9);
 
 /** @typedef {{ id: string; title: string; tagline: string; description: string; image: string; alt: string }} EvolveService */
 
@@ -21,8 +16,8 @@ export const evolveServices = [
     tagline: "Luxury begins before you enter",
     description:
       "Seamless arrival and an effortless experience from the moment you pull up.",
-    image: serviceValet,
-    alt: "Valet opening the door of a luxury car at Evolve Fitness",
+    image: s[0],
+    alt: "Evolve Fitness — arrival and luxury entrance experience",
   },
   {
     id: "space",
@@ -30,8 +25,8 @@ export const evolveServices = [
     tagline: "20,000 sq. ft. of pure luxury & strength",
     description:
       "Room to train without limits in an environment built for performance and comfort.",
-    image: serviceMassiveSpace,
-    alt: "Spacious luxury gym floor at Evolve Fitness",
+    image: s[1],
+    alt: "Evolve Fitness — spacious luxury training floor",
   },
   {
     id: "equipment",
@@ -39,8 +34,8 @@ export const evolveServices = [
     tagline: "USA-imported precision",
     description:
       "Professional-grade machines engineered for precision, safety, and results.",
-    image: serviceEliteEquipment,
-    alt: "Elite USA-imported gym equipment at Evolve Fitness",
+    image: s[2],
+    alt: "Evolve Fitness — elite strength and cardio equipment",
   },
   {
     id: "training",
@@ -48,8 +43,8 @@ export const evolveServices = [
     tagline: "Certified expert trainers",
     description:
       "Personalised programming from coaches who know how to unlock your next level.",
-    image: serviceSmartTraining,
-    alt: "Smart training with expert coaches at Evolve Fitness",
+    image: s[3],
+    alt: "Evolve Fitness — coaching and personal training",
   },
   {
     id: "pilates-yoga",
@@ -57,8 +52,8 @@ export const evolveServices = [
     tagline: "Balance meets strength",
     description:
       "Flow, stretch, and align your body in dedicated mind-body sessions.",
-    image: servicePilatesYoga,
-    alt: "Pilates and yoga studio at Evolve Fitness",
+    image: s[4],
+    alt: "Evolve Fitness — Pilates, yoga, and studio training",
   },
   {
     id: "recovery",
@@ -66,8 +61,8 @@ export const evolveServices = [
     tagline: "Steam · Ice bath · Shower",
     description:
       "Recover better so you can come back stronger, session after session.",
-    image: serviceRecovery,
-    alt: "Recovery zone with steam, ice bath, and showers at Evolve Fitness",
+    image: s[5],
+    alt: "Evolve Fitness — recovery and wellness amenities",
   },
   {
     id: "amenities",
@@ -75,8 +70,8 @@ export const evolveServices = [
     tagline: "Locker rooms · Showers · Lounge",
     description:
       "Spa-inspired spaces designed for comfort, privacy, and class.",
-    image: serviceAmenities,
-    alt: "Luxury locker rooms and lounge at Evolve Fitness",
+    image: s[6],
+    alt: "Evolve Fitness — luxury locker rooms and lounge",
   },
   {
     id: "cafe",
@@ -84,7 +79,7 @@ export const evolveServices = [
     tagline: "Fuel your body right",
     description:
       "Fresh meals and clean nutrition to complement your training.",
-    image: serviceCafe,
-    alt: "Healthy café meals and nutrition at Evolve Fitness",
+    image: s[7],
+    alt: "Evolve Fitness — healthy café and nutrition",
   },
 ];

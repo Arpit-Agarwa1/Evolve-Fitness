@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import "../styles/home.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import heroPhoto from "../assets/gymBanner.png";
+import { evolveGalleryImages, evolveHeroImage } from "../assets/evolveMagazine";
 import { evolveServices } from "../data/services";
 
 /**
@@ -19,7 +19,7 @@ export default function Home() {
           <div className="hero-bg" aria-hidden="true">
             <img
               className="hero-bg-img"
-              src={heroPhoto}
+              src={evolveHeroImage}
               alt=""
               width={1920}
               height={1080}
@@ -63,6 +63,37 @@ export default function Home() {
             <span>20,000 sq. ft.</span>
             <span className="intro-dot" />
             <span>USA-grade equipment</span>
+          </div>
+        </section>
+
+        <section
+          className="evolve-gallery"
+          aria-labelledby="evolve-gallery-heading"
+        >
+          <header className="evolve-gallery-header">
+            <p className="section-eyebrow">Inside Evolve</p>
+            <h2 id="evolve-gallery-heading" className="evolve-gallery-title">
+              The space, the detail, the standard
+            </h2>
+            <p className="evolve-gallery-sub">
+              A glimpse of our floor — premium finishes, elite equipment, and
+              room to breathe.
+            </p>
+          </header>
+          <div className="evolve-gallery-grid">
+            {evolveGalleryImages.map((src, i) => (
+              <figure
+                key={src}
+                className={`evolve-gallery-cell evolve-gallery-cell--${i}`}
+              >
+                <img
+                  src={src}
+                  alt={`Evolve Fitness interior and facilities, photo ${i + 1}`}
+                  loading="lazy"
+                  decoding="async"
+                />
+              </figure>
+            ))}
           </div>
         </section>
 

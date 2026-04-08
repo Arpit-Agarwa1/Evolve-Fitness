@@ -2,11 +2,22 @@ import React from "react";
 import "../styles/trainers.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import serviceSmartTraining from "../assets/service-smart-training.png";
-import img1 from "../assets/image1.png";
+import {
+  evolveTrainerCardImages,
+  evolveTrainersHeroImage,
+} from "../assets/evolveMagazine";
+
+const trainers = [
+  { name: "Alex Carter", role: "Strength coach", photoIndex: 0 },
+  { name: "Sophia Lee", role: "Pilates & mobility", photoIndex: 1 },
+  { name: "Michael Ross", role: "Hypertrophy specialist", photoIndex: 2 },
+  { name: "Emma Stone", role: "HIIT & conditioning", photoIndex: 3 },
+  { name: "Daniel Cruz", role: "Personal training lead", photoIndex: 4 },
+  { name: "Olivia Smith", role: "Wellness & recovery", photoIndex: 5 },
+];
 
 /**
- * Trainers page — hero uses branded coaching photography.
+ * Trainers page — hero and cards use Evolve magazine facility photography.
  */
 export default function Trainers() {
   return (
@@ -16,7 +27,7 @@ export default function Trainers() {
       <section
         className="trainers-hero"
         style={{
-          backgroundImage: `linear-gradient(180deg, rgba(10, 10, 12, 0.75) 0%, var(--ev-bg) 100%), url(${serviceSmartTraining})`,
+          backgroundImage: `linear-gradient(180deg, rgba(10, 10, 12, 0.78) 0%, var(--ev-bg) 100%), url(${evolveTrainersHeroImage})`,
           backgroundSize: "cover",
           backgroundPosition: "center top",
         }}
@@ -31,16 +42,13 @@ export default function Trainers() {
 
       <section className="trainers-section">
         <div className="trainers-grid">
-          {[
-            { name: "Alex Carter", role: "Strength coach" },
-            { name: "Sophia Lee", role: "Pilates & mobility" },
-            { name: "Michael Ross", role: "Hypertrophy specialist" },
-            { name: "Emma Stone", role: "HIIT & conditioning" },
-            { name: "Daniel Cruz", role: "Personal training lead" },
-            { name: "Olivia Smith", role: "Wellness & recovery" },
-          ].map((trainer) => (
+          {trainers.map((trainer) => (
             <article key={trainer.name} className="trainer-card">
-              <img src={img1} alt={`${trainer.name}, ${trainer.role}`} />
+              <img
+                src={evolveTrainerCardImages[trainer.photoIndex]}
+                alt={`${trainer.name}, ${trainer.role}`}
+                loading="lazy"
+              />
               <div className="trainer-info">
                 <h3>{trainer.name}</h3>
                 <span>{trainer.role}</span>
