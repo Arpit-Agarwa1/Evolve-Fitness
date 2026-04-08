@@ -1,38 +1,88 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, NavLink } from "react-router-dom";
 import "../styles/navbar.css";
 
+/**
+ * Primary site navigation with Evolve logo and membership CTA.
+ */
 export default function Navbar() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const linkClass = ({ isActive }) =>
+    `nav-link ${isActive ? "nav-link--active" : ""}`;
+
   return (
-    <nav className="navbar">
-      <div className="logo">
-        <div className="logo-main">
-          <span className="logo-e">E</span>
-          <span className="logo-arrow">&gt;</span>
-          <span className="logo-rest">OLVE</span>
-        </div>
-        <div className="logo-sub">THE LUXURY FITNESS</div>
-      </div>
+    <header className="nav-wrap">
+      <nav className="navbar" aria-label="Main">
+        <Link to="/" className="logo" onClick={() => setMenuOpen(false)}>
+          <div className="logo-main">
+            <span className="logo-e">E</span>
+            <span className="logo-arrow" aria-hidden="true">
+              &gt;
+            </span>
+            <span className="logo-rest">OLVE</span>
+          </div>
+          <div className="logo-sub">THE LUXURY FITNESS</div>
+        </Link>
 
-      <ul className="nav-links">
-        <li>
-          <Link to="/">Home</Link>
-        </li>
-        <li>
-          <Link to="/programs">Programs</Link>
-        </li>
-        <li>
-          <Link to="/trainers">Trainers</Link>
-        </li>
-        <li>
-          <Link to="/membership">Membership</Link>
-        </li>
-        <li>
-          <Link to="/contact">Contact</Link>
-        </li>
-      </ul>
+        <button
+          type="button"
+          className="nav-toggle"
+          aria-expanded={menuOpen}
+          aria-controls="nav-menu"
+          onClick={() => setMenuOpen((o) => !o)}
+        >
+          <span className="nav-toggle-bar" />
+          <span className="nav-toggle-bar" />
+          <span className="nav-toggle-bar" />
+          <span className="sr-only">Toggle menu</span>
+        </button>
 
-      <button className="join-btn">Join Now</button>
-    </nav>
+        <ul
+          id="nav-menu"
+          className={`nav-links ${menuOpen ? "nav-links--open" : ""}`}
+        >
+          <li>
+            <NavLink to="/" className={linkClass} end onClick={() => setMenuOpen(false)}>
+              Home
+            </NavLink>
+          </li>
+          <li>
+            <a href="/#experience" className="nav-link" onClick={() => setMenuOpen(false)}>
+              Experience
+            </a>
+          </li>
+          <li>
+            <NavLink to="/programs" className={linkClass} onClick={() => setMenuOpen(false)}>
+              Programs
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/trainers" className={linkClass} onClick={() => setMenuOpen(false)}>
+              Trainers
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/membership" className={linkClass} onClick={() => setMenuOpen(false)}>
+              Membership
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/contact" className={linkClass} onClick={() => setMenuOpen(false)}>
+              Contact
+            </NavLink>
+          </li>
+          <li className="join-btn--mobile">
+            <Link to="/membership" onClick={() => setMenuOpen(false)}>
+              Join now
+            </Link>
+          </li>
+        </ul>
+
+        <Link to="/membership" className="join-btn" onClick={() => setMenuOpen(false)}>
+          Join now
+        </Link>
+      </nav>
+    </header>
   );
 }

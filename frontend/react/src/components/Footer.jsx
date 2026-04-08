@@ -1,53 +1,82 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import "../styles/footer.css";
 
+/**
+ * Site footer with quick links and contact details.
+ */
 export default function Footer() {
   return (
     <footer className="footer">
       <div className="footer-container">
-        {/* LOGO + ABOUT */}
         <div className="footer-col">
-          <h2 className="footer-logo">E &gt; OLVE</h2>
-          <p>
-            Elevate your fitness journey with premium training, modern
-            equipment, and expert guidance.
+          <div className="footer-brand">
+            <span className="footer-logo-main">
+              <span className="footer-logo-e">E</span>
+              <span className="footer-logo-arrow">&gt;</span>
+              <span className="footer-logo-rest">OLVE</span>
+            </span>
+            <span className="footer-logo-sub">THE LUXURY FITNESS</span>
+          </div>
+          <p className="footer-about">
+            Premium training, elite equipment, and a complete luxury fitness
+            experience — designed to elevate every move.
           </p>
         </div>
 
-        {/* LINKS */}
         <div className="footer-col">
-          <h3>Quick Links</h3>
-          <ul>
-            <li>Home</li>
-            <li>Programs</li>
-            <li>Trainers</li>
-            <li>Membership</li>
-            <li>Contact</li>
+          <h3 className="footer-heading">Explore</h3>
+          <ul className="footer-list">
+            <li>
+              <Link to="/">Home</Link>
+            </li>
+            <li>
+              <a href="/#experience">Experience</a>
+            </li>
+            <li>
+              <Link to="/programs">Programs</Link>
+            </li>
+            <li>
+              <Link to="/trainers">Trainers</Link>
+            </li>
+            <li>
+              <Link to="/membership">Membership</Link>
+            </li>
+            <li>
+              <Link to="/contact">Contact</Link>
+            </li>
           </ul>
         </div>
 
-        {/* CONTACT */}
         <div className="footer-col">
-          <h3>Contact</h3>
-          <p>📍 123 Fitness Street</p>
-          <p>📞 +91 9876543210</p>
-          <p>📧 info@evolvefitness.com</p>
+          <h3 className="footer-heading">Visit</h3>
+          <p>
+            5th floor, Vivacity Mall, C-3, Hare Krishna Marg, near Akshay Patra
+            temple, Mahal Yojana, Jagatpura, Jaipur, Rajasthan 302017
+          </p>
+          <p>
+            <a href="tel:+919876543210">+91 98765 43210</a>
+          </p>
+          <p>
+            <a href="mailto:info@evolvefitness.com">info@evolvefitness.com</a>
+          </p>
         </div>
 
-        {/* SOCIAL */}
         <div className="footer-col">
-          <h3>Follow Us</h3>
+          <h3 className="footer-heading">Social</h3>
           <div className="socials">
-            <span>Instagram</span>
-            <span>Facebook</span>
-            <span>Twitter</span>
+            <a href="https://instagram.com" target="_blank" rel="noreferrer">
+              Instagram
+            </a>
+            <a href="https://facebook.com" target="_blank" rel="noreferrer">
+              Facebook
+            </a>
           </div>
         </div>
       </div>
 
-      {/* BOTTOM */}
       <div className="footer-bottom">
-        <p>© 2026 Evolve Fitness. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} Evolve Fitness. All rights reserved.</p>
       </div>
     </footer>
   );

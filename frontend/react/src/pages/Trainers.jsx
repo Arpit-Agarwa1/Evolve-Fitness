@@ -1,79 +1,52 @@
 import React from "react";
 import "../styles/trainers.css";
-import img1 from "../assets/image1.png";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import serviceSmartTraining from "../assets/service-smart-training.png";
+import img1 from "../assets/image1.png";
 
+/**
+ * Trainers page — hero uses branded coaching photography.
+ */
 export default function Trainers() {
   return (
     <div className="trainers-page">
       <Navbar />
 
-      {/* HERO */}
-      <section className="trainers-hero">
-        <h1>Meet Our Trainers</h1>
-        <p>
-          Train with elite professionals dedicated to transforming your fitness
-          journey.
+      <section
+        className="trainers-hero"
+        style={{
+          backgroundImage: `linear-gradient(180deg, rgba(10, 10, 12, 0.75) 0%, var(--ev-bg) 100%), url(${serviceSmartTraining})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center top",
+        }}
+      >
+        <p className="trainers-eyebrow">Coaching</p>
+        <h1 className="trainers-title">Meet your trainers</h1>
+        <p className="trainers-lede">
+          Certified experts who personalise every session — so you train smarter,
+          move better, and stay accountable.
         </p>
       </section>
 
-      {/* TRAINERS GRID */}
       <section className="trainers-section">
         <div className="trainers-grid">
-          {/* Trainer 1 */}
-          <div className="trainer-card">
-            <img src={img1} alt="trainer" />
-            <div className="trainer-info">
-              <h3>Alex Carter</h3>
-              <span>Strength Coach</span>
-            </div>
-          </div>
-
-          {/* Trainer 2 */}
-          <div className="trainer-card">
-            <img src={img1} alt="trainer" />
-            <div className="trainer-info">
-              <h3>Sophia Lee</h3>
-              <span>Yoga Expert</span>
-            </div>
-          </div>
-
-          {/* Trainer 3 */}
-          <div className="trainer-card">
-            <img src={img1} alt="trainer" />
-            <div className="trainer-info">
-              <h3>Michael Ross</h3>
-              <span>Bodybuilding Coach</span>
-            </div>
-          </div>
-
-          {/* Trainer 4 */}
-          <div className="trainer-card">
-            <img src={img1} alt="trainer" />
-            <div className="trainer-info">
-              <h3>Emma Stone</h3>
-              <span>HIIT Specialist</span>
-            </div>
-          </div>
-
-          {/* Trainer 5 */}
-          <div className="trainer-card">
-            <img src={img1} alt="trainer" />
-            <div className="trainer-info">
-              <h3>Daniel Cruz</h3>
-              <span>Personal Trainer</span>
-            </div>
-          </div>
-
-          {/* Trainer 6 */}
-          <div className="trainer-card">
-            <img src={img1} alt="trainer" />
-            <div className="trainer-info">
-              <h3>Olivia Smith</h3>
-              <span>Wellness Coach</span>
-            </div>
-          </div>
+          {[
+            { name: "Alex Carter", role: "Strength coach" },
+            { name: "Sophia Lee", role: "Pilates & mobility" },
+            { name: "Michael Ross", role: "Hypertrophy specialist" },
+            { name: "Emma Stone", role: "HIIT & conditioning" },
+            { name: "Daniel Cruz", role: "Personal training lead" },
+            { name: "Olivia Smith", role: "Wellness & recovery" },
+          ].map((trainer) => (
+            <article key={trainer.name} className="trainer-card">
+              <img src={img1} alt={`${trainer.name}, ${trainer.role}`} />
+              <div className="trainer-info">
+                <h3>{trainer.name}</h3>
+                <span>{trainer.role}</span>
+              </div>
+            </article>
+          ))}
         </div>
       </section>
       <Footer />

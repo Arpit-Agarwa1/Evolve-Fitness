@@ -1,101 +1,116 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import "../styles/home.css";
 import Navbar from "../components/Navbar";
-import gymBanner from "../assets/gymBanner.png";
-import img1 from "../assets/image1.png";
 import Footer from "../components/Footer";
+import heroPhoto from "../assets/gymBanner.png";
+import { evolveServices } from "../data/services";
 
+/**
+ * Landing page — hero uses HD gym photography + glass panel for readable type.
+ */
 export default function Home() {
   return (
     <>
       <Navbar />
       <div className="home">
-        {/* Hero Section */}
-        <section
-          className="hero"
-          style={{
-            backgroundImage: `url(${gymBanner})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-          }}
-        >
-          <div className="hero-overlay"></div>
+        <section className="hero" aria-labelledby="hero-heading">
+          {/* Background stack: sharp photo + overlays + light motion (no baked-in poster text). */}
+          <div className="hero-bg" aria-hidden="true">
+            <img
+              className="hero-bg-img"
+              src={heroPhoto}
+              alt=""
+              width={1920}
+              height={1080}
+              decoding="async"
+              fetchPriority="high"
+            />
+            <div className="hero-bg-vignette" />
+            <div className="hero-bg-mesh" />
+            <div className="hero-orbs">
+              <span className="hero-orb hero-orb--a" />
+              <span className="hero-orb hero-orb--b" />
+            </div>
+          </div>
 
-          <div className="hero-content">
-            <h1>Transform Your Body</h1>
-            <p>
-              {/* Experience elite fitness with world-class trainers, premium
-              equipment, and a space designed to elevate your performance. */}
-              Jaipur’s Largest Gym Chain 20,000 sq. ft. of luxury & power
-              USA-grade equipment
+          <div className="hero-inner">
+            <div className="hero-panel">
+              <p className="hero-eyebrow">The luxury fitness</p>
+              <h1 id="hero-heading" className="hero-title">
+                A complete luxury fitness experience
+              </h1>
+              <p className="hero-lede">
+                Designed to elevate every move — premium space, elite equipment,
+                smart coaching, recovery, and nutrition in one destination.
+              </p>
+              <div className="hero-buttons">
+                <Link to="/membership" className="btn-primary">
+                  Join now
+                </Link>
+                <Link to="/contact" className="btn-secondary">
+                  Book a visit
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="intro-strip" aria-hidden="true">
+          <div className="intro-strip-inner">
+            <span>Jaipur&apos;s luxury fitness destination</span>
+            <span className="intro-dot" />
+            <span>20,000 sq. ft.</span>
+            <span className="intro-dot" />
+            <span>USA-grade equipment</span>
+          </div>
+        </section>
+
+        <section id="experience" className="experience">
+          <header className="experience-header">
+            <p className="section-eyebrow">The experience</p>
+            <h2 className="section-title">Everything you expect — and more</h2>
+            <p className="section-sub">
+              From arrival to recovery, every touchpoint is crafted for comfort,
+              performance, and class.
             </p>
+          </header>
 
-            <div className="hero-buttons">
-              <button className="btn-primary">Join Now</button>
-              <button className="btn-secondary">Free Trial</button>
-            </div>
+          <div className="services-grid">
+            {evolveServices.map((service, index) => (
+              <article
+                key={service.id}
+                className={`service-card ${index === 0 ? "service-card--wide" : ""}`}
+              >
+                <div className="service-card-media">
+                  <img src={service.image} alt={service.alt} loading="lazy" />
+                  <div className="service-card-media-overlay" />
+                </div>
+                <div className="service-card-body">
+                  <h3 className="service-card-title">{service.title}</h3>
+                  <p className="service-card-tagline">{service.tagline}</p>
+                  <p className="service-card-desc">{service.description}</p>
+                </div>
+              </article>
+            ))}
           </div>
         </section>
 
-        {/* Features */}
-        <section className="features">
-          <h2>Why Choose Us</h2>
-
-          <div className="features-grid">
-            <div className="feature-card">
-              <img src={img1} alt="trainers" />
-              <div className="card-content">
-                <h3>Elite Trainers</h3>
-                <p>Train with certified professionals who push your limits.</p>
-              </div>
-            </div>
-
-            <div className="feature-card">
-              <img src={img1} alt="equipment" />
-              <div className="card-content">
-                <h3>Luxury Equipment</h3>
-                <p>State-of-the-art machines designed for performance.</p>
-              </div>
-            </div>
-
-            <div className="feature-card">
-              <img src={img1} alt="plans" />
-              <div className="card-content">
-                <h3>Premium Plans</h3>
-                <p>Flexible memberships tailored to your lifestyle.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Programs */}
-        <section className="programs">
-          <h2>Our Programs</h2>
-
-          <div className="program-grid">
-            <div className="program-card">
-              <img src={img1} alt="weight loss" />
-              <div className="card-content">
-                <h3>Weight Loss</h3>
-                <p>Burn fat with structured and proven programs.</p>
-              </div>
-            </div>
-
-            <div className="program-card">
-              <img src={img1} alt="muscle gain" />
-              <div className="card-content">
-                <h3>Muscle Gain</h3>
-                <p>Build strength and size with expert guidance.</p>
-              </div>
-            </div>
-
-            <div className="program-card">
-              <img src={img1} alt="personal training" />
-              <div className="card-content">
-                <h3>Personal Training</h3>
-                <p>1-on-1 coaching tailored just for you.</p>
-              </div>
+        <section className="cta-band">
+          <div className="cta-band-inner">
+            <p className="cta-eyebrow">Ready when you are</p>
+            <h2 className="cta-title">Step into Evolve</h2>
+            <p className="cta-copy">
+              Explore membership options or speak with our team to plan your
+              first session.
+            </p>
+            <div className="cta-actions">
+              <Link to="/membership" className="btn-primary">
+                View membership
+              </Link>
+              <Link to="/contact" className="btn-ghost">
+                Contact us
+              </Link>
             </div>
           </div>
         </section>

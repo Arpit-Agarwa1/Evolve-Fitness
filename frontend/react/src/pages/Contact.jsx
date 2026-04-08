@@ -1,58 +1,104 @@
-import React from "react";
+import React, { useState } from "react";
 import "../styles/contact.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
+/**
+ * Contact page with enquiry form and studio address.
+ */
 export default function Contact() {
+  const [status, setStatus] = useState("idle");
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    setStatus("sent");
+    e.currentTarget.reset();
+  }
+
   return (
     <div className="contact-page">
       <Navbar />
-      {/* HERO */}
+
       <section className="contact-hero">
-        <h1>Contact Us</h1>
-        <p>
-          Have questions or ready to start your journey? Get in touch with us.
+        <p className="contact-eyebrow">Contact</p>
+        <h1 className="contact-title">Let&apos;s talk</h1>
+        <p className="contact-lede">
+          Questions about membership, corporate plans, or your first visit —
+          we&apos;re here to help.
         </p>
       </section>
 
-      {/* CONTACT SECTION */}
       <section className="contact-section">
         <div className="contact-container">
-          {/* LEFT SIDE */}
           <div className="contact-info">
-            <h2>Get In Touch</h2>
-            <p>We’re here to help you achieve your fitness goals.</p>
+            <h2 className="contact-info-title">Visit Evolve</h2>
+            <p className="contact-info-copy">
+              We&apos;re located on the 5th floor of Vivacity Mall, Jaipur.
+            </p>
 
             <div className="info-item">
-              <span>📍</span>
+              <span className="info-icon" aria-hidden="true">
+                📍
+              </span>
               <p>
-                {" "}
                 5th floor, Vivacity Mall, C-3, Hare Krishna Marg, near Akshay
-                patra temple, mahal yojana, Jagatpura, Jaipur, Shri Kishanpura,
-                Rajasthan 302017
+                Patra temple, Mahal Yojana, Jagatpura, Jaipur, Rajasthan 302017
               </p>
             </div>
 
             <div className="info-item">
-              <span>📞</span>
-              <p>+91 9876543210</p>
+              <span className="info-icon" aria-hidden="true">
+                📞
+              </span>
+              <p>
+                <a href="tel:+919876543210">+91 98765 43210</a>
+              </p>
             </div>
 
             <div className="info-item">
-              <span>📧</span>
-              <p>info@evolvefitness.com</p>
+              <span className="info-icon" aria-hidden="true">
+                📧
+              </span>
+              <p>
+                <a href="mailto:info@evolvefitness.com">
+                  info@evolvefitness.com
+                </a>
+              </p>
             </div>
           </div>
 
-          {/* RIGHT SIDE FORM */}
-          <form className="contact-form">
-            <h2>Send Message</h2>
+          <form className="contact-form" onSubmit={handleSubmit}>
+            <h2 className="contact-form-title">Send a message</h2>
+            {status === "sent" ? (
+              <p className="contact-form-success" role="status">
+                Thank you — we&apos;ll get back to you shortly.
+              </p>
+            ) : null}
 
-            <input type="text" placeholder="Your Name" required />
-            <input type="email" placeholder="Your Email" required />
-            <textarea placeholder="Your Message" rows="5" required></textarea>
+            <label className="contact-label">
+              <span className="contact-label-text">Name</span>
+              <input type="text" name="name" placeholder="Your name" required />
+            </label>
+            <label className="contact-label">
+              <span className="contact-label-text">Email</span>
+              <input
+                type="email"
+                name="email"
+                placeholder="you@example.com"
+                required
+              />
+            </label>
+            <label className="contact-label">
+              <span className="contact-label-text">Message</span>
+              <textarea
+                name="message"
+                placeholder="How can we help?"
+                rows={5}
+                required
+              />
+            </label>
 
-            <button type="submit">Send Message</button>
+            <button type="submit">Send message</button>
           </form>
         </div>
       </section>

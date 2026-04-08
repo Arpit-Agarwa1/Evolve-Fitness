@@ -1,89 +1,89 @@
 import React from "react";
 import "../styles/programs.css";
 import Navbar from "../components/Navbar";
-import img1 from "../assets/image1.png";
 import Footer from "../components/Footer";
+import servicePilatesYoga from "../assets/service-pilates-yoga.png";
+import serviceRecovery from "../assets/service-recovery.png";
+import serviceSmartTraining from "../assets/service-smart-training.png";
+import serviceEliteEquipment from "../assets/service-elite-equipment.png";
+import serviceMassiveSpace from "../assets/service-massive-space.png";
+import serviceCafe from "../assets/service-cafe.png";
+
+/**
+ * Training programs aligned with Evolve facilities and coaching.
+ */
+const programs = [
+  {
+    title: "Smart Training",
+    body:
+      "Structured strength and conditioning with certified coaches and data-informed progressions.",
+    image: serviceSmartTraining,
+    alt: "Smart training at Evolve Fitness",
+  },
+  {
+    title: "Pilates & Yoga",
+    body:
+      "Balance meets strength — flow, stretch, and align your body in dedicated sessions.",
+    image: servicePilatesYoga,
+    alt: "Pilates and yoga at Evolve Fitness",
+  },
+  {
+    title: "Recovery & Mobility",
+    body:
+      "Complement hard training with recovery protocols, mobility work, and our Recovery Zone amenities.",
+    image: serviceRecovery,
+    alt: "Recovery and mobility at Evolve Fitness",
+  },
+  {
+    title: "Elite Strength",
+    body:
+      "USA-imported equipment and progressive overload programs built for serious lifters.",
+    image: serviceEliteEquipment,
+    alt: "Strength training on elite equipment",
+  },
+  {
+    title: "Conditioning & HIIT",
+    body:
+      "High-output sessions on our expansive floor — space to move without limits.",
+    image: serviceMassiveSpace,
+    alt: "Conditioning on the main gym floor",
+  },
+  {
+    title: "Nutrition & Fuel",
+    body:
+      "Support your goals with clean nutrition from our Healthy Café and coach guidance.",
+    image: serviceCafe,
+    alt: "Healthy café nutrition at Evolve Fitness",
+  },
+];
 
 export default function Programs() {
   return (
     <div className="programs-page">
       <Navbar />
 
-      {/* HERO */}
       <section className="programs-hero">
-        <h1>Our Programs</h1>
-        <p>
-          Discover world-class training programs designed to transform your body
-          and elevate your performance.
+        <p className="programs-eyebrow">Programs</p>
+        <h1 className="programs-title">Train with purpose</h1>
+        <p className="programs-lede">
+          Every program is built around our luxury floor, elite equipment, and
+          expert coaching — so results feel as good as they look.
         </p>
       </section>
 
-      {/* PROGRAMS GRID */}
       <section className="programs-section">
         <div className="programs-grid">
-          {/* Card 1 */}
-          <div className="program-card">
-            <img src={img1} alt="Weight Loss" />
-            <div className="program-content">
-              <h3>Weight Loss</h3>
-              <p>
-                Burn fat with structured workouts and expert guidance tailored
-                to your goals.
-              </p>
-            </div>
-          </div>
-
-          {/* Card 2 */}
-          <div className="program-card">
-            <img src={img1} alt="Muscle Gain" />
-            <div className="program-content">
-              <h3>Muscle Gain</h3>
-              <p>
-                Build strength and muscle with progressive training techniques.
-              </p>
-            </div>
-          </div>
-
-          {/* Card 3 */}
-          <div className="program-card">
-            <img src={img1} alt="Personal Training" />
-            <div className="program-content">
-              <h3>Personal Training</h3>
-              <p>
-                One-on-one coaching designed specifically for your fitness
-                journey.
-              </p>
-            </div>
-          </div>
-
-          {/* Card 4 */}
-          <div className="program-card">
-            <img src={img1} alt="HIIT Training" />
-            <div className="program-content">
-              <h3>HIIT Training</h3>
-              <p>High-intensity workouts to maximize fat burn and endurance.</p>
-            </div>
-          </div>
-
-          {/* Card 5 */}
-          <div className="program-card">
-            <img src={img1} alt="Yoga & Recovery" />
-            <div className="program-content">
-              <h3>Yoga & Recovery</h3>
-              <p>
-                Improve flexibility, reduce stress, and recover effectively.
-              </p>
-            </div>
-          </div>
-
-          {/* Card 6 */}
-          <div className="program-card">
-            <img src={img1} alt="Strength Training" />
-            <div className="program-content">
-              <h3>Strength Training</h3>
-              <p>Build raw strength with expert-designed lifting programs.</p>
-            </div>
-          </div>
+          {programs.map((program) => (
+            <article key={program.title} className="program-card">
+              <div className="program-card-image-wrap">
+                <img src={program.image} alt={program.alt} loading="lazy" />
+              </div>
+              <div className="program-content">
+                <h3>{program.title}</h3>
+                <p>{program.body}</p>
+              </div>
+            </article>
+          ))}
         </div>
       </section>
       <Footer />
