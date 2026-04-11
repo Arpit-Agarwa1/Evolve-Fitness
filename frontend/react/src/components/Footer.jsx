@@ -43,6 +43,9 @@ export default function Footer() {
               <Link to="/membership">Membership</Link>
             </li>
             <li>
+              <Link to="/register">Register</Link>
+            </li>
+            <li>
               <Link to="/contact">Contact</Link>
             </li>
           </ul>

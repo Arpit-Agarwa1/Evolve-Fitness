@@ -34,9 +34,9 @@ export default function Membership() {
               <li>Locker rooms &amp; showers</li>
               <li>Healthy Café access</li>
             </ul>
-            <button type="button" className="plan-btn">
+            <Link to="/register?plan=essential" className="plan-btn">
               Join now
-            </button>
+            </Link>
           </article>
 
           <article className="plan-card featured">
@@ -52,9 +52,9 @@ export default function Membership() {
               <li>2 personal training sessions / month</li>
               <li>Recovery Zone priority</li>
             </ul>
-            <button type="button" className="plan-btn">
+            <Link to="/register?plan=premium" className="plan-btn">
               Join now
-            </button>
+            </Link>
           </article>
 
           <article className="plan-card">
@@ -69,9 +69,9 @@ export default function Membership() {
               <li>Guest passes &amp; valet add-ons</li>
               <li>Concierge scheduling</li>
             </ul>
-            <button type="button" className="plan-btn">
+            <Link to="/register?plan=elite" className="plan-btn">
               Join now
-            </button>
+            </Link>
           </article>
         </div>
         <p className="membership-note">

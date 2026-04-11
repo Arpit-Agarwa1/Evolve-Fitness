@@ -1,14 +1,14 @@
 /**
- * Contact page.
+ * Member registration page — aligned with contact / membership theme.
  */
 
-.contact-page {
+.register-page {
   flex: 1;
   background: var(--ev-bg);
   color: var(--ev-text-muted);
 }
 
-.contact-hero {
+.register-hero {
   text-align: center;
   padding: clamp(5rem, 12vw, 7rem) clamp(1.25rem, 4vw, 2.5rem)
     clamp(2.5rem, 5vw, 3.5rem);
@@ -20,7 +20,7 @@
   border-bottom: 1px solid var(--ev-border);
 }
 
-.contact-eyebrow {
+.register-eyebrow {
   font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0.3em;
@@ -29,7 +29,7 @@
   margin: 0 0 0.75rem;
 }
 
-.contact-title {
+.register-title {
   font-family: var(--ev-serif);
   font-size: clamp(2.25rem, 4.5vw, 3rem);
   font-weight: 500;
@@ -37,68 +37,25 @@
   margin: 0 0 1rem;
 }
 
-.contact-lede {
-  max-width: 32rem;
+.register-lede {
+  max-width: 34rem;
   margin: 0 auto;
   font-size: 1.0625rem;
   font-weight: 300;
   line-height: 1.65;
 }
 
-.contact-section {
+.register-section {
   padding: clamp(3rem, 6vw, 5rem) clamp(1.25rem, 4vw, 2.5rem);
 }
 
-.contact-container {
-  max-width: var(--ev-max);
+.register-layout {
+  max-width: 28rem;
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: clamp(2rem, 5vw, 3rem);
-  align-items: start;
 }
 
-.contact-info-title {
-  font-family: var(--ev-serif);
-  font-size: 1.75rem;
-  font-weight: 500;
-  color: var(--ev-text);
-  margin: 0 0 0.5rem;
-}
-
-.contact-info-copy {
-  margin: 0 0 1.5rem;
-  font-size: 1rem;
-  line-height: 1.55;
-}
-
-.info-item {
-  display: flex;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-  text-align: left;
-}
-
-.info-icon {
-  flex-shrink: 0;
-}
-
-.info-item p {
-  margin: 0;
-  font-size: 0.95rem;
-  line-height: 1.55;
-}
-
-.info-item a {
-  color: var(--ev-accent);
-  text-decoration: none;
-}
-
-.info-item a:hover {
-  text-decoration: underline;
-}
-
-.contact-form {
+.register-form,
+.register-success-card {
   background: var(--ev-bg-card);
   padding: clamp(1.5rem, 4vw, 2rem);
   border-radius: var(--ev-radius-lg);
@@ -107,7 +64,8 @@
   text-align: left;
 }
 
-.contact-form-title {
+.register-form-title,
+.register-success-title {
   font-family: var(--ev-serif);
   font-size: 1.5rem;
   font-weight: 500;
@@ -115,17 +73,7 @@
   margin: 0 0 1.25rem;
 }
 
-.contact-form-success {
-  padding: 0.75rem 1rem;
-  margin-bottom: 1rem;
-  border-radius: 10px;
-  background: var(--ev-accent-soft);
-  border: 1px solid rgba(255, 106, 43, 0.35);
-  color: var(--ev-text);
-  font-size: 0.9375rem;
-}
-
-.contact-form-error {
+.register-form-error {
   padding: 0.75rem 1rem;
   margin-bottom: 1rem;
   border-radius: 10px;
@@ -135,15 +83,14 @@
   font-size: 0.9375rem;
 }
 
-.contact-label {
+.register-label {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
   margin-bottom: 1rem;
-  text-align: left;
 }
 
-.contact-label-text {
+.register-label-text {
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -151,8 +98,8 @@
   color: var(--ev-text-muted);
 }
 
-.contact-form input,
-.contact-form textarea {
+.register-form input,
+.register-form select {
   width: 100%;
   max-width: 100%;
   padding: 0.75rem 1rem;
@@ -160,25 +107,24 @@
   border: 1px solid var(--ev-border);
   background: var(--ev-bg-elevated);
   color: var(--ev-text);
-  /* 16px prevents iOS zoom-on-focus */
   font-size: 1rem;
   font-family: inherit;
 }
 
-.contact-form input::placeholder,
-.contact-form textarea::placeholder {
-  color: rgba(168, 165, 160, 0.75);
+.register-form select {
+  cursor: pointer;
 }
 
-.contact-form textarea {
-  resize: vertical;
-  min-height: 120px;
+.register-form input:disabled,
+.register-form select:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
-.contact-form button {
+.register-submit {
   width: 100%;
   padding: 0.875rem 1rem;
-  margin-top: 0.25rem;
+  margin-top: 0.5rem;
   background: linear-gradient(135deg, var(--ev-accent) 0%, #e85a20 100%);
   border: none;
   border-radius: 999px;
@@ -194,36 +140,74 @@
   box-shadow: 0 6px 20px rgba(255, 106, 43, 0.3);
 }
 
-.contact-form button:hover {
+.register-submit:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: 0 10px 28px rgba(255, 106, 43, 0.4);
 }
 
-.contact-form button:disabled {
+.register-submit:disabled {
   opacity: 0.65;
   cursor: not-allowed;
   transform: none;
-  box-shadow: 0 6px 20px rgba(255, 106, 43, 0.2);
 }
 
-@media (max-width: 900px) {
-  .contact-container {
-    grid-template-columns: 1fr;
-  }
-
-  .contact-section {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-
-  .contact-hero {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
+.register-footnote {
+  margin: 1.25rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--ev-text-muted);
 }
 
-@media (max-width: 480px) {
-  .info-item {
-    align-items: flex-start;
-  }
+.register-footnote a {
+  color: var(--ev-accent);
+  text-decoration: none;
+}
+
+.register-footnote a:hover {
+  text-decoration: underline;
+}
+
+.register-success-copy {
+  margin: 0 0 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--ev-text-muted);
+}
+
+.register-success-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.register-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.25rem;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  text-align: center;
+}
+
+.register-btn--primary {
+  background: linear-gradient(135deg, var(--ev-accent) 0%, #e85a20 100%);
+  color: #fff;
+  border: none;
+  box-shadow: 0 6px 20px rgba(255, 106, 43, 0.3);
+}
+
+.register-btn--ghost {
+  background: transparent;
+  color: var(--ev-text);
+  border: 1px solid var(--ev-border);
+}
+
+.register-btn--ghost:hover {
+  border-color: var(--ev-accent);
+  color: var(--ev-accent);
 }

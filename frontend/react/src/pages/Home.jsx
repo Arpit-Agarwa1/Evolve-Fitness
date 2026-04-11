@@ -45,9 +45,9 @@ export default function Home() {
                 smart coaching, recovery, and nutrition in one destination.
               </p>
               <div className="hero-buttons">
-                <Link to="/membership" className="btn-primary">
-                  Join now
-                </Link>
+              <Link to="/register" className="btn-primary">
+                Join now
+              </Link>
                 <Link to="/contact" className="btn-secondary">
                   Book a visit
                 </Link>

@@ -73,13 +73,13 @@ export default function Navbar() {
             </NavLink>
           </li>
           <li className="join-btn--mobile">
-            <Link to="/membership" onClick={() => setMenuOpen(false)}>
+            <Link to="/register" onClick={() => setMenuOpen(false)}>
               Join now
             </Link>
           </li>
         </ul>
 
-        <Link to="/membership" className="join-btn" onClick={() => setMenuOpen(false)}>
+        <Link to="/register" className="join-btn" onClick={() => setMenuOpen(false)}>
           Join now
         </Link>
       </nav>

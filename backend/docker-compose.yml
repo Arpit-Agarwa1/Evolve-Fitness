@@ -1,0 +1,13 @@
+# Local MongoDB for Evolve Fitness API — database evolve_fitness_data is created on first app write
+services:
+  mongodb:
+    image: mongo:7
+    container_name: evolve-fitness-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - evolve_mongo_data:/data/db
+
+volumes:
+  evolve_mongo_data:

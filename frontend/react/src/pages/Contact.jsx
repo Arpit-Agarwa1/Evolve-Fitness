@@ -2,17 +2,39 @@ import React, { useState } from "react";
 import "../styles/contact.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { apiFetch } from "../services/api";
 
 /**
- * Contact page with enquiry form and studio address.
+ * Contact page — submits enquiries to the MVC API (MongoDB).
  */
 export default function Contact() {
   const [status, setStatus] = useState("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    setStatus("sent");
-    e.currentTarget.reset();
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+    const name = String(fd.get("name") ?? "").trim();
+    const email = String(fd.get("email") ?? "").trim();
+    const message = String(fd.get("message") ?? "").trim();
+
+    setErrorMessage("");
+    setStatus("loading");
+
+    try {
+      await apiFetch("/api/contact", {
+        method: "POST",
+        body: JSON.stringify({ name, email, message, source: "website" }),
+      });
+      setStatus("sent");
+      form.reset();
+    } catch (err) {
+      setStatus("idle");
+      setErrorMessage(
+        err instanceof Error ? err.message : "Could not send message."
+      );
+    }
   }
 
   return (
@@ -74,10 +96,21 @@ export default function Contact() {
                 Thank you — we&apos;ll get back to you shortly.
               </p>
             ) : null}
+            {errorMessage ? (
+              <p className="contact-form-error" role="alert">
+                {errorMessage}
+              </p>
+            ) : null}
 
             <label className="contact-label">
               <span className="contact-label-text">Name</span>
-              <input type="text" name="name" placeholder="Your name" required />
+              <input
+                type="text"
+                name="name"
+                placeholder="Your name"
+                required
+                disabled={status === "loading"}
+              />
             </label>
             <label className="contact-label">
               <span className="contact-label-text">Email</span>
@@ -86,6 +119,7 @@ export default function Contact() {
                 name="email"
                 placeholder="you@example.com"
                 required
+                disabled={status === "loading"}
               />
             </label>
             <label className="contact-label">
@@ -95,10 +129,13 @@ export default function Contact() {
                 placeholder="How can we help?"
                 rows={5}
                 required
+                disabled={status === "loading"}
               />
             </label>
 
-            <button type="submit">Send message</button>
+            <button type="submit" disabled={status === "loading"}>
+              {status === "loading" ? "Sending…" : "Send message"}
+            </button>
           </form>
         </div>
       </section>
