@@ -1,0 +1,20 @@
+# Render Blueprint — Web Service for the Evolve Fitness API.
+# https://render.com/docs/blueprint-spec
+#
+# After first deploy, add MONGODB_URI in the Render dashboard (Environment),
+# or link this blueprint and set the secret when prompted.
+
+services:
+  - type: web
+    name: evolve-fitness-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: "20.18.1"
+      - key: MONGODB_DB_NAME
+        value: evolve_fitness_data
+      - key: MONGODB_URI
+        sync: false

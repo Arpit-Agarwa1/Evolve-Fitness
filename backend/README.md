@@ -138,3 +138,16 @@ This starts MongoDB on port **27017**; the API **`.env`** already matches. Stop 
 With the Vite dev server, `/api` is proxied to `http://localhost:5001`. Run **both** backend and `npm run dev` in `frontend/react` so the Contact form can save to MongoDB.
 
 For production, set `VITE_API_URL` to your deployed API origin (no trailing slash).
+
+## Deploy on Render
+
+1. **Use the API folder as the app root:** set **Root Directory** to `backend`, or deploy using the repo-root [`render.yaml`](../render.yaml) Blueprint (it already sets `rootDir: backend`).
+2. **Build command:** `npm install`
+3. **Start command:** `npm start` (runs `node server.js`)
+4. **Environment variables (required):**
+   - **`MONGODB_URI`** — full Atlas connection string (include `/evolve_fitness_data` before `?`, or end with `...mongodb.net/` and set `MONGODB_DB_NAME`).
+   - **`MONGODB_DB_NAME`** — optional; defaults to `evolve_fitness_data`.
+5. **Atlas:** under **Network Access**, allow **`0.0.0.0/0`** (or your region’s egress rules) so Render can reach the cluster.
+6. Render sets **`PORT`** automatically; the server reads it. The API listens on **`0.0.0.0`** so the platform health checks work.
+
+If the deploy exits with status **1**, open the service **Logs** — startup prints each failed Mongo attempt and a short checklist. Almost always **`MONGODB_URI` is missing** or Atlas is blocking Render’s IP range.
