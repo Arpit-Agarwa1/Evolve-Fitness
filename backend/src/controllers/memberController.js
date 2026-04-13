@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import mongoose from "mongoose";
 import Member, { PLAN_VALUES } from "../models/Member.js";
 import { sendSuccess, sendError } from "../views/jsonResponse.js";
 
@@ -56,6 +57,10 @@ export async function registerMember(req, res, next) {
       dateOfBirth: dob,
       city: city ? String(city).trim() : "",
     });
+
+    console.log(
+      `[mongo] members inserted ${member._id} db=${mongoose.connection.name}`
+    );
 
     return sendSuccess(
       res,

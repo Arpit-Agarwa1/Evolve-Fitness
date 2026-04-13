@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import ContactMessage from "../models/ContactMessage.js";
 import { sendSuccess, sendError } from "../views/jsonResponse.js";
 
@@ -18,6 +19,10 @@ export async function createContactMessage(req, res, next) {
       message: String(message),
       source: source ? String(source) : "website",
     });
+
+    console.log(
+      `[mongo] contactmessages inserted ${doc._id} db=${mongoose.connection.name}`
+    );
 
     return sendSuccess(
       res,

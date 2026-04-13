@@ -121,3 +121,12 @@
   font-size: 0.8125rem;
   color: rgba(168, 165, 160, 0.75);
 }
+
+.footer-owner-link {
+  color: rgba(168, 165, 160, 0.55);
+  transition: color 0.15s ease;
+}
+
+.footer-owner-link:hover {
+  color: var(--ev-accent);
+}

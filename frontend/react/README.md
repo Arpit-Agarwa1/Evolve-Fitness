@@ -8,7 +8,15 @@ Production builds read **`frontend/react/.env.production`** and set:
 
 So `apiFetch()` calls the Render backend. Local dev leaves `VITE_API_URL` unset and uses the Vite proxy (`vite.config.js` → `localhost:5001`).
 
+**API URL:** Production builds use **`src/config/apiOrigin.js`** — if `VITE_API_URL` is unset, the app falls back to **`https://evolve-fitness-backend.onrender.com`**, so forms and admin still hit Render. Set **`VITE_API_URL`** in Vercel only if you change the backend host.
+
 **On Render (backend):** set **`CORS_ORIGIN`** to your Vercel deployment URL(s), e.g. `https://your-app.vercel.app`, so the browser is allowed to call the API.
+
+### Owner admin (gym dashboard)
+
+Routes: **`/admin/login`** (sign in), **`/admin`** (overview), **`/admin/members`**, **`/admin/contacts`**, **`/admin/leads`**. The footer includes a discreet **Owner login** link.
+
+The API must have **`ADMIN_EMAIL`**, **`ADMIN_PASSWORD_BCRYPT`**, and **`ADMIN_JWT_SECRET`** set (see `backend/.env.example`). Without them, login returns 503.
 
 ---
 

@@ -1,15 +1,17 @@
 import { getApiBase } from "../config/apiOrigin.js";
 
 /**
- * JSON API helper. Dev: relative URLs → Vite proxy. Production: `VITE_API_URL` or default Render origin.
+ * Authenticated fetch for owner admin routes.
  * @param {string} path
+ * @param {string} token
  * @param {RequestInit} [options]
  */
-export async function apiFetch(path, options = {}) {
+export async function adminApiFetch(path, token, options = {}) {
   const API_BASE = getApiBase();
   const url = `${API_BASE}${path.startsWith("/") ? path : `/${path}`}`;
   const headers = {
     "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
     ...options.headers,
   };
   const res = await fetch(url, { ...options, headers });

@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import MembershipLead, { PLAN_VALUES } from "../models/MembershipLead.js";
 import { sendSuccess, sendError } from "../views/jsonResponse.js";
 
@@ -22,6 +23,10 @@ export async function createMembershipLead(req, res, next) {
       plan: safePlan,
       notes: notes ? String(notes) : undefined,
     });
+
+    console.log(
+      `[mongo] membershipleads inserted ${doc._id} db=${mongoose.connection.name}`
+    );
 
     return sendSuccess(
       res,

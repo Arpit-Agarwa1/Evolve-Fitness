@@ -132,6 +132,11 @@ This starts MongoDB on port **27017**; the API **`.env`** already matches. Stop 
 | POST   | `/api/contact`           | Contact form (`name`, `email`, `message`) |
 | POST   | `/api/membership/leads`  | Membership lead (`email` required; optional `name`, `phone`, `plan`, `notes`). `plan`: `essential` \| `premium` \| `elite` \| `unknown` |
 | POST   | `/api/members/register` | Member signup: `fullName`, `email`, `phone`, `password`, optional `confirmPassword`, `plan`, `dateOfBirth`, `city`. Password min 8 chars. |
+| POST   | `/api/admin/login`     | Owner sign-in: `email`, `password`. Returns `{ token }` when `ADMIN_*` env vars are set. |
+| GET    | `/api/admin/dashboard`  | JWT — counts for members, contacts, leads. |
+| GET    | `/api/admin/members`    | JWT — paginated members (`limit`, `skip`). |
+| GET    | `/api/admin/contacts`   | JWT — contact messages. |
+| GET    | `/api/admin/leads`      | JWT — membership leads. |
 
 ## Frontend
 
@@ -153,3 +158,22 @@ For production, set `VITE_API_URL` to your deployed API origin (no trailing slas
 6. Render sets **`PORT`** automatically; the server reads it. The API listens on **`0.0.0.0`** so the platform health checks work.
 
 If the deploy exits with status **1**, open the service **Logs** — startup prints each failed Mongo attempt and a short checklist. Almost always **`MONGODB_URI` is missing** or Atlas is blocking Render’s IP range.
+
+### Owner admin API
+
+Configure these **environment variables** (never commit real values):
+
+| Variable | Purpose |
+| -------- | ------- |
+| `ADMIN_EMAIL` | Owner’s login email (lowercased when compared). |
+| `ADMIN_PASSWORD_BCRYPT` | Bcrypt hash of the owner password (`bcrypt` cost 10). |
+| `ADMIN_JWT_SECRET` | Long random string used to sign JWTs (e.g. `openssl rand -hex 32`). |
+| `ADMIN_JWT_EXPIRES` | Optional, default `12h`. |
+
+Generate a hash locally:
+
+```bash
+cd backend && node -e "import('bcryptjs').then(async (m) => console.log(await m.default.hash('YourPasswordHere', 10)))"
+```
+
+The public site’s **Owner login** page (`/admin/login` on Vercel) calls `POST /api/admin/login`; other `/api/admin/*` routes require `Authorization: Bearer <token>`.

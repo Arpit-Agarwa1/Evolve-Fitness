@@ -79,7 +79,13 @@ export default function Footer() {
       </div>
 
       <div className="footer-bottom">
-        <p>© {new Date().getFullYear()} Evolve Fitness. All rights reserved.</p>
+        <p>
+          © {new Date().getFullYear()} Evolve Fitness. All rights reserved.
+          {" · "}
+          <Link to="/admin/login" className="footer-owner-link">
+            Owner login
+          </Link>
+        </p>
       </div>
     </footer>
   );
