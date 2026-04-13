@@ -18,9 +18,6 @@ services:
         value: evolve_fitness_data
       - key: MONGODB_URI
         sync: false
-      - key: ADMIN_EMAIL
-        sync: false
-      - key: ADMIN_PASSWORD_BCRYPT
-        sync: false
+      # Required for owner JWT sessions. Create admin user in MongoDB `admins` (npm run admin:create).
       - key: ADMIN_JWT_SECRET
         sync: false

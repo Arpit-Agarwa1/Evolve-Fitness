@@ -22,9 +22,14 @@ export async function getHealth(req, res, next) {
       database: dbOk ? "connected" : "disconnected",
       mongoDatabase,
       collections,
-      expectedCollections: ["members", "contactmessages", "membershipleads"],
+      expectedCollections: [
+        "admins",
+        "members",
+        "contactmessages",
+        "membershipleads",
+      ],
       hint:
-        "Atlas: open this database name → those collections. Signups/contact go there; owner admin login is not stored in MongoDB.",
+        "Atlas: database evolve_fitness_data. Admins collection stores owner login (email + passwordHash). Members/contacts/leads are site submissions.",
       timestamp: new Date().toISOString(),
     });
   } catch (err) {

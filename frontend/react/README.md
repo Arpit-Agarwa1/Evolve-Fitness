@@ -16,7 +16,7 @@ So `apiFetch()` calls the Render backend. Local dev leaves `VITE_API_URL` unset 
 
 Routes: **`/admin/login`** (sign in), **`/admin`** (overview), **`/admin/members`**, **`/admin/contacts`**, **`/admin/leads`**. The footer includes a discreet **Owner login** link.
 
-The API must have **`ADMIN_EMAIL`**, **`ADMIN_PASSWORD_BCRYPT`**, and **`ADMIN_JWT_SECRET`** set (see `backend/.env.example`). Without them, login returns 503.
+On the API, set **`ADMIN_JWT_SECRET`**. Owner **email/password** are stored in MongoDB collection **`admins`** (create with `npm run admin:create` in `backend/` — see `backend/README.md`). Without `ADMIN_JWT_SECRET`, login returns 503.
 
 ---
 

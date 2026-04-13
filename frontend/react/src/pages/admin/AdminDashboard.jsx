@@ -50,9 +50,10 @@ export default function AdminDashboard() {
       ) : (
         <>
         <p className="admin-atlas-hint">
-          Data comes from MongoDB database <strong>evolve_fitness_data</strong> — collections{" "}
-          <code>members</code>, <code>contactmessages</code>, <code>membershipleads</code>.
-          Owner sign-in is <strong>not</strong> stored in MongoDB (it uses env + JWT only).
+          Data lives in MongoDB database <strong>evolve_fitness_data</strong> — collections{" "}
+          <code>admins</code> (owner login), <code>members</code>, <code>contactmessages</code>,{" "}
+          <code>membershipleads</code>. Session tokens still require <code>ADMIN_JWT_SECRET</code> on
+          the server.
         </p>
         <div className="admin-stats">
           <Link to="/admin/members" className="admin-stat-card">
