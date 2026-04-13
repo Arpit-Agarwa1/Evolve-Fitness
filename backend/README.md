@@ -137,7 +137,9 @@ This starts MongoDB on port **27017**; the API **`.env`** already matches. Stop 
 
 With the Vite dev server, `/api` is proxied to `http://localhost:5001`. Run **both** backend and `npm run dev` in `frontend/react` so the Contact form can save to MongoDB.
 
-For production, set `VITE_API_URL` to your deployed API origin (no trailing slash).
+For production, set `VITE_API_URL` to your deployed API origin (no trailing slash). This repo’s frontend uses **`https://evolve-fitness-backend.onrender.com`** via `frontend/react/.env.production`.
+
+**CORS:** On Render, set **`CORS_ORIGIN`** to your **Vercel** site URL (e.g. `https://your-app.vercel.app`). Without it, `cors` may still allow requests in some setups, but locking this down is recommended for production.
 
 ## Deploy on Render
 

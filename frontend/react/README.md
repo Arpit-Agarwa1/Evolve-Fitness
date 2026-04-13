@@ -1,3 +1,17 @@
+# Evolve Fitness — React (Vite)
+
+## API (Vercel + Render)
+
+Production builds read **`frontend/react/.env.production`** and set:
+
+- **`VITE_API_URL=https://evolve-fitness-backend.onrender.com`**
+
+So `apiFetch()` calls the Render backend. Local dev leaves `VITE_API_URL` unset and uses the Vite proxy (`vite.config.js` → `localhost:5001`).
+
+**On Render (backend):** set **`CORS_ORIGIN`** to your Vercel deployment URL(s), e.g. `https://your-app.vercel.app`, so the browser is allowed to call the API.
+
+---
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
