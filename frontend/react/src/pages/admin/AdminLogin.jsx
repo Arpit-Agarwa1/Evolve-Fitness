@@ -3,6 +3,7 @@ import { Link, Navigate, useLocation } from "react-router-dom";
 import { apiFetch } from "../../services/api";
 import { useAdminAuth } from "../../hooks/useAdminAuth";
 import "../../styles/admin.css";
+import SEO from "../../components/SEO";
 
 /**
  * Owner sign-in — uses POST /api/admin/login.
@@ -55,6 +56,12 @@ export default function AdminLogin() {
 
   return (
     <div className="admin-login">
+      <SEO
+        title="Owner sign in"
+        description="Evolve Fitness owner console — not indexed."
+        path="/admin/login"
+        noIndex
+      />
       <div className="admin-login__card">
         <p className="admin-login__eyebrow">Evolve Fitness</p>
         <h1 className="admin-login__title">Owner sign in</h1>

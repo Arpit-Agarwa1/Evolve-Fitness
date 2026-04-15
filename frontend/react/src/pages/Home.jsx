@@ -7,6 +7,8 @@ import { evolveGalleryImages, evolveHeroImage } from "../assets/evolveMagazine";
 import { evolveServices } from "../data/services";
 import { INSTAGRAM_URL } from "../config/socialLinks";
 import EvolveImage from "../components/EvolveImage";
+import SEO from "../components/SEO";
+import JsonLdLocalBusiness from "../components/JsonLdLocalBusiness";
 
 /**
  * Landing page — hero uses HD gym photography + glass panel for readable type.
@@ -14,6 +16,12 @@ import EvolveImage from "../components/EvolveImage";
 export default function Home() {
   return (
     <>
+      <SEO
+        title="Evolve Fitness — Luxury Gym Jaipur | Vivacity Mall"
+        description="Evolve Fitness, also searched as Evolve Gym — premium luxury gym in Jaipur on the 5th floor of Vivacity Mall, Jagatpura. Elite USA-grade equipment, personal training, recovery zone, membership & café. Phone +91 90243 01606."
+        path="/"
+      />
+      <JsonLdLocalBusiness />
       <Navbar />
       <div className="home">
         <section className="hero" aria-labelledby="hero-heading">

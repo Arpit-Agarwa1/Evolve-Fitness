@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import AdminPagination from "../../components/admin/AdminPagination";
+import SEO from "../../components/SEO";
 import { useAdminApi } from "../../hooks/useAdminApi";
 import { adminListQuery, adminPageCount } from "../../utils/adminPagination";
 
@@ -60,6 +61,12 @@ export default function AdminLeads() {
 
   return (
     <AdminLayout title="Membership leads">
+      <SEO
+        title="Membership leads"
+        description="Evolve Fitness admin — membership leads."
+        path="/admin/leads"
+        noIndex
+      />
       {errorMessage ? (
         <p className="admin-banner admin-banner--error" role="alert">
           {errorMessage}

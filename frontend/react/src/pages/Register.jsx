@@ -4,6 +4,7 @@ import "../styles/register.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { apiFetch } from "../services/api";
+import SEO from "../components/SEO";
 
 const PLANS = [
   { value: "1month", label: "1 month — ₹7,999" },
@@ -93,6 +94,11 @@ export default function Register() {
 
   return (
     <div className="register-page">
+      <SEO
+        title="Join Evolve Fitness — Register Online"
+        description="Register for Evolve Fitness, Jaipur’s luxury gym at Vivacity Mall. Choose a membership plan, create your account, and start your fitness journey."
+        path="/register"
+      />
       <Navbar />
 
       <section className="register-hero">

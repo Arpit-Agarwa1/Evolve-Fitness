@@ -1,0 +1,72 @@
+/* Full-viewport route transition loader — minimal motion, respects reduced-motion */
+
+.page-loader {
+  flex: 1;
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: var(--ev-bg);
+}
+
+.page-loader__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.page-loader__mark {
+  display: flex;
+  align-items: center;
+  font-family: var(--ev-sans);
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.page-loader__arrow {
+  color: var(--ev-accent);
+  margin: 0 2px;
+}
+
+.page-loader__bar {
+  width: min(200px, 60vw);
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.page-loader__bar-fill {
+  height: 100%;
+  width: 40%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--ev-accent),
+    var(--ev-accent-hover),
+    transparent
+  );
+  animation: page-loader-shimmer 0.9s ease-in-out infinite;
+}
+
+@keyframes page-loader-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(350%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-loader__bar-fill {
+    animation: none;
+    width: 100%;
+    opacity: 0.6;
+  }
+}

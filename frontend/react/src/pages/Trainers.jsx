@@ -7,6 +7,7 @@ import {
   evolveTrainersHeroImage,
 } from "../assets/evolveMagazine";
 import EvolveImage from "../components/EvolveImage";
+import SEO from "../components/SEO";
 
 const trainers = [
   { name: "Alex Carter", role: "Strength coach", photoIndex: 0 },
@@ -23,6 +24,11 @@ const trainers = [
 export default function Trainers() {
   return (
     <div className="trainers-page">
+      <SEO
+        title="Personal Trainers — Evolve Fitness Jaipur"
+        description="Meet Evolve Fitness coaches at our luxury gym in Jaipur, Vivacity Mall — strength, Pilates, HIIT, conditioning & recovery. Expert personal training."
+        path="/trainers"
+      />
       <Navbar />
 
       <section className="trainers-hero">

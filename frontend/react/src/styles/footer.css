@@ -3,13 +3,32 @@
  */
 
 .footer {
-  background: #050506;
+  position: relative;
+  background: linear-gradient(180deg, #0c0c0f 0%, #050506 38%, #030304 100%);
   color: var(--ev-text-muted);
   padding: clamp(3rem, 8vw, 4rem) clamp(1.25rem, 4vw, 2.5rem) 1.5rem;
-  border-top: 1px solid var(--ev-border);
+  border-top: 1px solid transparent;
+}
+
+.footer::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 106, 43, 0.35) 20%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 106, 43, 0.25) 80%,
+    transparent
+  );
+  pointer-events: none;
 }
 
 .footer-container {
+  position: relative;
+  z-index: 1;
   max-width: var(--ev-max);
   margin: 0 auto;
   display: grid;
@@ -119,6 +138,8 @@
 }
 
 .footer-bottom {
+  position: relative;
+  z-index: 1;
   max-width: var(--ev-max);
   margin: 2.5rem auto 0;
   padding-top: 1.5rem;

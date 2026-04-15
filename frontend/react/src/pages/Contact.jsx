@@ -5,6 +5,7 @@ import Footer from "../components/Footer";
 import WhatsAppPromptModal from "../components/WhatsAppPromptModal";
 import ContactMap from "../components/ContactMap";
 import { apiFetch } from "../services/api";
+import SEO from "../components/SEO";
 
 /**
  * Contact page — submits enquiries to the MVC API (MongoDB).
@@ -62,6 +63,11 @@ export default function Contact() {
 
   return (
     <div className="contact-page">
+      <SEO
+        title="Contact & Location — Evolve Gym Jaipur"
+        description="Contact Evolve Fitness — luxury gym on the 5th floor of Vivacity Mall, Jagatpura, Jaipur. Phone +91 90243 01606. Send a message or get directions on Google Maps."
+        path="/contact"
+      />
       <Navbar />
 
       <section className="contact-hero">

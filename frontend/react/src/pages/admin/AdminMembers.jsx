@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
 import AdminPagination from "../../components/admin/AdminPagination";
+import SEO from "../../components/SEO";
 import { useAdminApi } from "../../hooks/useAdminApi";
 import { adminListQuery, adminPageCount } from "../../utils/adminPagination";
 
@@ -62,6 +63,12 @@ export default function AdminMembers() {
 
   return (
     <AdminLayout title="Members">
+      <SEO
+        title="Members"
+        description="Evolve Fitness admin — members list."
+        path="/admin/members"
+        noIndex
+      />
       {errorMessage ? (
         <p className="admin-banner admin-banner--error" role="alert">
           {errorMessage}

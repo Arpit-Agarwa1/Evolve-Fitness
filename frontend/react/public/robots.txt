@@ -1,0 +1,5 @@
+# Dev fallback; production uses dist/robots.txt generated in postbuild with your VITE_SITE_URL.
+User-agent: *
+Allow: /
+
+Disallow: /admin

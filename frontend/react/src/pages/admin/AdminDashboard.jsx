@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AdminLayout from "../../components/admin/AdminLayout";
+import SEO from "../../components/SEO";
 import { useAdminApi } from "../../hooks/useAdminApi";
 
 /**
@@ -39,6 +40,12 @@ export default function AdminDashboard() {
 
   return (
     <AdminLayout title="Overview">
+      <SEO
+        title="Owner overview"
+        description="Evolve Fitness admin console."
+        path="/admin"
+        noIndex
+      />
       {errorMessage ? (
         <p className="admin-banner admin-banner--error" role="alert">
           {errorMessage}

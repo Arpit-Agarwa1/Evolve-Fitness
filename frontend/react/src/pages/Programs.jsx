@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { evolveProgramImages } from "../assets/evolveMagazine";
 import EvolveImage from "../components/EvolveImage";
+import SEO from "../components/SEO";
 
 /**
  * Training programs — each card uses Evolve magazine photography.
@@ -56,6 +57,11 @@ const programs = [
 export default function Programs() {
   return (
     <div className="programs-page">
+      <SEO
+        title="Training Programs — Evolve Gym Jaipur"
+        description="Smart training, Pilates, yoga, recovery, strength, HIIT & nutrition at Evolve Fitness — luxury gym in Jaipur, Vivacity Mall. Explore programs and train with expert coaches."
+        path="/programs"
+      />
       <Navbar />
 
       <section className="programs-hero">

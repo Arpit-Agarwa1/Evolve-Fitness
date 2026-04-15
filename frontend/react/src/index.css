@@ -18,6 +18,11 @@
   --ev-radius-lg: 22px;
   --ev-max: 1200px;
   --ev-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+  --ev-shadow-glow: 0 20px 60px rgba(255, 106, 43, 0.12);
+  --ev-ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+  --ev-transition: 0.22s var(--ev-ease-out);
+  --ev-transition-slow: 0.4s var(--ev-ease-out);
+  --ev-focus-ring: 0 0 0 2px var(--ev-bg), 0 0 0 4px rgba(255, 106, 43, 0.65);
 }
 
 *,
@@ -42,11 +47,35 @@ body {
   font-weight: 400;
   line-height: 1.55;
   color: var(--ev-text-muted);
-  background: var(--ev-bg);
+  background-color: var(--ev-bg);
+  background-image:
+    radial-gradient(
+      ellipse 130% 90% at 50% -25%,
+      rgba(255, 106, 43, 0.09),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 70% 50% at 100% 20%,
+      rgba(100, 70, 160, 0.05),
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 60% 40% at 0% 80%,
+      rgba(255, 106, 43, 0.04),
+      transparent 45%
+    );
+  background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   overflow-x: clip;
   padding-left: env(safe-area-inset-left, 0);
   padding-right: env(safe-area-inset-right, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body {
+    background-attachment: scroll;
+  }
 }
 
 #root {
@@ -73,6 +102,23 @@ h3,
 a {
   color: inherit;
   text-decoration: none;
+  transition: color var(--ev-transition), opacity var(--ev-transition);
+}
+
+:focus-visible {
+  outline: none;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  box-shadow: var(--ev-focus-ring);
+}
+
+button:focus:not(:focus-visible) {
+  box-shadow: none;
 }
 
 img {

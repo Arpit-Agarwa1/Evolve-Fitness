@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import "../styles/navbar.css";
 
 /**
@@ -7,6 +7,14 @@ import "../styles/navbar.css";
  */
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const location = useLocation();
+
+  /** Home is “active” only at `/` without the Experience hash — avoids both Home + Experience orange at once */
+  const homeActive =
+    location.pathname === "/" && location.hash !== "#experience";
+  /** Experience uses hash routing on the landing page */
+  const experienceActive =
+    location.pathname === "/" && location.hash === "#experience";
 
   const linkClass = ({ isActive }) =>
     `nav-link ${isActive ? "nav-link--active" : ""}`;
@@ -43,14 +51,25 @@ export default function Navbar() {
           className={`nav-links ${menuOpen ? "nav-links--open" : ""}`}
         >
           <li>
-            <NavLink to="/" className={linkClass} end onClick={() => setMenuOpen(false)}>
+            <NavLink
+              to="/"
+              end
+              className={() =>
+                `nav-link ${homeActive ? "nav-link--active" : ""}`
+              }
+              onClick={() => setMenuOpen(false)}
+            >
               Home
             </NavLink>
           </li>
           <li>
-            <a href="/#experience" className="nav-link" onClick={() => setMenuOpen(false)}>
+            <Link
+              to="/#experience"
+              className={`nav-link ${experienceActive ? "nav-link--active" : ""}`}
+              onClick={() => setMenuOpen(false)}
+            >
               Experience
-            </a>
+            </Link>
           </li>
           <li>
             <NavLink to="/programs" className={linkClass} onClick={() => setMenuOpen(false)}>

@@ -4,6 +4,7 @@ import "../styles/membership.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { MEMBERSHIP_PLANS, GYM_HOURS_LINE } from "../data/membershipPlans";
+import SEO from "../components/SEO";
 
 /**
  * Membership — duration-based plans and gym hours.
@@ -11,6 +12,11 @@ import { MEMBERSHIP_PLANS, GYM_HOURS_LINE } from "../data/membershipPlans";
 export default function Membership() {
   return (
     <div className="membership-page">
+      <SEO
+        title="Gym Membership Jaipur — Evolve Fitness Vivacity Mall"
+        description="Evolve Fitness membership plans — full access to Jaipur’s luxury gym at Vivacity Mall, Jagatpura. Premium equipment, amenities & hours. View pricing and join."
+        path="/membership"
+      />
       <Navbar />
 
       <section className="membership-hero">
