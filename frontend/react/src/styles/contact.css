@@ -235,6 +235,9 @@
 
 .contact-map {
   width: 100%;
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .contact-map__frame {
@@ -244,8 +247,8 @@
   overflow: hidden;
   border: 1px solid var(--ev-border);
   box-shadow: var(--ev-shadow);
-  aspect-ratio: 16 / 10;
-  min-height: 260px;
+  /* Compact map: capped height so it doesn’t dominate the page */
+  height: clamp(200px, 28vw, 260px);
   background: var(--ev-bg-elevated);
 }
 
