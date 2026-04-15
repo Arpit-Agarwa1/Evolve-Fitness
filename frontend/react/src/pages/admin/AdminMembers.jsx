@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
+import AdminPagination from "../../components/admin/AdminPagination";
 import { useAdminApi } from "../../hooks/useAdminApi";
+import { adminListQuery, adminPageCount } from "../../utils/adminPagination";
 
 function formatWhen(iso) {
   if (!iso) return "—";
@@ -20,6 +22,15 @@ export default function AdminMembers() {
   const [total, setTotal] = useState(0);
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+
+  const pageCount = useMemo(() => adminPageCount(total), [total]);
+
+  useEffect(() => {
+    if (total > 0 && pageCount > 0 && page > pageCount) {
+      setPage(pageCount);
+    }
+  }, [total, pageCount, page]);
 
   useEffect(() => {
     let cancelled = false;
@@ -27,7 +38,9 @@ export default function AdminMembers() {
       setLoading(true);
       setErrorMessage("");
       try {
-        const res = await request("/api/admin/members?limit=100");
+        const res = await request(
+          `/api/admin/members?${adminListQuery(page)}`
+        );
         if (!cancelled) {
           setItems(res.data?.items ?? []);
           setTotal(res.data?.total ?? 0);
@@ -45,7 +58,7 @@ export default function AdminMembers() {
     return () => {
       cancelled = true;
     };
-  }, [request]);
+  }, [request, page]);
 
   return (
     <AdminLayout title="Members">
@@ -86,6 +99,12 @@ export default function AdminMembers() {
           <p className="admin-empty">No members yet.</p>
         ) : null}
       </div>
+      <AdminPagination
+        page={page}
+        total={total}
+        loading={loading}
+        onPageChange={setPage}
+      />
     </AdminLayout>
   );
 }

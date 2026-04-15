@@ -49,11 +49,9 @@ export default function AdminDashboard() {
         <p className="admin-muted">Loading…</p>
       ) : (
         <>
-        <p className="admin-atlas-hint">
-          Data lives in MongoDB database <strong>evolve_fitness_data</strong> — collections{" "}
-          <code>admins</code> (owner login), <code>members</code>, <code>contactmessages</code>,{" "}
-          <code>membershipleads</code>. Session tokens still require <code>ADMIN_JWT_SECRET</code> on
-          the server.
+        <p className="admin-dashboard-hint">
+          Overview of member sign-ups, contact messages, and membership leads from your live
+          database. Technical setup details are in the project README.
         </p>
         <div className="admin-stats">
           <Link to="/admin/members" className="admin-stat-card">

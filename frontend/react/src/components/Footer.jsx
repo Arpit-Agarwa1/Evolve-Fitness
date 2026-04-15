@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { GYM_HOURS_LINE } from "../data/membershipPlans";
+import { INSTAGRAM_URL } from "../config/socialLinks";
 import "../styles/footer.css";
 
 /**
@@ -70,11 +71,12 @@ export default function Footer() {
         <div className="footer-col">
           <h3 className="footer-heading">Social</h3>
           <div className="socials">
-            <a href="https://instagram.com" target="_blank" rel="noreferrer">
-              Instagram
-            </a>
-            <a href="https://facebook.com" target="_blank" rel="noreferrer">
-              Facebook
+            <a
+              href={INSTAGRAM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              @evolvefitnesclub on Instagram
             </a>
           </div>
         </div>

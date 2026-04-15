@@ -3,6 +3,7 @@ import "../styles/contact.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import WhatsAppPromptModal from "../components/WhatsAppPromptModal";
+import ContactMap from "../components/ContactMap";
 import { apiFetch } from "../services/api";
 
 /**
@@ -171,6 +172,14 @@ export default function Contact() {
               {status === "loading" ? "Sending…" : "Send message"}
             </button>
           </form>
+        </div>
+
+        <div className="contact-map-section">
+          <h2 className="contact-map-section__title">Find us</h2>
+          <p className="contact-map-section__lede">
+            Vivacity Mall, Jagatpura — 5th floor.
+          </p>
+          <ContactMap />
         </div>
       </section>
       <Footer />

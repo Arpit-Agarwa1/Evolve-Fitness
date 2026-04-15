@@ -121,7 +121,7 @@
   color: #f0c4c0;
 }
 
-.admin-atlas-hint {
+.admin-dashboard-hint {
   font-size: 0.85rem;
   color: var(--ev-text-muted);
   line-height: 1.5;
@@ -132,9 +132,54 @@
   border-radius: var(--ev-radius);
 }
 
-.admin-atlas-hint code {
-  font-size: 0.8rem;
+.admin-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  margin-top: 1rem;
+  padding: 0.75rem 0 0;
+  border-top: 1px solid var(--ev-border);
+}
+
+.admin-pagination__meta {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--ev-text-muted);
+}
+
+.admin-pagination__controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.admin-pagination__status {
+  font-size: 0.8125rem;
+  color: var(--ev-text-muted);
+  white-space: nowrap;
+}
+
+.admin-pagination__btn {
+  padding: 0.45rem 0.85rem;
+  border-radius: 10px;
+  border: 1px solid var(--ev-border);
+  background: var(--ev-bg-elevated);
+  color: var(--ev-text);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.admin-pagination__btn:hover:not(:disabled) {
+  border-color: rgba(255, 106, 43, 0.45);
   color: var(--ev-accent);
+}
+
+.admin-pagination__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .admin-stats {
