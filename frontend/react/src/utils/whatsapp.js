@@ -1,8 +1,8 @@
 /**
- * WhatsApp click-to-chat — digits only, country code without + (e.g. 919876543210).
+ * WhatsApp click-to-chat — digits only, country code without + (e.g. 919024301606).
  * Override with VITE_WHATSAPP_NUMBER in Vercel.
  */
-const DEFAULT_WHATSAPP_E164_DIGITS = "919876543210";
+const DEFAULT_WHATSAPP_E164_DIGITS = "919024301606";
 
 /**
  * @returns {string}

@@ -59,7 +59,7 @@ export default function Footer() {
             temple, Mahal Yojana, Jagatpura, Jaipur, Rajasthan 302017
           </p>
           <p>
-            <a href="tel:+919876543210">+91 98765 43210</a>
+            <a href="tel:+919024301606">+91 90243 01606</a>
           </p>
           <p>
             <a href="mailto:info@evolvefitness.com">info@evolvefitness.com</a>

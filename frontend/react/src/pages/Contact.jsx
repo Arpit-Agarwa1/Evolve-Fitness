@@ -95,7 +95,7 @@ export default function Contact() {
                 📞
               </span>
               <p>
-                <a href="tel:+919876543210">+91 98765 43210</a>
+                <a href="tel:+919024301606">+91 90243 01606</a>
               </p>
             </div>
 
