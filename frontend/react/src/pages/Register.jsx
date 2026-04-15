@@ -38,6 +38,7 @@ export default function Register() {
   const [plan, setPlan] = useState(defaultPlan);
   const [status, setStatus] = useState("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [whatsappThankYouSent, setWhatsappThankYouSent] = useState(false);
 
   useEffect(() => {
     setPlan(defaultPlan);
@@ -65,7 +66,7 @@ export default function Register() {
     setStatus("loading");
 
     try {
-      await apiFetch("/api/members/register", {
+      const res = await apiFetch("/api/members/register", {
         method: "POST",
         body: JSON.stringify({
           fullName,
@@ -78,6 +79,7 @@ export default function Register() {
           city: city || undefined,
         }),
       });
+      setWhatsappThankYouSent(Boolean(res?.data?.whatsappThankYouSent));
       setStatus("success");
       form.reset();
       setPlan("unknown");
@@ -111,6 +113,12 @@ export default function Register() {
                 Thank you for signing up. We&apos;ll reach out shortly with
                 membership confirmation and onboarding details.
               </p>
+              {whatsappThankYouSent ? (
+                <p className="register-success-wa" role="status">
+                  A thank-you message from Evolve Fitness has been sent to your
+                  WhatsApp number.
+                </p>
+              ) : null}
               <div className="register-success-actions">
                 <Link to="/" className="register-btn register-btn--primary">
                   Back to home

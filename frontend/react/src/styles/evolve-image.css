@@ -1,0 +1,30 @@
+/**
+ * Shared photo treatment — smooth decode, GPU-friendly transforms, optional lazy fade-in.
+ */
+
+.evolve-image {
+  display: block;
+  max-width: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  image-rendering: auto;
+}
+
+/** Below-the-fold lazy images: fade in once decoded to avoid a harsh pop-in */
+.evolve-image--fade-pending {
+  opacity: 0;
+}
+
+.evolve-image--loaded {
+  opacity: 1;
+  transition: opacity 0.45s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .evolve-image--fade-pending,
+  .evolve-image--loaded {
+    opacity: 1;
+    transition: none;
+  }
+}

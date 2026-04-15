@@ -9,11 +9,51 @@
 }
 
 .trainers-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: min(56vh, 560px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   padding: clamp(6rem, 14vw, 9rem) clamp(1.25rem, 4vw, 2.5rem)
     clamp(3.5rem, 8vw, 5rem);
-  background-repeat: no-repeat;
   border-bottom: 1px solid var(--ev-border);
+}
+
+.trainers-hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.trainers-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 32%;
+  transform: scale(1.02);
+}
+
+.trainers-hero-scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 10, 12, 0.78) 0%,
+    var(--ev-bg) 100%
+  );
+}
+
+.trainers-hero-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: var(--ev-max);
+  margin: 0 auto;
 }
 
 .trainers-eyebrow {
@@ -62,10 +102,11 @@
   box-shadow: var(--ev-shadow);
 }
 
-.trainer-card img {
+.trainer-card .evolve-image {
   width: 100%;
   height: 320px;
   object-fit: cover;
+  object-position: center 28%;
   transition: transform 0.45s ease;
 }
 
@@ -100,9 +141,9 @@
 
 @media (max-width: 640px) {
   .trainers-hero {
+    min-height: min(48vh, 480px);
     padding-left: 1rem;
     padding-right: 1rem;
-    background-position: center top;
   }
 
   .trainers-section {
@@ -114,13 +155,19 @@
     grid-template-columns: 1fr;
   }
 
-  .trainer-card img {
+  .trainer-card .evolve-image {
     height: min(72vw, 300px);
   }
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .trainer-card:hover img {
-    transform: scale(1.06);
+  .trainer-card:hover .evolve-image {
+    transform: translateZ(0) scale(1.06);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trainers-hero-img {
+    transform: none;
   }
 }

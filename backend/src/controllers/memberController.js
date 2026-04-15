@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
 import Member, { PLAN_VALUES } from "../models/Member.js";
+import { sendRegistrationThankYou } from "../services/whatsappRegistrationThankYou.js";
 import { sendSuccess, sendError } from "../views/jsonResponse.js";
 
 const SALT_ROUNDS = 10;
@@ -62,6 +63,20 @@ export async function registerMember(req, res, next) {
       `[mongo] members inserted ${member._id} db=${mongoose.connection.name}`
     );
 
+    let whatsappThankYouSent = false;
+    try {
+      const wa = await sendRegistrationThankYou({
+        phone: member.phone,
+        fullName: member.fullName,
+      });
+      whatsappThankYouSent = Boolean(wa.sent);
+    } catch (waErr) {
+      console.error(
+        "[whatsapp] thank-you send threw:",
+        waErr instanceof Error ? waErr.message : waErr
+      );
+    }
+
     return sendSuccess(
       res,
       {
@@ -70,11 +85,14 @@ export async function registerMember(req, res, next) {
         fullName: member.fullName,
         planInterest: member.planInterest,
         createdAt: member.createdAt,
+        whatsappThankYouSent,
       },
       201
     );
   } catch (err) {
-    if (err.code === 11000) {
+    const dup =
+      err?.code === 11000 || err?.cause?.code === 11000;
+    if (dup) {
       return sendError(
         res,
         "An account with this email already exists",

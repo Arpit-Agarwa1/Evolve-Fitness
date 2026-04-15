@@ -1,0 +1,87 @@
+/* WhatsApp follow-up modal — matches Evolve tokens */
+
+.wa-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: var(--ev-overlay);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.wa-modal {
+  width: 100%;
+  max-width: 400px;
+  padding: 1.75rem 1.5rem;
+  background: var(--ev-bg-card);
+  border: 1px solid var(--ev-border);
+  border-radius: var(--ev-radius-lg);
+  box-shadow: var(--ev-shadow);
+  text-align: center;
+}
+
+.wa-modal__icon {
+  color: #25d366;
+  margin-bottom: 0.75rem;
+}
+
+.wa-modal__title {
+  font-family: var(--ev-serif);
+  font-size: 1.35rem;
+  font-weight: 500;
+  color: var(--ev-text);
+  margin: 0 0 0.5rem;
+}
+
+.wa-modal__subtitle {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--ev-text-muted);
+  margin: 0 0 1.5rem;
+}
+
+.wa-modal__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.wa-modal__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  border: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.wa-modal__btn--primary {
+  background: linear-gradient(135deg, #25d366, #128c7e);
+  color: #fff;
+}
+
+.wa-modal__btn--primary:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.wa-modal__btn--ghost {
+  background: transparent;
+  color: var(--ev-text-muted);
+  border: 1px solid var(--ev-border);
+}
+
+.wa-modal__btn--ghost:hover {
+  color: var(--ev-text);
+  border-color: rgba(255, 255, 255, 0.15);
+}

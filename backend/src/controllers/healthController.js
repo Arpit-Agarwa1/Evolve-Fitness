@@ -1,8 +1,11 @@
 import mongoose from "mongoose";
 import { sendSuccess } from "../views/jsonResponse.js";
 
+const verboseHealth =
+  process.env.HEALTH_VERBOSE === "1" || process.env.NODE_ENV !== "production";
+
 /**
- * GET /api/health — liveness + MongoDB + collection names (helps verify Atlas vs app).
+ * GET /api/health — liveness + DB status. Full collection list only when HEALTH_VERBOSE=1 or non-production.
  */
 export async function getHealth(req, res, next) {
   try {
@@ -11,27 +14,35 @@ export async function getHealth(req, res, next) {
     /** @type {string[]} */
     let collections = [];
 
-    if (dbOk && mongoose.connection.db) {
+    if (verboseHealth && dbOk && mongoose.connection.db) {
       mongoDatabase = mongoose.connection.name;
       const cols = await mongoose.connection.db.listCollections().toArray();
       collections = cols.map((c) => c.name).sort();
+    } else if (dbOk && mongoose.connection.db) {
+      mongoDatabase = mongoose.connection.name;
     }
 
-    return sendSuccess(res, {
+    /** @type {Record<string, unknown>} */
+    const payload = {
       status: "ok",
       database: dbOk ? "connected" : "disconnected",
       mongoDatabase,
-      collections,
-      expectedCollections: [
+      timestamp: new Date().toISOString(),
+    };
+
+    if (verboseHealth) {
+      payload.collections = collections;
+      payload.expectedCollections = [
         "admins",
         "members",
         "contactmessages",
         "membershipleads",
-      ],
-      hint:
-        "Atlas: database evolve_fitness_data. Admins collection stores owner login (email + passwordHash). Members/contacts/leads are site submissions.",
-      timestamp: new Date().toISOString(),
-    });
+      ];
+      payload.hint =
+        "Set HEALTH_VERBOSE=0 in production to hide collection names. Use npm run db:list locally.";
+    }
+
+    return sendSuccess(res, payload);
   } catch (err) {
     next(err);
   }

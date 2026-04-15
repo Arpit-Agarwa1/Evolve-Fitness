@@ -59,6 +59,12 @@ async function start() {
       );
     }
 
+    if (process.env.NODE_ENV === "production" && !process.env.CORS_ORIGIN?.trim()) {
+      console.warn(
+        "[CORS] CORS_ORIGIN is not set — browsers may block your Vercel app. Set CORS_ORIGIN=https://your-app.vercel.app on Render."
+      );
+    }
+
     app.listen(PORT, HOST, () => {
       console.log(`Evolve API listening on http://${HOST}:${PORT}`);
     });

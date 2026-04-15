@@ -38,12 +38,18 @@ export default function AdminLogin() {
       if (!token) {
         throw new Error("No token returned");
       }
+      setStatus("idle");
       setToken(token);
     } catch (err) {
       setStatus("idle");
-      setErrorMessage(
-        err instanceof Error ? err.message : "Sign-in failed."
-      );
+      const status = err && typeof err === "object" && "status" in err ? err.status : undefined;
+      let message =
+        err instanceof Error ? err.message : "Sign-in failed.";
+      if (status === 503) {
+        message =
+          "Sign-in is temporarily unavailable (server misconfiguration). Ask the host to set ADMIN_JWT_SECRET on the API.";
+      }
+      setErrorMessage(message);
     }
   }
 

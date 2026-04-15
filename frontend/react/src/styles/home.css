@@ -390,17 +390,18 @@
   min-height: 120px;
 }
 
-.evolve-gallery-cell img {
+.evolve-gallery-cell .evolve-image {
   width: 100%;
   height: 100%;
+  min-height: 120px;
   object-fit: cover;
-  display: block;
+  object-position: center;
   transition: transform 0.55s ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .evolve-gallery-cell:hover img {
-    transform: scale(1.04);
+  .evolve-gallery-cell:hover .evolve-image {
+    transform: translateZ(0) scale(1.04);
   }
 }
 
@@ -561,10 +562,11 @@
   aspect-ratio: auto;
 }
 
-.service-card-media img {
+.service-card-media .evolve-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   transition: transform 0.55s ease;
 }
 
@@ -776,8 +778,8 @@
     border-color: rgba(255, 106, 43, 0.35);
   }
 
-  .service-card:hover .service-card-media img {
-    transform: scale(1.04);
+  .service-card:hover .service-card-media .evolve-image {
+    transform: translateZ(0) scale(1.04);
   }
 }
 

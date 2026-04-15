@@ -5,6 +5,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { evolveGalleryImages, evolveHeroImage } from "../assets/evolveMagazine";
 import { evolveServices } from "../data/services";
+import EvolveImage from "../components/EvolveImage";
 
 /**
  * Landing page — hero uses HD gym photography + glass panel for readable type.
@@ -17,14 +18,17 @@ export default function Home() {
         <section className="hero" aria-labelledby="hero-heading">
           {/* Background stack: sharp photo + overlays + light motion (no baked-in poster text). */}
           <div className="hero-bg" aria-hidden="true">
-            <img
+            <EvolveImage
               className="hero-bg-img"
               src={evolveHeroImage}
               alt=""
               width={1920}
               height={1080}
-              decoding="async"
+              sizes="100vw"
+              loading="eager"
               fetchPriority="high"
+              decoding="async"
+              fadeIn={false}
             />
             <div className="hero-bg-vignette" />
             <div className="hero-bg-mesh" />
@@ -86,9 +90,10 @@ export default function Home() {
                 key={src}
                 className={`evolve-gallery-cell evolve-gallery-cell--${i}`}
               >
-                <img
+                <EvolveImage
                   src={src}
                   alt={`Evolve Fitness interior and facilities, photo ${i + 1}`}
+                  sizes="(max-width: 767px) 48vw, (max-width: 1199px) 32vw, 600px"
                   loading="lazy"
                   decoding="async"
                 />
@@ -114,7 +119,13 @@ export default function Home() {
                 className={`service-card ${index === 0 ? "service-card--wide" : ""}`}
               >
                 <div className="service-card-media">
-                  <img src={service.image} alt={service.alt} loading="lazy" />
+                  <EvolveImage
+                    src={service.image}
+                    alt={service.alt}
+                    sizes="(max-width: 767px) 100vw, (max-width: 1099px) 50vw, 400px"
+                    loading="lazy"
+                    decoding="async"
+                  />
                   <div className="service-card-media-overlay" />
                 </div>
                 <div className="service-card-body">

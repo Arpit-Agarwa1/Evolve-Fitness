@@ -7,10 +7,11 @@ import {
   listAdminLeads,
 } from "../controllers/adminDataController.js";
 import { requireAdminAuth } from "../middleware/requireAdminAuth.js";
+import { adminLoginLimiter } from "../middleware/rateLimits.js";
 
 const router = Router();
 
-router.post("/login", adminLogin);
+router.post("/login", adminLoginLimiter, adminLogin);
 
 router.use(requireAdminAuth);
 router.get("/dashboard", getAdminDashboard);

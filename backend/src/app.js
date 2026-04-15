@@ -1,11 +1,21 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
 import apiRoutes from "./routes/index.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
 const app = express();
 
-/** CORS: allow Vite dev server by default */
+/** Required for express-rate-limit and correct client IP on Render / reverse proxies */
+app.set("trust proxy", 1);
+
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  })
+);
+
 const corsOrigin = process.env.CORS_ORIGIN;
 app.use(
   cors({

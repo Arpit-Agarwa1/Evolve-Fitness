@@ -7,15 +7,20 @@ import { sendSuccess, sendError } from "../views/jsonResponse.js";
  */
 export async function createContactMessage(req, res, next) {
   try {
-    const { name, email, message, source } = req.body ?? {};
+    const { name, email, phone, message, source } = req.body ?? {};
 
-    if (!name || !email || !message) {
-      return sendError(res, "Name, email, and message are required", 422);
+    if (!name || !email || !phone || !message) {
+      return sendError(
+        res,
+        "Name, email, phone, and message are required",
+        422
+      );
     }
 
     const doc = await ContactMessage.create({
       name: String(name),
       email: String(email),
+      phone: String(phone).trim(),
       message: String(message),
       source: source ? String(source) : "website",
     });

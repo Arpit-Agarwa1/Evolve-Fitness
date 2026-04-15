@@ -4,7 +4,7 @@ import { adminApiFetch } from "../services/adminApi";
 import { useAdminAuth } from "./useAdminAuth";
 
 /**
- * Wraps {@link adminApiFetch} with token and redirects to login on 401.
+ * Wraps {@link adminApiFetch} with token and redirects to login on 401/403.
  */
 export function useAdminApi() {
   const { token, clearToken } = useAdminAuth();
@@ -19,7 +19,7 @@ export function useAdminApi() {
       try {
         return await adminApiFetch(path, token, options);
       } catch (err) {
-        if (err.status === 401) {
+        if (err.status === 401 || err.status === 403) {
           clearToken();
           navigate("/admin/login", { replace: true });
         }

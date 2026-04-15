@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "../styles/contact.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import WhatsAppPromptModal from "../components/WhatsAppPromptModal";
 import { apiFetch } from "../services/api";
 
 /**
@@ -10,6 +11,8 @@ import { apiFetch } from "../services/api";
 export default function Contact() {
   const [status, setStatus] = useState("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [whatsappOpen, setWhatsappOpen] = useState(false);
+  const [whatsappPrefill, setWhatsappPrefill] = useState("");
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -17,6 +20,7 @@ export default function Contact() {
     const fd = new FormData(form);
     const name = String(fd.get("name") ?? "").trim();
     const email = String(fd.get("email") ?? "").trim();
+    const phone = String(fd.get("phone") ?? "").trim();
     const message = String(fd.get("message") ?? "").trim();
 
     setErrorMessage("");
@@ -25,10 +29,28 @@ export default function Contact() {
     try {
       await apiFetch("/api/contact", {
         method: "POST",
-        body: JSON.stringify({ name, email, message, source: "website" }),
+        body: JSON.stringify({
+          name,
+          email,
+          phone,
+          message,
+          source: "website",
+        }),
       });
+      const wa = [
+        "Hi Evolve Fitness — I just sent a message via your website.",
+        "",
+        `Name: ${name}`,
+        `Email: ${email}`,
+        `Phone: ${phone}`,
+        "",
+        "Message:",
+        message,
+      ].join("\n");
+      setWhatsappPrefill(wa);
       setStatus("sent");
       form.reset();
+      setWhatsappOpen(true);
     } catch (err) {
       setStatus("idle");
       setErrorMessage(
@@ -119,6 +141,18 @@ export default function Contact() {
                 name="email"
                 placeholder="you@example.com"
                 required
+                autoComplete="email"
+                disabled={status === "loading"}
+              />
+            </label>
+            <label className="contact-label">
+              <span className="contact-label-text">Phone</span>
+              <input
+                type="tel"
+                name="phone"
+                placeholder="+91 …"
+                required
+                autoComplete="tel"
                 disabled={status === "loading"}
               />
             </label>
@@ -140,6 +174,14 @@ export default function Contact() {
         </div>
       </section>
       <Footer />
+
+      <WhatsAppPromptModal
+        open={whatsappOpen}
+        onClose={() => setWhatsappOpen(false)}
+        prefillText={whatsappPrefill}
+        title="Message received — continue on WhatsApp?"
+        subtitle="Your enquiry is saved. Open WhatsApp to chat with our team; your message is prefilled."
+      />
     </div>
   );
 }

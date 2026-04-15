@@ -64,6 +64,7 @@ export default function AdminContacts() {
               <th>When</th>
               <th>Name</th>
               <th>Email</th>
+              <th>Phone</th>
               <th>Message</th>
             </tr>
           </thead>
@@ -73,6 +74,7 @@ export default function AdminContacts() {
                 <td className="admin-table__nowrap">{formatWhen(row.createdAt)}</td>
                 <td>{row.name}</td>
                 <td>{row.email}</td>
+                <td className="admin-table__nowrap">{row.phone || "—"}</td>
                 <td className="admin-table__message">{row.message}</td>
               </tr>
             ))}

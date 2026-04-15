@@ -151,7 +151,7 @@ This starts MongoDB on port **27017**; the API **`.env`** already matches. Stop 
 | GET    | `/api/health`            | Health + DB connection     |
 | POST   | `/api/contact`           | Contact form (`name`, `email`, `message`) |
 | POST   | `/api/membership/leads`  | Membership lead (`email` required; optional `name`, `phone`, `plan`, `notes`). `plan`: `1month` \| `3months` \| `6months` \| `1year` \| legacy `essential` \| `premium` \| `elite` \| `unknown` |
-| POST   | `/api/members/register` | Member signup: `fullName`, `email`, `phone`, `password`, optional `confirmPassword`, `plan`, `dateOfBirth`, `city`. Password min 8 chars. |
+| POST   | `/api/members/register` | Member signup: `fullName`, `email`, `phone`, `password`, optional `confirmPassword`, `plan`, `dateOfBirth`, `city`. Password min 8 chars. Response includes `whatsappThankYouSent` when WhatsApp Cloud API env is configured. |
 | POST   | `/api/admin/login`     | Owner sign-in: `email`, `password`. Checks MongoDB `admins` collection first; optional env fallback. Requires `ADMIN_JWT_SECRET`. |
 | GET    | `/api/admin/dashboard`  | JWT — counts for members, contacts, leads. |
 | GET    | `/api/admin/members`    | JWT — paginated members (`limit`, `skip`). |
@@ -220,3 +220,21 @@ openssl rand -hex 32
 Paste the output into Render → Environment → `ADMIN_JWT_SECRET` → **Save** → **Manual Deploy**. Check Render logs for `[Admin] ADMIN_JWT_SECRET is set (length …)` after deploy.
 
 The **Owner login** page (`/admin/login`) calls `POST /api/admin/login`; other `/api/admin/*` routes require `Authorization: Bearer <token>`.
+
+### WhatsApp thank-you after registration (optional)
+
+To **send a template message from Evolve’s WhatsApp Business number** to the member’s phone after successful signup:
+
+1. Set up **WhatsApp Business Platform** in [Meta for Developers](https://developers.facebook.com/) and get a **permanent access token**, **Phone number ID**, and an **approved message template** (business-initiated messages must use templates).
+2. Template example: category *Utility*, body text like `Hi {{1}}, thank you for registering with Evolve Fitness! We’ll be in touch soon.` — one variable for the member’s name.
+3. Add to **Render** (or `.env`):
+
+| Variable | Purpose |
+| -------- | ------- |
+| `WHATSAPP_CLOUD_API_TOKEN` | Graph API access token |
+| `WHATSAPP_PHONE_NUMBER_ID` | WhatsApp **Phone number ID** (not the display number) |
+| `WHATSAPP_REGISTRATION_TEMPLATE_NAME` | Approved template name |
+| `WHATSAPP_REGISTRATION_TEMPLATE_LANG` | e.g. `en` or `en_US` (must match template) |
+| `WHATSAPP_REGISTRATION_TEMPLATE_BODY_PARAMS` | `1` if template has one body variable (name); `0` if the message is static |
+
+If these are not set, registration still succeeds; the API returns `whatsappThankYouSent: false`. Phone numbers are normalized (10-digit India numbers get country code `91`).

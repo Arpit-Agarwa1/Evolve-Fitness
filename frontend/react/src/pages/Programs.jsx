@@ -3,6 +3,7 @@ import "../styles/programs.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { evolveProgramImages } from "../assets/evolveMagazine";
+import EvolveImage from "../components/EvolveImage";
 
 /**
  * Training programs — each card uses Evolve magazine photography.
@@ -71,7 +72,13 @@ export default function Programs() {
           {programs.map((program) => (
             <article key={program.title} className="program-card">
               <div className="program-card-image-wrap">
-                <img src={program.image} alt={program.alt} loading="lazy" />
+                <EvolveImage
+                  src={program.image}
+                  alt={program.alt}
+                  sizes="(max-width: 640px) 100vw, (max-width: 960px) 50vw, 440px"
+                  loading="lazy"
+                  decoding="async"
+                />
               </div>
               <div className="program-content">
                 <h3>{program.title}</h3>

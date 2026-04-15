@@ -18,6 +18,12 @@ const contactMessageSchema = new mongoose.Schema(
       lowercase: true,
       maxlength: [254, "Email is too long"],
     },
+    phone: {
+      type: String,
+      required: [true, "Phone is required"],
+      trim: true,
+      maxlength: [32, "Phone is too long"],
+    },
     message: {
       type: String,
       required: [true, "Message is required"],
