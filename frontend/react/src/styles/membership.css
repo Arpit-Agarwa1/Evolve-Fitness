@@ -38,11 +38,52 @@
 }
 
 .membership-lede {
-  max-width: 34rem;
+  max-width: 36rem;
   margin: 0 auto;
   font-size: 1.0625rem;
   font-weight: 300;
   line-height: 1.65;
+}
+
+.membership-hours-inline {
+  color: var(--ev-text);
+  font-weight: 500;
+}
+
+.membership-hours-banner {
+  border-bottom: 1px solid var(--ev-border);
+  background: var(--ev-bg-elevated);
+}
+
+.membership-hours-inner {
+  max-width: var(--ev-max);
+  margin: 0 auto;
+  padding: 1.25rem clamp(1.25rem, 4vw, 2.5rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.membership-hours-icon {
+  font-size: 1.5rem;
+  opacity: 0.85;
+}
+
+.membership-hours-label {
+  margin: 0;
+  font-size: 0.6875rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ev-accent);
+}
+
+.membership-hours-value {
+  margin: 0.25rem 0 0;
+  font-family: var(--ev-serif);
+  font-size: 1.35rem;
+  color: var(--ev-text);
 }
 
 .membership-section {

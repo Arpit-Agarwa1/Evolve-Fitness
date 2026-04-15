@@ -17,6 +17,26 @@ Express REST API using **MVC** (Models, Views as JSON formatters, Controllers) a
 
 Your app stores data in a database named **`evolve_fitness_data`**. MongoDB **does not allow spaces** in database names, so we use this identifier (you can still call it “Evolve Fitness Data” in the product). In connection URLs, use that name as-is after the host: **`/evolve_fitness_data`**
 
+### “I don’t see any folders / collections in MongoDB”
+
+MongoDB Atlas does not use the word **folders**. You have:
+
+1. **Cluster** (e.g. Cluster0)  
+2. **Database** — ours is named **`evolve_fitness_data`**  
+3. **Collections** (like tables) — e.g. **`members`**, **`contactmessages`**, **`membershipleads`**, **`admins`**
+
+**Important:** A database or collection often **does not appear until the first document is inserted**. If nobody has registered, contacted, or created an admin yet, **`evolve_fitness_data` may be empty or missing** in the UI.
+
+**Check from your computer** (with `backend/.env` and a valid `MONGODB_URI`):
+
+```bash
+cd backend && npm run db:list
+```
+
+This prints the **exact database name** and **collection names** your API uses. If the list is empty, nothing has been written yet.
+
+**In Atlas:** **Database** → your cluster → **Browse Collections** → open the database **`evolve_fitness_data`** — not only `admin` / `local` / `config`. If you still see nothing, submit one test **Contact** or **Register** from the site (with the API and `VITE_API_URL` working), then refresh Atlas.
+
 Pick **one** path: **Atlas (cloud)** is easiest if you do not want to install MongoDB on your computer.
 
 ---
@@ -130,7 +150,7 @@ This starts MongoDB on port **27017**; the API **`.env`** already matches. Stop 
 | ------ | ------------------------ | -------------------------- |
 | GET    | `/api/health`            | Health + DB connection     |
 | POST   | `/api/contact`           | Contact form (`name`, `email`, `message`) |
-| POST   | `/api/membership/leads`  | Membership lead (`email` required; optional `name`, `phone`, `plan`, `notes`). `plan`: `essential` \| `premium` \| `elite` \| `unknown` |
+| POST   | `/api/membership/leads`  | Membership lead (`email` required; optional `name`, `phone`, `plan`, `notes`). `plan`: `1month` \| `3months` \| `6months` \| `1year` \| legacy `essential` \| `premium` \| `elite` \| `unknown` |
 | POST   | `/api/members/register` | Member signup: `fullName`, `email`, `phone`, `password`, optional `confirmPassword`, `plan`, `dateOfBirth`, `city`. Password min 8 chars. |
 | POST   | `/api/admin/login`     | Owner sign-in: `email`, `password`. Checks MongoDB `admins` collection first; optional env fallback. Requires `ADMIN_JWT_SECRET`. |
 | GET    | `/api/admin/dashboard`  | JWT — counts for members, contacts, leads. |
@@ -190,5 +210,13 @@ Paste the hash into the `passwordHash` field in **Data Explorer → Insert Docum
 | `ADMIN_JWT_EXPIRES` | Optional, default `12h`. |
 | `ADMIN_EMAIL` | Optional fallback — only if not using MongoDB admin. |
 | `ADMIN_PASSWORD_BCRYPT` | Optional fallback — bcrypt hash. |
+
+**Admin JWT secret on Render:** Avoid `$`, `#`, and `!` in `ADMIN_JWT_SECRET` — some platforms treat `$` as variable interpolation, so sign-in can succeed but the dashboard returns **401 / Invalid session** (token signed with a different string than verify). Use a **hex-only** secret:
+
+```bash
+openssl rand -hex 32
+```
+
+Paste the output into Render → Environment → `ADMIN_JWT_SECRET` → **Save** → **Manual Deploy**. Check Render logs for `[Admin] ADMIN_JWT_SECRET is set (length …)` after deploy.
 
 The **Owner login** page (`/admin/login`) calls `POST /api/admin/login`; other `/api/admin/*` routes require `Authorization: Bearer <token>`.

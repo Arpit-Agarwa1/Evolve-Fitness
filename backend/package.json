@@ -10,7 +10,8 @@
     "dev": "node --watch server.js",
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",
-    "admin:create": "node scripts/createAdmin.js"
+    "admin:create": "node scripts/createAdmin.js",
+    "db:list": "node scripts/listMongoCollections.js"
   },
   "engines": {
     "node": ">=18.0.0"

@@ -1,5 +1,6 @@
 import "dotenv/config";
 import app from "./src/app.js";
+import { getAdminJwtSecret } from "./src/config/adminJwt.js";
 import { connectDB } from "./src/config/database.js";
 
 /** Render and most PaaS require binding to all interfaces, not loopback only. */
@@ -46,6 +47,18 @@ async function connectWithRetry() {
 async function start() {
   try {
     await connectWithRetry();
+
+    const jwtLen = getAdminJwtSecret().length;
+    if (!jwtLen) {
+      console.warn(
+        "[Admin] ADMIN_JWT_SECRET is not set — POST /api/admin/login will return 503."
+      );
+    } else {
+      console.log(
+        `[Admin] ADMIN_JWT_SECRET is set (length ${jwtLen}).`
+      );
+    }
+
     app.listen(PORT, HOST, () => {
       console.log(`Evolve API listening on http://${HOST}:${PORT}`);
     });

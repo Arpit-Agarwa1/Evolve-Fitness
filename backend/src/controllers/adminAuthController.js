@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { getAdminJwtSecret } from "../config/adminJwt.js";
 import Admin from "../models/Admin.js";
 import { sendSuccess, sendError } from "../views/jsonResponse.js";
 
@@ -16,7 +17,7 @@ export async function adminLogin(req, res, next) {
       .toLowerCase();
     const password = String(req.body?.password ?? "");
 
-    const jwtSecret = process.env.ADMIN_JWT_SECRET?.trim();
+    const jwtSecret = getAdminJwtSecret();
     if (!jwtSecret) {
       return sendError(
         res,

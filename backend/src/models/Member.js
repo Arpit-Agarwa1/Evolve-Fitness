@@ -1,6 +1,15 @@
 import mongoose from "mongoose";
 
-const PLAN_VALUES = ["essential", "premium", "elite", "unknown"];
+const PLAN_VALUES = [
+  "1month",
+  "3months",
+  "6months",
+  "1year",
+  "essential",
+  "premium",
+  "elite",
+  "unknown",
+];
 
 /**
  * Registered member account (signup). Password stored as hash only.

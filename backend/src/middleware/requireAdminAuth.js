@@ -1,11 +1,12 @@
 import jwt from "jsonwebtoken";
+import { getAdminJwtSecret } from "../config/adminJwt.js";
 import { sendError } from "../views/jsonResponse.js";
 
 /**
  * Requires `Authorization: Bearer <JWT>` from POST /api/admin/login.
  */
 export function requireAdminAuth(req, res, next) {
-  const secret = process.env.ADMIN_JWT_SECRET?.trim();
+  const secret = getAdminJwtSecret();
   if (!secret) {
     return sendError(res, "Admin access is not configured on the server", 503);
   }

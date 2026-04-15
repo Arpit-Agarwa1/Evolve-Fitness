@@ -6,9 +6,10 @@ import Footer from "../components/Footer";
 import { apiFetch } from "../services/api";
 
 const PLANS = [
-  { value: "essential", label: "Essential" },
-  { value: "premium", label: "Premium" },
-  { value: "elite", label: "Elite" },
+  { value: "1month", label: "1 month — ₹7,999" },
+  { value: "3months", label: "3 months — ₹17,999" },
+  { value: "6months", label: "6 months — ₹23,999" },
+  { value: "1year", label: "1 year — ₹34,999" },
   { value: "unknown", label: "Not sure yet" },
 ];
 
@@ -21,7 +22,16 @@ export default function Register() {
 
   const defaultPlan = useMemo(() => {
     const p = planFromUrl?.toLowerCase();
-    if (p === "essential" || p === "premium" || p === "elite") return p;
+    const allowed = new Set([
+      "1month",
+      "3months",
+      "6months",
+      "1year",
+      "essential",
+      "premium",
+      "elite",
+    ]);
+    if (p && allowed.has(p)) return p;
     return "unknown";
   }, [planFromUrl]);
 

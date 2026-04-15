@@ -1,6 +1,15 @@
 import mongoose from "mongoose";
 
-const PLAN_VALUES = ["essential", "premium", "elite", "unknown"];
+const PLAN_VALUES = [
+  "1month",
+  "3months",
+  "6months",
+  "1year",
+  "essential",
+  "premium",
+  "elite",
+  "unknown",
+];
 
 /**
  * Membership interest captured from the site (e.g. plan buttons).

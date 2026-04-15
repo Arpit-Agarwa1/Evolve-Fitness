@@ -1,0 +1,39 @@
+{
+  "admins": [
+    {
+      "email": "owner@evolvefitness.com",
+      "passwordHash": "$2a$10$o3HisaxnGbfTTiY.l/vR.OAJMX6ZBG7PUjyyYYwGYZZG37O7jj9ZS",
+      "displayName": "Evolve Owner"
+    }
+  ],
+
+  "members": [
+    {
+      "fullName": "Sample Member",
+      "email": "member.sample@example.com",
+      "phone": "+91 98765 43210",
+      "passwordHash": "$2a$10$bvMpUigC708zSAi2h.3DOe45qaRHmCK2NYHfKRMG2XmHOxX0qqDcu",
+      "planInterest": "premium",
+      "city": "Jaipur"
+    }
+  ],
+
+  "contactmessages": [
+    {
+      "name": "Demo Visitor",
+      "email": "visitor@example.com",
+      "message": "Hello — this is sample contact data for testing Atlas.",
+      "source": "website"
+    }
+  ],
+
+  "membershipleads": [
+    {
+      "name": "Lead Person",
+      "email": "lead@example.com",
+      "phone": "+91 90000 00000",
+      "plan": "elite",
+      "notes": "Sample lead row for testing."
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { GYM_HOURS_LINE } from "../data/membershipPlans";
 import "../styles/footer.css";
 
 /**
@@ -63,6 +64,7 @@ export default function Footer() {
           <p>
             <a href="mailto:info@evolvefitness.com">info@evolvefitness.com</a>
           </p>
+          <p className="footer-hours">{GYM_HOURS_LINE}</p>
         </div>
 
         <div className="footer-col">

@@ -3,9 +3,10 @@ import { Link } from "react-router-dom";
 import "../styles/membership.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { MEMBERSHIP_PLANS, GYM_HOURS_LINE } from "../data/membershipPlans";
 
 /**
- * Membership tiers — placeholder pricing; replace with live plans when ready.
+ * Membership — duration-based plans and gym hours.
  */
 export default function Membership() {
   return (
@@ -16,69 +17,59 @@ export default function Membership() {
         <p className="membership-eyebrow">Membership</p>
         <h1 className="membership-title">Choose your plan</h1>
         <p className="membership-lede">
-          Flexible options to match your schedule — from full access to
-          premium coaching and lounge privileges.
+          Full floor access, premium equipment, and luxury amenities — train on
+          your schedule.{" "}
+          <strong className="membership-hours-inline">{GYM_HOURS_LINE}</strong>.
         </p>
+      </section>
+
+      <section className="membership-hours-banner" aria-label="Gym hours">
+        <div className="membership-hours-inner">
+          <span className="membership-hours-icon" aria-hidden="true">
+            ◐
+          </span>
+          <div>
+            <p className="membership-hours-label">Opening hours</p>
+            <p className="membership-hours-value">{GYM_HOURS_LINE}</p>
+          </div>
+        </div>
       </section>
 
       <section className="membership-section">
         <div className="membership-grid">
-          <article className="plan-card">
-            <h3 className="plan-name">Essential</h3>
-            <p className="plan-desc">Full floor access + amenities</p>
-            <p className="plan-price">
-              ₹2,999<span>/month</span>
-            </p>
-            <ul>
-              <li>Access to gym floor &amp; equipment</li>
-              <li>Locker rooms &amp; showers</li>
-              <li>Healthy Café access</li>
-            </ul>
-            <Link to="/register?plan=essential" className="plan-btn">
-              Join now
-            </Link>
-          </article>
-
-          <article className="plan-card featured">
-            <span className="plan-badge">Popular</span>
-            <h3 className="plan-name">Premium</h3>
-            <p className="plan-desc">Classes + trainer sessions</p>
-            <p className="plan-price">
-              ₹5,999<span>/month</span>
-            </p>
-            <ul>
-              <li>Everything in Essential</li>
-              <li>Group classes &amp; Pilates / Yoga</li>
-              <li>2 personal training sessions / month</li>
-              <li>Recovery Zone priority</li>
-            </ul>
-            <Link to="/register?plan=premium" className="plan-btn">
-              Join now
-            </Link>
-          </article>
-
-          <article className="plan-card">
-            <h3 className="plan-name">Elite</h3>
-            <p className="plan-desc">Unlimited coaching &amp; VIP perks</p>
-            <p className="plan-price">
-              ₹9,999<span>/month</span>
-            </p>
-            <ul>
-              <li>Everything in Premium</li>
-              <li>Unlimited personal training*</li>
-              <li>Guest passes &amp; valet add-ons</li>
-              <li>Concierge scheduling</li>
-            </ul>
-            <Link to="/register?plan=elite" className="plan-btn">
-              Join now
-            </Link>
-          </article>
+          {MEMBERSHIP_PLANS.map((plan) => (
+            <article
+              key={plan.id}
+              className={`plan-card ${plan.featured ? "featured" : ""}`}
+            >
+              {plan.featured ? (
+                <span className="plan-badge">Popular</span>
+              ) : null}
+              <h3 className="plan-name">{plan.title}</h3>
+              <p className="plan-desc">{plan.blurb}</p>
+              <p className="plan-price">
+                {plan.priceLabel}
+                <span> total</span>
+              </p>
+              <ul>
+                <li>Full gym floor &amp; equipment access</li>
+                <li>Locker rooms &amp; showers</li>
+                <li>Healthy Café access</li>
+                <li>Hours: {GYM_HOURS_LINE}</li>
+              </ul>
+              <Link
+                to={`/register?plan=${plan.id}`}
+                className="plan-btn"
+              >
+                Join now
+              </Link>
+            </article>
+          ))}
         </div>
         <p className="membership-note">
-          *Subject to trainer availability. Pricing shown is indicative — confirm
-          at the front desk or via{" "}
+          Pricing is subject to confirmation at the front desk. Questions?{" "}
           <Link to="/contact" className="membership-note-link">
-            Contact
+            Contact us
           </Link>
           .
         </p>
