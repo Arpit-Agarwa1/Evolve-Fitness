@@ -1,15 +1,20 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import "../styles/membership.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { MEMBERSHIP_PLANS, GYM_HOURS_LINE } from "../data/membershipPlans";
 import SEO from "../components/SEO";
+import MembershipInterestForm from "../components/MembershipInterestForm";
 
 /**
  * Membership — duration-based plans and gym hours.
  */
 export default function Membership() {
+  const [searchParams] = useSearchParams();
+  // Remount interest form when ?plan= changes so the select matches the URL.
+  const membershipInterestKey = searchParams.get("plan") ?? "default";
+
   return (
     <div className="membership-page">
       <SEO
@@ -77,9 +82,16 @@ export default function Membership() {
           <Link to="/contact" className="membership-note-link">
             Contact us
           </Link>
-          .
+          . Or{" "}
+          <a href="#interest" className="membership-note-link">
+            express interest
+          </a>{" "}
+          below without registering.
         </p>
       </section>
+
+      <MembershipInterestForm key={membershipInterestKey} />
+
       <Footer />
     </div>
   );
