@@ -32,13 +32,45 @@ function parseCorsOrigins(raw) {
     .filter(Boolean);
 }
 
+/**
+ * Also allow `www.` ↔ apex so only one needs to be listed in CORS_ORIGIN.
+ * @param {true|string[]} parsed
+ */
+function expandCorsOrigins(parsed) {
+  if (parsed === true) return true;
+  const out = new Set(parsed);
+  for (const o of parsed) {
+    try {
+      const u = new URL(o);
+      if (u.protocol !== "http:" && u.protocol !== "https:") continue;
+      const port = u.port ? `:${u.port}` : "";
+      const host = u.hostname;
+      if (host.startsWith("www.")) {
+        out.add(`${u.protocol}//${host.slice(4)}${port}`);
+      } else {
+        out.add(`${u.protocol}//www.${host}${port}`);
+      }
+    } catch {
+      /* ignore bad URLs */
+    }
+  }
+  return [...out];
+}
+
 const corsOrigin = process.env.CORS_ORIGIN;
-const corsAllowed = parseCorsOrigins(corsOrigin);
+const corsAllowed = expandCorsOrigins(parseCorsOrigins(corsOrigin));
+
+if (process.env.NODE_ENV === "production" && corsOrigin?.trim()) {
+  const n = corsAllowed === true ? "all (*)" : String(corsAllowed.length);
+  console.log(`[CORS] Allowed origin count: ${n} (set CORS_ORIGIN on Render if the site domain is missing)`);
+}
 
 app.use(
   cors({
     origin: corsAllowed,
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    optionsSuccessStatus: 204,
   })
 );
 
