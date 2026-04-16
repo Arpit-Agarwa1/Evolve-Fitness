@@ -67,6 +67,18 @@ function expandCorsOrigins(origins) {
 }
 
 /**
+ * Public site URL for CORS (admin calls Render from the browser). Override with PUBLIC_SITE_ORIGIN.
+ * Set CORS_SKIP_DEFAULT_SITE=1 to omit this merge (e.g. other deployments).
+ */
+function getPublicSiteOriginForCors() {
+  if (process.env.CORS_SKIP_DEFAULT_SITE === "1") return null;
+  const raw = process.env.PUBLIC_SITE_ORIGIN;
+  if (raw === "") return null;
+  const base = (raw || "https://evolvestudio.fitness").trim().replace(/\/+$/, "");
+  return base || null;
+}
+
+/**
  * @returns {{ mode: "all" } | { mode: "list"; list: string[] }}
  */
 function buildCorsConfig() {
@@ -74,7 +86,7 @@ function buildCorsConfig() {
   if (parsed === true) {
     if (IS_PROD) {
       console.warn(
-        "[CORS] CORS_ORIGIN is not set — allowing any origin. Set CORS_ORIGIN on Render (e.g. https://evolvestudio.fitness) for a strict allowlist."
+        "[CORS] CORS_ORIGIN is not set — allowing any origin. Set CORS_ORIGIN on Render for a strict allowlist."
       );
     }
     return { mode: "all" };
@@ -83,6 +95,11 @@ function buildCorsConfig() {
   let list = expandCorsOrigins(parsed);
   if (!IS_PROD) {
     list = [...new Set([...list, ...CORS_DEV_ORIGINS])];
+  } else {
+    const site = getPublicSiteOriginForCors();
+    if (site) {
+      list = [...new Set([...list, ...expandCorsOrigins([site])])];
+    }
   }
 
   console.log(
