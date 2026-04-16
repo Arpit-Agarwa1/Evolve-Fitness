@@ -57,8 +57,8 @@ export default function AdminDashboard() {
       ) : (
         <>
         <p className="admin-dashboard-hint">
-          Overview of member sign-ups, contact messages, and membership leads from your live
-          database. Technical setup details are in the project README.
+          Overview of member sign-ups, contact messages, membership leads, and trainers from
+          your live database. Technical setup details are in the project README.
         </p>
         <div className="admin-stats">
           <Link to="/admin/members" className="admin-stat-card">
@@ -72,6 +72,10 @@ export default function AdminDashboard() {
           <Link to="/admin/leads" className="admin-stat-card">
             <span className="admin-stat-card__value">{c?.leads ?? "—"}</span>
             <span className="admin-stat-card__label">Membership leads</span>
+          </Link>
+          <Link to="/admin/trainers" className="admin-stat-card">
+            <span className="admin-stat-card__value">{c?.trainers ?? "—"}</span>
+            <span className="admin-stat-card__label">Trainers</span>
           </Link>
         </div>
         </>

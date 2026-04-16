@@ -37,6 +37,7 @@ export async function getHealth(req, res, next) {
         "members",
         "contactmessages",
         "membershipleads",
+        "trainers",
       ];
       payload.hint =
         "Set HEALTH_VERBOSE=0 in production to hide collection names. Use npm run db:list locally.";

@@ -1,6 +1,7 @@
 import Member from "../models/Member.js";
 import ContactMessage from "../models/ContactMessage.js";
 import MembershipLead from "../models/MembershipLead.js";
+import Trainer from "../models/Trainer.js";
 import { sendSuccess } from "../views/jsonResponse.js";
 
 const MAX_LIMIT = 100;
@@ -19,14 +20,15 @@ function parsePagination(query) {
  */
 export async function getAdminDashboard(req, res, next) {
   try {
-    const [members, contacts, leads] = await Promise.all([
+    const [members, contacts, leads, trainers] = await Promise.all([
       Member.countDocuments(),
       ContactMessage.countDocuments(),
       MembershipLead.countDocuments(),
+      Trainer.countDocuments(),
     ]);
 
     return sendSuccess(res, {
-      counts: { members, contacts, leads },
+      counts: { members, contacts, leads, trainers },
       generatedAt: new Date().toISOString(),
     });
   } catch (err) {

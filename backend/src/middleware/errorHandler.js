@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { MulterError } from "multer";
 import { sendError } from "../views/jsonResponse.js";
 
 /**
@@ -26,6 +27,13 @@ export function errorHandler(err, req, res, next) {
 
   console.error(err);
 
+  if (err instanceof MulterError) {
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return sendError(res, "Image must be 5MB or smaller", 413);
+    }
+    return sendError(res, err.message || "Upload failed", 400);
+  }
+
   if (isDuplicateKeyError(err)) {
     return sendError(res, "This record already exists", 409);
   }
@@ -41,7 +49,12 @@ export function errorHandler(err, req, res, next) {
     return sendError(res, "Invalid identifier", 400);
   }
 
-  const status = err.status || err.statusCode || 500;
+  const status =
+    typeof err === "object" &&
+    err !== null &&
+    ("status" in err || "statusCode" in err)
+      ? Number(err.status ?? err.statusCode) || 500
+      : 500;
   const message =
     status === 500 ? "Something went wrong" : err.message || "Request failed";
 

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "../styles/trainers.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -8,20 +8,45 @@ import {
 } from "../assets/evolveMagazine";
 import EvolveImage from "../components/EvolveImage";
 import SEO from "../components/SEO";
+import { apiFetch } from "../services/api";
+import { trainerDisplayPhotoUrl } from "../utils/trainerImageUrl";
 
-const trainers = [
-  { name: "Alex Carter", role: "Strength coach", photoIndex: 0 },
-  { name: "Sophia Lee", role: "Pilates & mobility", photoIndex: 1 },
-  { name: "Michael Ross", role: "Hypertrophy specialist", photoIndex: 2 },
-  { name: "Emma Stone", role: "HIIT & conditioning", photoIndex: 3 },
-  { name: "Daniel Cruz", role: "Personal training lead", photoIndex: 4 },
-  { name: "Olivia Smith", role: "Wellness & recovery", photoIndex: 5 },
-];
+/** Fallback card image when a trainer has no uploaded photo yet */
+const PLACEHOLDER_IMG = evolveTrainerCardImages[0];
 
 /**
- * Trainers page — hero and cards use Evolve magazine facility photography.
+ * Trainers page — hero uses facility photography; cards load from the API (owner-managed).
  */
 export default function Trainers() {
+  const [trainers, setTrainers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      setErrorMessage("");
+      try {
+        const res = await apiFetch("/api/trainers");
+        if (!cancelled) {
+          setTrainers(res.data?.items ?? []);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setErrorMessage(
+            err instanceof Error ? err.message : "Could not load trainers."
+          );
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <div className="trainers-page">
       <SEO
@@ -56,23 +81,41 @@ export default function Trainers() {
       </section>
 
       <section className="trainers-section">
-        <div className="trainers-grid">
-          {trainers.map((trainer) => (
-            <article key={trainer.name} className="trainer-card">
-              <EvolveImage
-                src={evolveTrainerCardImages[trainer.photoIndex]}
-                alt={`${trainer.name}, ${trainer.role} — Evolve Fitness facility`}
-                sizes="(max-width: 640px) 100vw, 380px"
-                loading="lazy"
-                decoding="async"
-              />
-              <div className="trainer-info">
-                <h3>{trainer.name}</h3>
-                <span>{trainer.role}</span>
-              </div>
-            </article>
-          ))}
-        </div>
+        {errorMessage ? (
+          <p className="trainers-api-error" role="alert">
+            {errorMessage}
+          </p>
+        ) : null}
+        {loading ? (
+          <p className="trainers-loading">Loading coaches…</p>
+        ) : trainers.length === 0 ? (
+          <p className="trainers-empty">
+            Our coaching team will appear here soon. Check back or contact the
+            front desk.
+          </p>
+        ) : (
+          <div className="trainers-grid">
+            {trainers.map((trainer) => {
+              const uploaded = trainerDisplayPhotoUrl(trainer);
+              const src = uploaded ?? PLACEHOLDER_IMG;
+              return (
+                <article key={trainer._id} className="trainer-card">
+                  <EvolveImage
+                    src={src}
+                    alt={`${trainer.name}, ${trainer.role} — Evolve Fitness`}
+                    sizes="(max-width: 640px) 100vw, 380px"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <div className="trainer-info">
+                    <h3>{trainer.name}</h3>
+                    <span>{trainer.role}</span>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
       </section>
       <Footer />
     </div>

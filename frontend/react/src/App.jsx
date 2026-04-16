@@ -14,6 +14,7 @@ const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminMembers = lazy(() => import("./pages/admin/AdminMembers"));
 const AdminContacts = lazy(() => import("./pages/admin/AdminContacts"));
 const AdminLeads = lazy(() => import("./pages/admin/AdminLeads"));
+const AdminTrainers = lazy(() => import("./pages/admin/AdminTrainers"));
 
 function App() {
   return (
@@ -56,6 +57,14 @@ function App() {
           element={
             <ProtectedAdminRoute>
               <AdminLeads />
+            </ProtectedAdminRoute>
+          }
+        />
+        <Route
+          path="/admin/trainers"
+          element={
+            <ProtectedAdminRoute>
+              <AdminTrainers />
             </ProtectedAdminRoute>
           }
         />

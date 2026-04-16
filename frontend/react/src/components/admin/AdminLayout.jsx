@@ -38,6 +38,9 @@ export default function AdminLayout({ children, title }) {
           <NavLink to="/admin/leads" className={navClass}>
             Leads
           </NavLink>
+          <NavLink to="/admin/trainers" className={navClass}>
+            Trainers
+          </NavLink>
         </nav>
         <div className="admin-sidebar__foot">
           <Link to="/" className="admin-sidebar__site">

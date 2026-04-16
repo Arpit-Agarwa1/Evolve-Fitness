@@ -85,6 +85,22 @@
   padding: clamp(3rem, 6vw, 5rem) clamp(1.25rem, 4vw, 2.5rem);
 }
 
+.trainers-api-error,
+.trainers-loading,
+.trainers-empty {
+  max-width: var(--ev-max);
+  margin: 0 auto;
+  text-align: center;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--ev-text-muted);
+}
+
+.trainers-api-error {
+  color: #f0c4c0;
+  margin-bottom: 0.5rem;
+}
+
 .trainers-grid {
   max-width: var(--ev-max);
   margin: 0 auto;
