@@ -30,6 +30,14 @@ function ensureCloudinaryConfig() {
   }
 }
 
+/** Avoid hanging until Render/proxy times out (empty 502). Override via CLOUDINARY_UPLOAD_TIMEOUT_MS. */
+function cloudinaryUploadTimeoutMs() {
+  const raw = process.env.CLOUDINARY_UPLOAD_TIMEOUT_MS?.trim();
+  const n = raw ? Number.parseInt(raw, 10) : NaN;
+  if (Number.isFinite(n) && n >= 5_000 && n <= 120_000) return n;
+  return 45_000;
+}
+
 /**
  * @param {string} mime
  * @param {string} originalname
@@ -63,9 +71,20 @@ export async function saveTrainerImageFile(file) {
     const folder =
       process.env.CLOUDINARY_TRAINER_FOLDER?.trim() || "evolve-fitness/trainers";
 
+    const timeoutMs = cloudinaryUploadTimeoutMs();
     const result = await new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(
+          new Error(
+            `Image upload timed out after ${timeoutMs}ms (check CLOUDINARY_URL and network)`
+          )
+        );
+      }, timeoutMs);
       const stream = cloudinary.uploader.upload_stream(
-        (err, res) => (err ? reject(err) : resolve(res)),
+        (err, res) => {
+          clearTimeout(timer);
+          err ? reject(err) : resolve(res);
+        },
         { folder, resource_type: "image" }
       );
       stream.end(file.buffer);

@@ -15,6 +15,7 @@ import {
 import { requireAdminAuth } from "../middleware/requireAdminAuth.js";
 import { adminLoginLimiter } from "../middleware/rateLimits.js";
 import { trainerImageUpload } from "../middleware/trainerUpload.js";
+import { asyncHandler } from "../middleware/asyncHandler.js";
 
 const router = Router();
 
@@ -26,17 +27,17 @@ function trainerImageOptional(req, res, next) {
   return trainerImageUpload.single("image")(req, res, next);
 }
 
-router.post("/login", adminLoginLimiter, adminLogin);
+router.post("/login", adminLoginLimiter, asyncHandler(adminLogin));
 
 router.use(requireAdminAuth);
-router.get("/dashboard", getAdminDashboard);
-router.get("/members", listAdminMembers);
-router.get("/contacts", listAdminContacts);
-router.get("/leads", listAdminLeads);
+router.get("/dashboard", asyncHandler(getAdminDashboard));
+router.get("/members", asyncHandler(listAdminMembers));
+router.get("/contacts", asyncHandler(listAdminContacts));
+router.get("/leads", asyncHandler(listAdminLeads));
 
-router.get("/trainers", listTrainersAdmin);
-router.post("/trainers", trainerImageOptional, createTrainer);
-router.patch("/trainers/:id", trainerImageOptional, updateTrainer);
-router.delete("/trainers/:id", deleteTrainer);
+router.get("/trainers", asyncHandler(listTrainersAdmin));
+router.post("/trainers", trainerImageOptional, asyncHandler(createTrainer));
+router.patch("/trainers/:id", trainerImageOptional, asyncHandler(updateTrainer));
+router.delete("/trainers/:id", asyncHandler(deleteTrainer));
 
 export default router;
