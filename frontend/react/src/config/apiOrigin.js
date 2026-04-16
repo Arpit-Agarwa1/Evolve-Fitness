@@ -6,13 +6,25 @@ export const DEFAULT_PRODUCTION_API_ORIGIN =
   "https://evolve-fitness-backend.onrender.com";
 
 /**
- * @returns {string} Empty string → fetch(`/api/...`) stays on the site origin (Vercel proxies to Render).
- * Set `VITE_API_URL` on Vercel only if you must call the API host directly (then fix CORS on Render).
+ * Public API — same origin in production so `vercel.json` can proxy `/api` without CORS.
+ * @returns {string}
  */
 export function getApiBase() {
   const fromEnv = import.meta.env.VITE_API_URL?.replace(/\/$/, "");
   if (fromEnv) return fromEnv;
-  // Production: same-origin /api — requires vercel.json rewrite to the Render API.
   if (import.meta.env.PROD) return "";
+  return "";
+}
+
+/**
+ * Owner admin API — always calls the Render host in production (not the Vercel `/api` rewrite).
+ * Vercel rewrites often return **502** on multipart POST (trainer photo uploads), so we bypass them.
+ * Requires **`CORS_ORIGIN`** on Render to include your site (e.g. `https://evolvestudio.fitness`).
+ * @returns {string}
+ */
+export function getAdminApiBase() {
+  const fromEnv = import.meta.env.VITE_API_URL?.replace(/\/$/, "");
+  if (fromEnv) return fromEnv;
+  if (import.meta.env.PROD) return DEFAULT_PRODUCTION_API_ORIGIN;
   return "";
 }

@@ -1,13 +1,13 @@
-import { getApiBase } from "../config/apiOrigin.js";
+import { getAdminApiBase } from "../config/apiOrigin.js";
 
 /**
- * Authenticated fetch for owner admin routes.
+ * Authenticated fetch for owner admin routes (direct Render URL in prod — see {@link getAdminApiBase}).
  * @param {string} path
  * @param {string} token
  * @param {RequestInit} [options]
  */
 export async function adminApiFetch(path, token, options = {}) {
-  const API_BASE = getApiBase();
+  const API_BASE = getAdminApiBase();
   const url = `${API_BASE}${path.startsWith("/") ? path : `/${path}`}`;
   const isFormData =
     typeof FormData !== "undefined" && options.body instanceof FormData;
