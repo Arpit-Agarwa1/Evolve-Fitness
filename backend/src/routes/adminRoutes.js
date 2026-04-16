@@ -18,6 +18,14 @@ import { trainerImageUpload } from "../middleware/trainerUpload.js";
 
 const router = Router();
 
+/** JSON trainer payloads skip multer (browser sends base64 — avoids multipart/proxy 502). */
+function trainerImageOptional(req, res, next) {
+  if (req.is("application/json")) {
+    return next();
+  }
+  return trainerImageUpload.single("image")(req, res, next);
+}
+
 router.post("/login", adminLoginLimiter, adminLogin);
 
 router.use(requireAdminAuth);
@@ -27,12 +35,8 @@ router.get("/contacts", listAdminContacts);
 router.get("/leads", listAdminLeads);
 
 router.get("/trainers", listTrainersAdmin);
-router.post("/trainers", trainerImageUpload.single("image"), createTrainer);
-router.patch(
-  "/trainers/:id",
-  trainerImageUpload.single("image"),
-  updateTrainer
-);
+router.post("/trainers", trainerImageOptional, createTrainer);
+router.patch("/trainers/:id", trainerImageOptional, updateTrainer);
 router.delete("/trainers/:id", deleteTrainer);
 
 export default router;

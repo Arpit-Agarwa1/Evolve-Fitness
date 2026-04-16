@@ -149,7 +149,15 @@ app.use(
   })
 );
 
-app.use(express.json({ limit: "64kb" }));
+/** Admin routes need larger JSON (trainer `imageBase64`); other `/api` routes stay at 64kb. */
+const jsonAdmin = express.json({ limit: "8mb" });
+const jsonPublic = express.json({ limit: "64kb" });
+app.use((req, res, next) => {
+  if (req.path.startsWith("/api/admin")) {
+    return jsonAdmin(req, res, next);
+  }
+  return jsonPublic(req, res, next);
+});
 
 app.use("/api", apiRoutes);
 

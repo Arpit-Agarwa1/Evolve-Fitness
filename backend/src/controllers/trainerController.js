@@ -6,6 +6,41 @@ import {
   removeTrainerStoredImage,
 } from "../services/trainerImageService.js";
 
+const MAX_TRAINER_IMAGE_BYTES = 5 * 1024 * 1024;
+/** ~5MB binary in base64 + overhead */
+const MAX_BASE64_CHARS = 7 * 1024 * 1024;
+
+/**
+ * Build a multer-like file object from JSON `{ imageBase64, imageMimeType }`.
+ * @param {Record<string, unknown>} body
+ */
+function fileFromImageBase64(body) {
+  const b64 = body?.imageBase64;
+  if (b64 == null || (typeof b64 === "string" && !b64.trim())) return null;
+  if (typeof b64 !== "string") {
+    throw new Error("Invalid image payload");
+  }
+  if (b64.length > MAX_BASE64_CHARS) {
+    throw new Error("Image too large (max 5MB)");
+  }
+  const mime = String(body.imageMimeType || "image/jpeg").toLowerCase();
+  if (!/^image\/(jpeg|png|webp|gif)$/.test(mime)) {
+    throw new Error("Only JPEG, PNG, WebP, or GIF images are allowed");
+  }
+  const buffer = Buffer.from(b64, "base64");
+  if (buffer.length > MAX_TRAINER_IMAGE_BYTES) {
+    throw new Error("Image too large (max 5MB)");
+  }
+  return {
+    fieldname: "image",
+    originalname: "upload.jpg",
+    encoding: "7bit",
+    mimetype: mime,
+    buffer,
+    size: buffer.length,
+  };
+}
+
 /**
  * GET /api/trainers — public list (sorted).
  */
@@ -28,7 +63,7 @@ export async function listTrainersAdmin(req, res, next) {
 }
 
 /**
- * POST /api/admin/trainers — multipart: name, role, sortOrder?, image?
+ * POST /api/admin/trainers — multipart **or** JSON with optional `imageBase64` + `imageMimeType`.
  */
 export async function createTrainer(req, res, next) {
   try {
@@ -49,9 +84,19 @@ export async function createTrainer(req, res, next) {
     let imageUrl = null;
     let cloudinaryPublicId = null;
 
-    if (req.file) {
+    let file = req.file;
+    if (!file && req.body?.imageBase64) {
       try {
-        const saved = await saveTrainerImageFile(req.file);
+        file = fileFromImageBase64(req.body);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Invalid image";
+        return sendError(res, msg, 422);
+      }
+    }
+
+    if (file) {
+      try {
+        const saved = await saveTrainerImageFile(file);
         imagePath = saved.imagePath;
         imageUrl = saved.imageUrl;
         cloudinaryPublicId = saved.cloudinaryPublicId;
@@ -77,7 +122,7 @@ export async function createTrainer(req, res, next) {
 }
 
 /**
- * PATCH /api/admin/trainers/:id — multipart fields; image replaces photo if provided.
+ * PATCH /api/admin/trainers/:id — multipart **or** JSON; `imageBase64` replaces photo when present.
  */
 export async function updateTrainer(req, res, next) {
   try {
@@ -106,13 +151,23 @@ export async function updateTrainer(req, res, next) {
       if (!Number.isNaN(n)) trainer.sortOrder = n;
     }
 
-    if (req.file) {
+    let file = req.file;
+    if (!file && req.body?.imageBase64) {
+      try {
+        file = fileFromImageBase64(req.body);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Invalid image";
+        return sendError(res, msg, 422);
+      }
+    }
+
+    if (file) {
       const previous = {
         imagePath: trainer.imagePath,
         cloudinaryPublicId: trainer.cloudinaryPublicId,
       };
       try {
-        const saved = await saveTrainerImageFile(req.file);
+        const saved = await saveTrainerImageFile(file);
         trainer.imagePath = saved.imagePath;
         trainer.imageUrl = saved.imageUrl;
         trainer.cloudinaryPublicId = saved.cloudinaryPublicId;

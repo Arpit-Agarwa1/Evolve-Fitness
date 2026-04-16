@@ -70,28 +70,53 @@ export default function AdminTrainers() {
     setImageFile(null);
   }
 
+  /**
+   * @param {File} file
+   * @returns {Promise<string>} raw base64 (no data: prefix)
+   */
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result;
+        if (typeof dataUrl !== "string") {
+          reject(new Error("Could not read image"));
+          return;
+        }
+        const comma = dataUrl.indexOf(",");
+        resolve(comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl);
+      };
+      reader.onerror = () => reject(new Error("Could not read image"));
+      reader.readAsDataURL(file);
+    });
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     setSaving(true);
     setErrorMessage("");
     try {
-      const fd = new FormData();
-      fd.append("name", name.trim());
-      fd.append("role", role.trim());
-      fd.append("sortOrder", sortOrder);
+      const sortNum = Number.parseInt(sortOrder, 10);
+      /** @type {{ name: string; role: string; sortOrder: number; imageBase64?: string; imageMimeType?: string }} */
+      const payload = {
+        name: name.trim(),
+        role: role.trim(),
+        sortOrder: Number.isNaN(sortNum) ? 0 : sortNum,
+      };
       if (imageFile) {
-        fd.append("image", imageFile);
+        payload.imageBase64 = await fileToBase64(imageFile);
+        payload.imageMimeType = imageFile.type || "image/jpeg";
       }
 
       if (editingId) {
         await request(`/api/admin/trainers/${editingId}`, {
           method: "PATCH",
-          body: fd,
+          body: JSON.stringify(payload),
         });
       } else {
         await request("/api/admin/trainers", {
           method: "POST",
-          body: fd,
+          body: JSON.stringify(payload),
         });
       }
       await load();
