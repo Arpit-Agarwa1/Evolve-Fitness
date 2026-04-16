@@ -158,7 +158,9 @@ app.use(
 const jsonAdmin = express.json({ limit: "8mb" });
 const jsonPublic = express.json({ limit: "64kb" });
 app.use((req, res, next) => {
-  if (req.path.startsWith("/api/admin")) {
+  /** Use pathname from full URL — matches `req.path` at app root but safer across Express edge cases. */
+  const pathname = (req.originalUrl ?? req.url ?? "").split("?")[0] || req.path || "";
+  if (pathname.startsWith("/api/admin")) {
     return jsonAdmin(req, res, next);
   }
   return jsonPublic(req, res, next);

@@ -3,6 +3,11 @@ import app from "./src/app.js";
 import { getAdminJwtSecret } from "./src/config/adminJwt.js";
 import { connectDB } from "./src/config/database.js";
 
+/** Surfaces async bugs in Render logs (otherwise proxy returns empty 502). */
+process.on("unhandledRejection", (reason) => {
+  console.error("[process] unhandledRejection:", reason);
+});
+
 /** Render and most PaaS require binding to all interfaces, not loopback only. */
 const HOST = process.env.HOST ?? "0.0.0.0";
 const PORT = Number(process.env.PORT) || 5001;

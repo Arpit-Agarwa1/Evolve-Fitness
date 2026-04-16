@@ -67,6 +67,11 @@ export async function listTrainersAdmin(req, res, next) {
  */
 export async function createTrainer(req, res, next) {
   try {
+    console.log("[admin/trainers] POST create", {
+      contentLength: req.headers["content-length"],
+      hasImage: Boolean(req.body?.imageBase64),
+    });
+
     const name = String(req.body?.name ?? "").trim();
     const role = String(req.body?.role ?? "").trim();
     const sortOrderRaw = req.body?.sortOrder;
