@@ -5,6 +5,7 @@ import cors from "cors";
 import helmet from "helmet";
 import apiRoutes from "./routes/index.js";
 import { errorHandler } from "./middleware/errorHandler.js";
+import { isPinnedCorsOrigin } from "./config/corsHeaders.js";
 
 const app = express();
 
@@ -122,6 +123,10 @@ function corsOriginCallback(origin, callback) {
     return;
   }
   if (!origin) {
+    callback(null, true);
+    return;
+  }
+  if (isPinnedCorsOrigin(origin)) {
     callback(null, true);
     return;
   }

@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { MulterError } from "multer";
+import { applyPinnedCorsHeaders } from "../config/corsHeaders.js";
 import { sendError } from "../views/jsonResponse.js";
 
 /**
@@ -25,7 +26,17 @@ export function errorHandler(err, req, res, next) {
     return;
   }
 
+  applyPinnedCorsHeaders(req, res);
+
   console.error(err);
+
+  if (err?.type === "entity.too.large" || err?.status === 413) {
+    return sendError(
+      res,
+      "Request body too large. Try a smaller image (max 5MB).",
+      413
+    );
+  }
 
   if (err instanceof MulterError) {
     if (err.code === "LIMIT_FILE_SIZE") {

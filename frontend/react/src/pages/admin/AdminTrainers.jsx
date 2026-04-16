@@ -71,6 +71,38 @@ export default function AdminTrainers() {
   }
 
   /**
+   * Downscale photos before upload — smaller JSON avoids proxy/gateway limits (502).
+   * @param {File} file
+   */
+  async function compressImageFile(file) {
+    if (!file.type.startsWith("image/")) return file;
+    try {
+      const bmp = await createImageBitmap(file);
+      const maxDim = 1600;
+      const scale = Math.min(1, maxDim / Math.max(bmp.width, bmp.height));
+      const w = Math.round(bmp.width * scale);
+      const h = Math.round(bmp.height * scale);
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return file;
+      ctx.drawImage(bmp, 0, 0, w, h);
+      bmp.close();
+      const blob = await new Promise((resolve, reject) => {
+        canvas.toBlob(
+          (b) => (b ? resolve(b) : reject(new Error("encode"))),
+          "image/jpeg",
+          0.82
+        );
+      });
+      return new File([blob], "trainer.jpg", { type: "image/jpeg" });
+    } catch {
+      return file;
+    }
+  }
+
+  /**
    * @param {File} file
    * @returns {Promise<string>} raw base64 (no data: prefix)
    */
@@ -104,8 +136,9 @@ export default function AdminTrainers() {
         sortOrder: Number.isNaN(sortNum) ? 0 : sortNum,
       };
       if (imageFile) {
-        payload.imageBase64 = await fileToBase64(imageFile);
-        payload.imageMimeType = imageFile.type || "image/jpeg";
+        const img = await compressImageFile(imageFile);
+        payload.imageBase64 = await fileToBase64(img);
+        payload.imageMimeType = img.type || "image/jpeg";
       }
 
       if (editingId) {
