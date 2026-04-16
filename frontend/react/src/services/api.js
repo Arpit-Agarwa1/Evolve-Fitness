@@ -1,7 +1,7 @@
 import { getApiBase } from "../config/apiOrigin.js";
 
 /**
- * JSON API helper. Dev: relative URLs → Vite proxy. Production: `VITE_API_URL` or default Render origin.
+ * JSON API helper. Dev: relative `/api` → Vite proxy. Prod: same-origin `/api` (Vercel → Render) unless `VITE_API_URL` is set.
  * @param {string} path
  * @param {RequestInit} [options]
  */

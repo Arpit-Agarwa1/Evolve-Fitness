@@ -1,16 +1,18 @@
 /**
- * Public Render API base (no trailing slash). Used when `VITE_API_URL` is missing in production.
- * Override with VITE_API_URL in Vercel if the backend URL changes.
+ * Direct Render URL — only used when building with `VITE_API_URL` (bypasses Vercel proxy).
+ * Default production builds use relative `/api` (see `vercel.json` rewrite) → same origin = no CORS.
  */
 export const DEFAULT_PRODUCTION_API_ORIGIN =
   "https://evolve-fitness-backend.onrender.com";
 
 /**
- * @returns {string} Empty in local dev (Vite proxy uses relative `/api`).
+ * @returns {string} Empty string → fetch(`/api/...`) stays on the site origin (Vercel proxies to Render).
+ * Set `VITE_API_URL` on Vercel only if you must call the API host directly (then fix CORS on Render).
  */
 export function getApiBase() {
   const fromEnv = import.meta.env.VITE_API_URL?.replace(/\/$/, "");
   if (fromEnv) return fromEnv;
-  if (import.meta.env.PROD) return DEFAULT_PRODUCTION_API_ORIGIN;
+  // Production: same-origin /api — requires vercel.json rewrite to the Render API.
+  if (import.meta.env.PROD) return "";
   return "";
 }
