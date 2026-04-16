@@ -23,6 +23,16 @@ app.use(
   })
 );
 
+const IS_PROD = process.env.NODE_ENV === "production";
+
+/** Vite dev server & preview — always merged in non-production when using an explicit allowlist. */
+const CORS_DEV_ORIGINS = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://localhost:4173",
+  "http://127.0.0.1:4173",
+];
+
 /** Comma-separated list; trailing slashes stripped so `https://site.com/` matches browser `Origin`. */
 function parseCorsOrigins(raw) {
   if (!raw?.trim()) return true;
@@ -34,12 +44,11 @@ function parseCorsOrigins(raw) {
 
 /**
  * Also allow `www.` ↔ apex so only one needs to be listed in CORS_ORIGIN.
- * @param {true|string[]} parsed
+ * @param {string[]} origins
  */
-function expandCorsOrigins(parsed) {
-  if (parsed === true) return true;
-  const out = new Set(parsed);
-  for (const o of parsed) {
+function expandCorsOrigins(origins) {
+  const out = new Set(origins);
+  for (const o of origins) {
     try {
       const u = new URL(o);
       if (u.protocol !== "http:" && u.protocol !== "https:") continue;
@@ -57,20 +66,69 @@ function expandCorsOrigins(parsed) {
   return [...out];
 }
 
-const corsOrigin = process.env.CORS_ORIGIN;
-const corsAllowed = expandCorsOrigins(parseCorsOrigins(corsOrigin));
+/**
+ * @returns {{ mode: "all" } | { mode: "list"; list: string[] }}
+ */
+function buildCorsConfig() {
+  const parsed = parseCorsOrigins(process.env.CORS_ORIGIN);
+  if (parsed === true) {
+    if (IS_PROD) {
+      console.warn(
+        "[CORS] CORS_ORIGIN is not set — allowing any origin. Set CORS_ORIGIN on Render (e.g. https://evolvestudio.fitness) for a strict allowlist."
+      );
+    }
+    return { mode: "all" };
+  }
 
-if (process.env.NODE_ENV === "production" && corsOrigin?.trim()) {
-  const n = corsAllowed === true ? "all (*)" : String(corsAllowed.length);
-  console.log(`[CORS] Allowed origin count: ${n} (set CORS_ORIGIN on Render if the site domain is missing)`);
+  let list = expandCorsOrigins(parsed);
+  if (!IS_PROD) {
+    list = [...new Set([...list, ...CORS_DEV_ORIGINS])];
+  }
+
+  console.log(
+    `[CORS] Explicit allowlist: ${list.length} origin(s)${IS_PROD ? "" : " (includes local Vite/preview)"}`
+  );
+  return { mode: "list", list };
+}
+
+const corsConfig = buildCorsConfig();
+
+/** Optional: set CORS_ALLOW_VERCEL_PREVIEWS=1 to allow any https://*.vercel.app during deploy previews. */
+const VERCEL_PREVIEW =
+  process.env.CORS_ALLOW_VERCEL_PREVIEWS === "1"
+    ? /^https:\/\/[^\s/]+\.vercel\.app$/i
+    : null;
+
+function corsOriginCallback(origin, callback) {
+  if (corsConfig.mode === "all") {
+    callback(null, true);
+    return;
+  }
+  if (!origin) {
+    callback(null, true);
+    return;
+  }
+  if (corsConfig.list.includes(origin)) {
+    callback(null, true);
+    return;
+  }
+  if (VERCEL_PREVIEW && VERCEL_PREVIEW.test(origin)) {
+    callback(null, true);
+    return;
+  }
+  if (!IS_PROD || process.env.CORS_LOG_BLOCKED === "1") {
+    console.warn(`[CORS] Blocked Origin: ${origin}`);
+  }
+  callback(null, false);
 }
 
 app.use(
   cors({
-    origin: corsAllowed,
+    origin: corsOriginCallback,
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     optionsSuccessStatus: 204,
+    maxAge: 86_400,
   })
 );
 
