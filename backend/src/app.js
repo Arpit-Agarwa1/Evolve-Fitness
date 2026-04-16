@@ -23,12 +23,21 @@ app.use(
   })
 );
 
+/** Comma-separated list; trailing slashes stripped so `https://site.com/` matches browser `Origin`. */
+function parseCorsOrigins(raw) {
+  if (!raw?.trim()) return true;
+  return raw
+    .split(",")
+    .map((o) => o.trim().replace(/\/+$/, ""))
+    .filter(Boolean);
+}
+
 const corsOrigin = process.env.CORS_ORIGIN;
+const corsAllowed = parseCorsOrigins(corsOrigin);
+
 app.use(
   cors({
-    origin: corsOrigin
-      ? corsOrigin.split(",").map((o) => o.trim())
-      : true,
+    origin: corsAllowed,
     credentials: true,
   })
 );
