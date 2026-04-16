@@ -71,14 +71,15 @@ export default function AdminTrainers() {
   }
 
   /**
-   * Downscale photos before upload — smaller JSON avoids proxy/gateway limits (502).
+   * Downscale + compress for admin JSON upload — keeps Cloudinary + Render proxy under time/size limits (avoids 502).
    * @param {File} file
    */
   async function compressImageFile(file) {
     if (!file.type.startsWith("image/")) return file;
     try {
       const bmp = await createImageBitmap(file);
-      const maxDim = 1600;
+      /** Trainer headshots: cap longest edge so base64 stays small and upload finishes quickly. */
+      const maxDim = 1024;
       const scale = Math.min(1, maxDim / Math.max(bmp.width, bmp.height));
       const w = Math.round(bmp.width * scale);
       const h = Math.round(bmp.height * scale);
@@ -93,7 +94,7 @@ export default function AdminTrainers() {
         canvas.toBlob(
           (b) => (b ? resolve(b) : reject(new Error("encode"))),
           "image/jpeg",
-          0.82
+          0.72
         );
       });
       return new File([blob], "trainer.jpg", { type: "image/jpeg" });

@@ -30,12 +30,15 @@ function ensureCloudinaryConfig() {
   }
 }
 
-/** Avoid hanging until Render/proxy times out (empty 502). Override via CLOUDINARY_UPLOAD_TIMEOUT_MS. */
+/**
+ * Finish before Render’s edge proxy times out (~30s on free tier) so we can return JSON + CORS
+ * instead of an empty 502. Override via CLOUDINARY_UPLOAD_TIMEOUT_MS.
+ */
 function cloudinaryUploadTimeoutMs() {
   const raw = process.env.CLOUDINARY_UPLOAD_TIMEOUT_MS?.trim();
   const n = raw ? Number.parseInt(raw, 10) : NaN;
   if (Number.isFinite(n) && n >= 5_000 && n <= 120_000) return n;
-  return 45_000;
+  return 20_000;
 }
 
 /**
