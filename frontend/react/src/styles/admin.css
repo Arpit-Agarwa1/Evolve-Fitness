@@ -222,6 +222,119 @@
   margin-bottom: 0.75rem;
 }
 
+.admin-member-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem 1.5rem;
+  margin-bottom: 1rem;
+  padding: 1rem 1.15rem;
+  border-radius: var(--ev-radius);
+  border: 1px solid var(--ev-border);
+  background: var(--ev-bg-card);
+}
+
+.admin-member-toolbar__search {
+  flex: 1 1 220px;
+  min-width: 180px;
+}
+
+.admin-member-toolbar__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 1rem;
+}
+
+.admin-member-toolbar__label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ev-text-muted);
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+.admin-member-toolbar__search .admin-member-toolbar__label {
+  margin-bottom: 0.35rem;
+}
+
+.admin-member-toolbar__input,
+.admin-member-toolbar__select {
+  width: 100%;
+  min-width: 0;
+  padding: 0.55rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid var(--ev-border);
+  background: var(--ev-bg-elevated);
+  color: var(--ev-text);
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+
+.admin-member-toolbar__select {
+  width: auto;
+  min-width: 11rem;
+}
+
+.admin-table__notes-cell {
+  max-width: 12rem;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: var(--ev-text-muted);
+  vertical-align: top;
+}
+
+.admin-modal--wide {
+  max-width: 480px;
+}
+
+.admin-modal__switch-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.admin-modal__switch-row > span:first-child {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ev-text-muted);
+}
+
+.admin-modal__field-hint {
+  margin: -0.35rem 0 0.65rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--ev-text-muted);
+}
+
+.admin-modal__label--textarea span {
+  margin-bottom: 0.35rem;
+}
+
+.admin-modal__textarea {
+  width: 100%;
+  min-height: 5rem;
+  padding: 0.6rem 0.7rem;
+  border-radius: 10px;
+  border: 1px solid var(--ev-border);
+  background: var(--ev-bg-elevated);
+  color: var(--ev-text);
+  font-size: 0.9rem;
+  font-family: inherit;
+  line-height: 1.45;
+  resize: vertical;
+}
+
+.admin-modal__textarea:focus {
+  outline: none;
+  border-color: rgba(255, 106, 43, 0.45);
+}
+
 .admin-table-wrap {
   overflow-x: auto;
   border: 1px solid var(--ev-border);

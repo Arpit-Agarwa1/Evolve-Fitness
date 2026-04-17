@@ -71,7 +71,7 @@ export default function AdminDashboard() {
             </span>
             <span className="admin-stat-card__label">
               {typeof c?.membersActive === "number"
-                ? "Members (active / total)"
+                ? "Members active / total"
                 : "Members"}
             </span>
           </Link>

@@ -30,7 +30,7 @@ export default function AdminLayout({ children, title }) {
             Overview
           </NavLink>
           <NavLink to="/admin/members" className={navClass}>
-            Members
+            Member management
           </NavLink>
           <NavLink to="/admin/contacts" className={navClass}>
             Messages

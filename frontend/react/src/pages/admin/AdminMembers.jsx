@@ -67,7 +67,18 @@ function isMembershipExpired(endIso) {
 }
 
 /**
- * Registered members table (no passwords shown).
+ * @param {string | undefined} text
+ * @param {number} max
+ */
+function truncateNote(text, max) {
+  if (!text || !String(text).trim()) return "—";
+  const s = String(text).trim();
+  if (s.length <= max) return s;
+  return `${s.slice(0, max)}…`;
+}
+
+/**
+ * Gym member management — search, filters, membership period, notes, account status.
  */
 export default function AdminMembers() {
   const { request } = useAdminApi();
@@ -77,19 +88,54 @@ export default function AdminMembers() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [toggleBusyId, setToggleBusyId] = useState(null);
-  /** Member row open in membership modal, or null. */
-  const [membershipModal, setMembershipModal] = useState(null);
+
+  const [searchInput, setSearchInput] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [membershipFilter, setMembershipFilter] = useState("all");
+
+  /** Full manage dialog: status, dates, admin notes. */
+  const [manageModal, setManageModal] = useState(null);
+  const [manageActive, setManageActive] = useState(true);
   const [membershipStartInput, setMembershipStartInput] = useState("");
   const [membershipEndInput, setMembershipEndInput] = useState("");
-  const [membershipSaving, setMembershipSaving] = useState(false);
+  const [adminNotesInput, setAdminNotesInput] = useState("");
+  const [manageSaving, setManageSaving] = useState(false);
 
   const pageCount = useMemo(() => adminPageCount(total), [total]);
+
+  const listFilters = useMemo(
+    () => ({
+      q: debouncedSearch,
+      status: statusFilter,
+      membership: membershipFilter,
+    }),
+    [debouncedSearch, statusFilter, membershipFilter]
+  );
+
+  const hasListFilters = Boolean(
+    debouncedSearch ||
+      statusFilter !== "all" ||
+      membershipFilter !== "all"
+  );
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setDebouncedSearch(searchInput.trim());
+    }, 400);
+    return () => clearTimeout(t);
+  }, [searchInput]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, statusFilter, membershipFilter]);
 
   const loadMembers = useCallback(async () => {
     setLoading(true);
     setErrorMessage("");
     try {
-      const res = await request(`/api/admin/members?${adminListQuery(page)}`);
+      const qs = adminListQuery(page, listFilters);
+      const res = await request(`/api/admin/members?${qs}`);
       setItems(res.data?.items ?? []);
       setTotal(res.data?.total ?? 0);
     } catch (err) {
@@ -99,7 +145,7 @@ export default function AdminMembers() {
     } finally {
       setLoading(false);
     }
-  }, [request, page]);
+  }, [request, page, listFilters]);
 
   useEffect(() => {
     if (total > 0 && pageCount > 0 && page > pageCount) {
@@ -119,7 +165,7 @@ export default function AdminMembers() {
     setErrorMessage("");
     setToggleBusyId(row._id);
     try {
-      await request(`/api/admin/members/${row._id}/active`, {
+      await request(`/api/admin/members/${row._id}/manage`, {
         method: "POST",
         body: JSON.stringify({ isActive: !currentlyActive }),
       });
@@ -133,50 +179,52 @@ export default function AdminMembers() {
     }
   }
 
-  /**
-   * @param {{ _id: string; fullName: string; membershipStartDate?: string; membershipEndDate?: string }} row
-   */
-  function openMembershipModal(row) {
-    setMembershipModal(row);
+  /** @param {Record<string, unknown> & { _id: string }} row */
+  function openManageModal(row) {
+    setManageModal(row);
+    setManageActive(row.isActive !== false);
     setMembershipStartInput(dateToInputValue(row.membershipStartDate));
     setMembershipEndInput(dateToInputValue(row.membershipEndDate));
+    setAdminNotesInput(row.adminNotes != null ? String(row.adminNotes) : "");
   }
 
-  function closeMembershipModal() {
-    if (membershipSaving) return;
-    setMembershipModal(null);
+  function closeManageModal() {
+    if (manageSaving) return;
+    setManageModal(null);
   }
 
-  async function saveMembershipPeriod() {
-    if (!membershipModal) return;
-    setMembershipSaving(true);
+  async function saveManageMember() {
+    if (!manageModal) return;
+    setManageSaving(true);
     setErrorMessage("");
     try {
-      await request(`/api/admin/members/${membershipModal._id}/membership`, {
+      await request(`/api/admin/members/${manageModal._id}/manage`, {
         method: "POST",
         body: JSON.stringify({
+          isActive: manageActive,
           membershipStartDate:
             membershipStartInput.trim() === "" ? null : membershipStartInput,
           membershipEndDate:
             membershipEndInput.trim() === "" ? null : membershipEndInput,
+          adminNotes: adminNotesInput,
         }),
       });
-      setMembershipModal(null);
+      setManageModal(null);
       await loadMembers();
     } catch (err) {
       setErrorMessage(
-        err instanceof Error ? err.message : "Could not save membership dates."
+        err instanceof Error ? err.message : "Could not save member."
       );
     } finally {
-      setMembershipSaving(false);
+      setManageSaving(false);
     }
   }
 
   return (
-    <AdminLayout title="Members">
+    <AdminLayout title="Member management">
       <SEO
-        title="Members"
-        description="Evolve Fitness admin — members list."
+        title="Member management"
+        description="Evolve Fitness — gym member roster, membership period, and notes."
         path="/admin/members"
         noIndex
       />
@@ -185,13 +233,61 @@ export default function AdminMembers() {
           {errorMessage}
         </p>
       ) : null}
+
+      <div className="admin-member-toolbar">
+        <div className="admin-member-toolbar__search">
+          <label className="admin-member-toolbar__label" htmlFor="admin-member-search">
+            Search
+          </label>
+          <input
+            id="admin-member-search"
+            type="search"
+            className="admin-member-toolbar__input"
+            placeholder="Name, email, or phone"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            autoComplete="off"
+          />
+        </div>
+        <div className="admin-member-toolbar__filters">
+          <label className="admin-member-toolbar__label" htmlFor="admin-member-status">
+            Account
+          </label>
+          <select
+            id="admin-member-status"
+            className="admin-member-toolbar__select"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="all">All</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+          <label className="admin-member-toolbar__label" htmlFor="admin-member-membership">
+            Membership
+          </label>
+          <select
+            id="admin-member-membership"
+            className="admin-member-toolbar__select"
+            value={membershipFilter}
+            onChange={(e) => setMembershipFilter(e.target.value)}
+          >
+            <option value="all">All</option>
+            <option value="valid">Valid / not expired</option>
+            <option value="expired">Expired</option>
+            <option value="none">No dates set</option>
+          </select>
+        </div>
+      </div>
+
       <p className="admin-muted admin-table-meta">
-        {loading ? "Loading…" : `${total} registered`}
+        {loading ? "Loading…" : `${total} match${total === 1 ? "" : "es"}`}
       </p>
       <p className="admin-muted admin-members-hint">
-        Use <strong>Active</strong> for account status. Set <strong>membership start / end</strong>{" "}
-        for the paid period (optional).
+        Use <strong>Manage</strong> to set membership dates and internal notes. Quick toggles
+        update account status only.
       </p>
+
       <div className="admin-table-wrap">
         <table className="admin-table">
           <thead>
@@ -204,6 +300,7 @@ export default function AdminMembers() {
               <th>City</th>
               <th>Signed up</th>
               <th>Membership</th>
+              <th>Notes</th>
               <th>Active</th>
             </tr>
           </thead>
@@ -235,9 +332,7 @@ export default function AdminMembers() {
                   <td>{formatWhen(row.createdAt)}</td>
                   <td className="admin-table__membership-cell">
                     <div className="admin-membership-dates">
-                      <span>
-                        {formatDateOnly(row.membershipStartDate)}
-                      </span>
+                      <span>{formatDateOnly(row.membershipStartDate)}</span>
                       <span className="admin-membership-dates__sep" aria-hidden>
                         →
                       </span>
@@ -251,10 +346,13 @@ export default function AdminMembers() {
                     <button
                       type="button"
                       className="admin-trainers-btn admin-trainers-btn--small admin-membership-edit"
-                      onClick={() => openMembershipModal(row)}
+                      onClick={() => openManageModal(row)}
                     >
-                      Set period
+                      Manage
                     </button>
+                  </td>
+                  <td className="admin-table__notes-cell">
+                    {truncateNote(row.adminNotes, 48)}
                   </td>
                   <td>
                     <label className="admin-trainers-switch admin-trainers-switch--compact admin-members-table-switch">
@@ -281,7 +379,11 @@ export default function AdminMembers() {
           </tbody>
         </table>
         {!loading && items.length === 0 ? (
-          <p className="admin-empty">No members yet.</p>
+          <p className="admin-empty">
+            {hasListFilters
+              ? "No members match these filters."
+              : "No members registered yet."}
+          </p>
         ) : null}
       </div>
       <AdminPagination
@@ -291,59 +393,94 @@ export default function AdminMembers() {
         onPageChange={setPage}
       />
 
-      {membershipModal ? (
+      {manageModal ? (
         <div
           className="admin-modal-backdrop"
           role="presentation"
-          onClick={closeMembershipModal}
+          onClick={closeManageModal}
         >
           <div
-            className="admin-modal"
+            className="admin-modal admin-modal--wide"
             role="dialog"
             aria-modal="true"
-            aria-labelledby="admin-membership-modal-title"
+            aria-labelledby="admin-manage-member-title"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 id="admin-membership-modal-title" className="admin-modal__title">
-              Membership period
+            <h2 id="admin-manage-member-title" className="admin-modal__title">
+              Manage member
             </h2>
-            <p className="admin-modal__lede">
-              {membershipModal.fullName} — leave a field empty to clear it.
-            </p>
+            <p className="admin-modal__lede">{manageModal.fullName}</p>
+
             <div className="admin-modal__fields">
+              <label className="admin-modal__switch-row">
+                <span>Account active</span>
+                <label className="admin-trainers-switch">
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    checked={manageActive}
+                    onChange={(e) => setManageActive(e.target.checked)}
+                    disabled={manageSaving}
+                  />
+                  <span className="admin-trainers-switch__track" aria-hidden>
+                    <span className="admin-trainers-switch__thumb" />
+                  </span>
+                  <span className="admin-trainers-switch__label">
+                    {manageActive ? "Active" : "Inactive"}
+                  </span>
+                </label>
+              </label>
+
               <label className="admin-modal__label">
-                <span>Start date</span>
+                <span>Membership start</span>
                 <input
                   type="date"
                   value={membershipStartInput}
                   onChange={(e) => setMembershipStartInput(e.target.value)}
-                  disabled={membershipSaving}
+                  disabled={manageSaving}
                 />
               </label>
               <label className="admin-modal__label">
-                <span>End date</span>
+                <span>Membership end</span>
                 <input
                   type="date"
                   value={membershipEndInput}
                   onChange={(e) => setMembershipEndInput(e.target.value)}
-                  disabled={membershipSaving}
+                  disabled={manageSaving}
+                />
+              </label>
+              <p className="admin-modal__field-hint">
+                Leave a date empty to clear it. End must be on or after start.
+              </p>
+
+              <label className="admin-modal__label admin-modal__label--textarea">
+                <span>Internal notes (admin only)</span>
+                <textarea
+                  className="admin-modal__textarea"
+                  rows={4}
+                  maxLength={2000}
+                  placeholder="e.g. renewal call, payment plan, injuries…"
+                  value={adminNotesInput}
+                  onChange={(e) => setAdminNotesInput(e.target.value)}
+                  disabled={manageSaving}
                 />
               </label>
             </div>
+
             <div className="admin-modal__actions">
               <button
                 type="button"
                 className="admin-trainers-btn admin-trainers-btn--primary"
-                disabled={membershipSaving}
-                onClick={saveMembershipPeriod}
+                disabled={manageSaving}
+                onClick={saveManageMember}
               >
-                {membershipSaving ? "Saving…" : "Save"}
+                {manageSaving ? "Saving…" : "Save"}
               </button>
               <button
                 type="button"
                 className="admin-trainers-btn"
-                disabled={membershipSaving}
-                onClick={closeMembershipModal}
+                disabled={manageSaving}
+                onClick={closeManageModal}
               >
                 Cancel
               </button>

@@ -12,6 +12,83 @@ const activeMemberFilter = {
 
 const MAX_LIMIT = 100;
 
+/** @param {string} s */
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Build Mongo filter from GET /api/admin/members query params.
+ * @param {import('express').Request["query"]} query
+ */
+function buildMemberListFilter(query) {
+  /** @type {Record<string, unknown>[]} */
+  const parts = [];
+
+  const rawQ = String(query.q ?? query.search ?? "").trim();
+  if (rawQ) {
+    const esc = escapeRegex(rawQ);
+    parts.push({
+      $or: [
+        { fullName: new RegExp(esc, "i") },
+        { email: new RegExp(esc, "i") },
+        { phone: new RegExp(esc, "i") },
+      ],
+    });
+  }
+
+  const status = String(query.status ?? "all").toLowerCase();
+  if (status === "active") {
+    parts.push({
+      $or: [{ isActive: true }, { isActive: { $exists: false } }],
+    });
+  } else if (status === "inactive") {
+    parts.push({ isActive: false });
+  }
+
+  const membership = String(query.membership ?? "all").toLowerCase();
+  const today = new Date();
+  const utcMidnight = Date.UTC(
+    today.getUTCFullYear(),
+    today.getUTCMonth(),
+    today.getUTCDate()
+  );
+  const startOfToday = new Date(utcMidnight);
+
+  if (membership === "expired") {
+    parts.push({ membershipEndDate: { $lt: startOfToday } });
+  } else if (membership === "valid") {
+    parts.push({
+      $or: [
+        { membershipEndDate: null },
+        { membershipEndDate: { $exists: false } },
+        { membershipEndDate: { $gte: startOfToday } },
+      ],
+    });
+  } else if (membership === "none") {
+    parts.push({
+      $and: [
+        {
+          $or: [
+            { membershipStartDate: null },
+            { membershipStartDate: { $exists: false } },
+          ],
+        },
+        {
+          $or: [
+            { membershipEndDate: null },
+            { membershipEndDate: { $exists: false } },
+          ],
+        },
+      ],
+    });
+  }
+
+  if (parts.length === 0) return {};
+  if (parts.length === 1) return parts[0];
+  return { $and: parts };
+}
+
 function parsePagination(query) {
   const limit = Math.min(
     MAX_LIMIT,
@@ -49,47 +126,18 @@ export async function getAdminDashboard(req, res, next) {
 export async function listAdminMembers(req, res, next) {
   try {
     const { limit, skip } = parsePagination(req.query);
+    const filter = buildMemberListFilter(req.query);
     const [items, total] = await Promise.all([
-      Member.find()
+      Member.find(filter)
         .select("-passwordHash")
         .sort({ isActive: -1, createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean(),
-      Member.countDocuments(),
+      Member.countDocuments(filter),
     ]);
 
     return sendSuccess(res, { items, total, limit, skip });
-  } catch (err) {
-    next(err);
-  }
-}
-
-/**
- * PATCH /api/admin/members/:id — set `isActive` (admin only).
- * POST /api/admin/members/:id/active — same body `{ isActive }` (preferred from admin UI).
- */
-export async function patchAdminMember(req, res, next) {
-  try {
-    const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return sendError(res, "Invalid member id", 400);
-    }
-    if (req.body?.isActive === undefined) {
-      return sendError(res, "isActive is required", 422);
-    }
-
-    const member = await Member.findByIdAndUpdate(
-      id,
-      { $set: { isActive: Boolean(req.body.isActive) } },
-      { new: true, runValidators: true, select: "-passwordHash" }
-    ).lean();
-
-    if (!member) {
-      return sendError(res, "Member not found", 404);
-    }
-
-    return sendSuccess(res, { member });
   } catch (err) {
     next(err);
   }
@@ -124,12 +172,13 @@ function parseMembershipDay(raw) {
   return { ok: true, date };
 }
 
+const ADMIN_NOTES_MAX = 2000;
+
 /**
- * POST /api/admin/members/:id/membership — set membership start/end (calendar days).
- * Body: `{ membershipStartDate?, membershipEndDate? }` each `YYYY-MM-DD` or `null` to clear.
- * At least one field must be present in the JSON body.
+ * PATCH/POST /api/admin/members/:id — set any of: isActive, membership dates, adminNotes.
+ * POST aliases: /active, /membership, /manage (same handler).
  */
-export async function updateAdminMemberMembership(req, res, next) {
+export async function updateAdminMember(req, res, next) {
   try {
     const { id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -137,23 +186,19 @@ export async function updateAdminMemberMembership(req, res, next) {
     }
 
     const body = req.body ?? {};
-    const hasStart = Object.prototype.hasOwnProperty.call(body, "membershipStartDate");
-    const hasEnd = Object.prototype.hasOwnProperty.call(body, "membershipEndDate");
-    if (!hasStart && !hasEnd) {
+    const has = (k) => Object.prototype.hasOwnProperty.call(body, k);
+    const fields = [
+      "isActive",
+      "membershipStartDate",
+      "membershipEndDate",
+      "adminNotes",
+    ];
+    if (!fields.some((k) => has(k))) {
       return sendError(
         res,
-        "Provide membershipStartDate and/or membershipEndDate (YYYY-MM-DD or null)",
+        "Provide at least one of: isActive, membershipStartDate, membershipEndDate, adminNotes",
         422
       );
-    }
-
-    const startParsed = hasStart ? parseMembershipDay(body.membershipStartDate) : null;
-    const endParsed = hasEnd ? parseMembershipDay(body.membershipEndDate) : null;
-    if (hasStart && startParsed && !startParsed.ok) {
-      return sendError(res, "Invalid membershipStartDate (use YYYY-MM-DD)", 422);
-    }
-    if (hasEnd && endParsed && !endParsed.ok) {
-      return sendError(res, "Invalid membershipEndDate (use YYYY-MM-DD)", 422);
     }
 
     const member = await Member.findById(id).select("-passwordHash");
@@ -161,22 +206,38 @@ export async function updateAdminMemberMembership(req, res, next) {
       return sendError(res, "Member not found", 404);
     }
 
-    const nextStart = hasStart ? startParsed.date : member.membershipStartDate;
-    const nextEnd = hasEnd ? endParsed.date : member.membershipEndDate;
+    if (has("isActive")) {
+      member.isActive = Boolean(body.isActive);
+    }
 
-    if (nextStart && nextEnd && nextEnd < nextStart) {
+    if (has("membershipStartDate")) {
+      const p = parseMembershipDay(body.membershipStartDate);
+      if (!p.ok) {
+        return sendError(res, "Invalid membershipStartDate (use YYYY-MM-DD)", 422);
+      }
+      member.membershipStartDate = p.date;
+    }
+    if (has("membershipEndDate")) {
+      const p = parseMembershipDay(body.membershipEndDate);
+      if (!p.ok) {
+        return sendError(res, "Invalid membershipEndDate (use YYYY-MM-DD)", 422);
+      }
+      member.membershipEndDate = p.date;
+    }
+
+    if (has("adminNotes")) {
+      const raw = body.adminNotes == null ? "" : String(body.adminNotes);
+      member.adminNotes = raw.trim().slice(0, ADMIN_NOTES_MAX);
+    }
+
+    const start = member.membershipStartDate;
+    const end = member.membershipEndDate;
+    if (start && end && end < start) {
       return sendError(
         res,
         "Membership end date must be on or after the start date",
         422
       );
-    }
-
-    if (hasStart) {
-      member.membershipStartDate = startParsed.date;
-    }
-    if (hasEnd) {
-      member.membershipEndDate = endParsed.date;
     }
 
     await member.save();

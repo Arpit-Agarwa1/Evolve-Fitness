@@ -5,8 +5,7 @@ import {
   listAdminMembers,
   listAdminContacts,
   listAdminLeads,
-  patchAdminMember,
-  updateAdminMemberMembership,
+  updateAdminMember,
 } from "../controllers/adminDataController.js";
 import {
   listTrainersAdmin,
@@ -34,13 +33,11 @@ router.post("/login", adminLoginLimiter, asyncHandler(adminLogin));
 router.use(requireAdminAuth);
 router.get("/dashboard", asyncHandler(getAdminDashboard));
 router.get("/members", asyncHandler(listAdminMembers));
-/** POST alias: some proxies mis-handle PATCH; keep PATCH for API clients. */
-router.post("/members/:id/active", asyncHandler(patchAdminMember));
-router.patch("/members/:id", asyncHandler(patchAdminMember));
-router.post(
-  "/members/:id/membership",
-  asyncHandler(updateAdminMemberMembership)
-);
+/** Unified member updates (status, membership period, admin notes). */
+router.patch("/members/:id", asyncHandler(updateAdminMember));
+router.post("/members/:id/manage", asyncHandler(updateAdminMember));
+router.post("/members/:id/active", asyncHandler(updateAdminMember));
+router.post("/members/:id/membership", asyncHandler(updateAdminMember));
 router.get("/contacts", asyncHandler(listAdminContacts));
 router.get("/leads", asyncHandler(listAdminLeads));
 

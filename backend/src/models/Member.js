@@ -70,6 +70,13 @@ const memberSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    /** Internal notes — admin only, not shown to the member. */
+    adminNotes: {
+      type: String,
+      trim: true,
+      maxlength: 2000,
+      default: "",
+    },
   },
   { timestamps: true }
 );
