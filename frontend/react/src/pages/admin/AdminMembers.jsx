@@ -288,12 +288,15 @@ export default function AdminMembers() {
                   <td className="admin-table__notes-cell">
                     {truncateNote(row.adminNotes, 40)}
                   </td>
-                  <td>
+                  <td className="admin-table__action-cell">
                     <Link
                       to={`/admin/members/${row._id}`}
-                      className="admin-trainers-btn admin-trainers-btn--small"
+                      className="admin-table__action-link"
                     >
-                      View profile
+                      <span className="admin-table__action-link-text">View profile</span>
+                      <span className="admin-table__action-link-chevron" aria-hidden>
+                        →
+                      </span>
                     </Link>
                   </td>
                   <td>
