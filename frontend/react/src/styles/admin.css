@@ -261,6 +261,22 @@
   background: rgba(255, 255, 255, 0.02);
 }
 
+.admin-table-row--inactive td {
+  opacity: 0.88;
+}
+
+.admin-members-hint {
+  margin: 0 0 0.75rem;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  max-width: 42rem;
+}
+
+.admin-members-table-switch {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
 .admin-table__nowrap {
   white-space: nowrap;
 }

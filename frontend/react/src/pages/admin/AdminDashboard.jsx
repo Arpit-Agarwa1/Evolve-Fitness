@@ -62,8 +62,18 @@ export default function AdminDashboard() {
         </p>
         <div className="admin-stats">
           <Link to="/admin/members" className="admin-stat-card">
-            <span className="admin-stat-card__value">{c?.members ?? "—"}</span>
-            <span className="admin-stat-card__label">Members</span>
+            <span className="admin-stat-card__value">
+              {c?.members != null
+                ? typeof c?.membersActive === "number"
+                  ? `${c.membersActive} / ${c.members}`
+                  : c.members
+                : "—"}
+            </span>
+            <span className="admin-stat-card__label">
+              {typeof c?.membersActive === "number"
+                ? "Members (active / total)"
+                : "Members"}
+            </span>
           </Link>
           <Link to="/admin/contacts" className="admin-stat-card">
             <span className="admin-stat-card__value">{c?.contacts ?? "—"}</span>

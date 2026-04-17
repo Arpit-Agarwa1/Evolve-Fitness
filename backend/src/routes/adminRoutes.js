@@ -5,6 +5,7 @@ import {
   listAdminMembers,
   listAdminContacts,
   listAdminLeads,
+  patchAdminMember,
 } from "../controllers/adminDataController.js";
 import {
   listTrainersAdmin,
@@ -32,6 +33,7 @@ router.post("/login", adminLoginLimiter, asyncHandler(adminLogin));
 router.use(requireAdminAuth);
 router.get("/dashboard", asyncHandler(getAdminDashboard));
 router.get("/members", asyncHandler(listAdminMembers));
+router.patch("/members/:id", asyncHandler(patchAdminMember));
 router.get("/contacts", asyncHandler(listAdminContacts));
 router.get("/leads", asyncHandler(listAdminLeads));
 

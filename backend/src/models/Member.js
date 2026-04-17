@@ -56,6 +56,11 @@ const memberSchema = new mongoose.Schema(
       maxlength: 120,
       default: "",
     },
+    /** Admin can deactivate accounts (e.g. churned); inactive still listed in admin. */
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );
