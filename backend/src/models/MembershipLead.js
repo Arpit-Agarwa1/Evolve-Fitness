@@ -5,9 +5,6 @@ const PLAN_VALUES = [
   "3months",
   "6months",
   "1year",
-  "essential",
-  "premium",
-  "elite",
   "unknown",
 ];
 

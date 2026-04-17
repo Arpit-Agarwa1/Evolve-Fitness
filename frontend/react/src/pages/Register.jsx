@@ -29,9 +29,6 @@ export default function Register() {
       "3months",
       "6months",
       "1year",
-      "essential",
-      "premium",
-      "elite",
     ]);
     if (p && allowed.has(p)) return p;
     return "unknown";

@@ -13,7 +13,7 @@
       "email": "member.sample@example.com",
       "phone": "+91 90243 01606",
       "passwordHash": "$2a$10$bvMpUigC708zSAi2h.3DOe45qaRHmCK2NYHfKRMG2XmHOxX0qqDcu",
-      "planInterest": "premium",
+      "planInterest": "3months",
       "city": "Jaipur"
     }
   ],
@@ -32,7 +32,7 @@
       "name": "Lead Person",
       "email": "lead@example.com",
       "phone": "+91 90000 00000",
-      "plan": "elite",
+      "plan": "1year",
       "notes": "Sample lead row for testing."
     }
   ]

@@ -150,7 +150,7 @@ This starts MongoDB on port **27017**; the API **`.env`** already matches. Stop 
 | ------ | ------------------------ | -------------------------- |
 | GET    | `/api/health`            | Health + DB connection     |
 | POST   | `/api/contact`           | Contact form (`name`, `email`, `message`) |
-| POST   | `/api/membership/leads`  | Membership lead (`email` required; optional `name`, `phone`, `plan`, `notes`). `plan`: `1month` \| `3months` \| `6months` \| `1year` \| legacy `essential` \| `premium` \| `elite` \| `unknown` |
+| POST   | `/api/membership/leads`  | Membership lead (`email` required; optional `name`, `phone`, `plan`, `notes`). `plan`: `1month` \| `3months` \| `6months` \| `1year` \| `unknown` |
 | POST   | `/api/members/register` | Member signup: `fullName`, `email`, `phone`, `password`, optional `confirmPassword`, `plan`, `dateOfBirth`, `city`. Password min 8 chars. Response includes `whatsappThankYouSent` when WhatsApp Cloud API env is configured. |
 | POST   | `/api/admin/login`     | Owner sign-in: `email`, `password`. Checks MongoDB `admins` collection first; optional env fallback. Requires `ADMIN_JWT_SECRET`. |
 | GET    | `/api/admin/dashboard`  | JWT — counts for members, contacts, leads. |

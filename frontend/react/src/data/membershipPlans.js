@@ -18,7 +18,7 @@ export const MEMBERSHIP_PLANS = [
     title: "3 months",
     price: 17999,
     priceLabel: "₹17,999",
-    blurb: "Stay consistent with a quarter of premium training.",
+    blurb: "Stay consistent with a quarter of focused training.",
   },
   {
     id: "6months",

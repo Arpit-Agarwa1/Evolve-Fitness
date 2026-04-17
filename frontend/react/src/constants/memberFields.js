@@ -5,9 +5,6 @@ export const MEMBER_PLAN_OPTIONS = [
   { value: "3months", label: "3 months" },
   { value: "6months", label: "6 months" },
   { value: "1year", label: "1 year" },
-  { value: "essential", label: "Essential" },
-  { value: "premium", label: "Premium" },
-  { value: "elite", label: "Elite" },
 ];
 
 export const GENDER_OPTIONS = [
