@@ -71,15 +71,14 @@ export default function AdminTrainers() {
   }
 
   /**
-   * Downscale + compress for admin JSON upload — keeps Cloudinary + Render proxy under time/size limits (avoids 502).
+   * Encodes one JPEG pass at given max edge length + quality.
    * @param {File} file
+   * @param {number} maxDim
+   * @param {number} quality 0–1
    */
-  async function compressImageFile(file) {
-    if (!file.type.startsWith("image/")) return file;
+  async function fileToTrainerJpegFile(file, maxDim, quality) {
+    const bmp = await createImageBitmap(file);
     try {
-      const bmp = await createImageBitmap(file);
-      /** Trainer headshots: cap longest edge so base64 stays small and upload finishes quickly. */
-      const maxDim = 1024;
       const scale = Math.min(1, maxDim / Math.max(bmp.width, bmp.height));
       const w = Math.round(bmp.width * scale);
       const h = Math.round(bmp.height * scale);
@@ -87,20 +86,48 @@ export default function AdminTrainers() {
       canvas.width = w;
       canvas.height = h;
       const ctx = canvas.getContext("2d");
-      if (!ctx) return file;
+      if (!ctx) throw new Error("Canvas not available");
       ctx.drawImage(bmp, 0, 0, w, h);
-      bmp.close();
       const blob = await new Promise((resolve, reject) => {
         canvas.toBlob(
           (b) => (b ? resolve(b) : reject(new Error("encode"))),
           "image/jpeg",
-          0.72
+          quality
         );
       });
       return new File([blob], "trainer.jpg", { type: "image/jpeg" });
-    } catch {
-      return file;
+    } finally {
+      bmp.close();
     }
+  }
+
+  /**
+   * Shrinks JPEG until base64 fits under proxy limits (~178kb+ JSON was causing empty 502 from edge).
+   * @param {File} file
+   * @returns {Promise<{ imageBase64: string; imageMimeType: string }>}
+   */
+  async function prepareTrainerImageForUpload(file) {
+    if (!file.type.startsWith("image/")) {
+      throw new Error("Choose a JPEG, PNG, WebP, or GIF image.");
+    }
+    /** ~72k chars base64 → ~95kb JSON overhead — stays under typical CDN/proxy POST caps. */
+    const maxBase64 = 72_000;
+    let maxDim = 720;
+    let quality = 0.62;
+    for (let attempt = 0; attempt < 12; attempt += 1) {
+      const jpegFile = await fileToTrainerJpegFile(file, maxDim, quality);
+      const imageBase64 = await fileToBase64(jpegFile);
+      if (imageBase64.length <= maxBase64 || maxDim <= 320) {
+        return { imageBase64, imageMimeType: "image/jpeg" };
+      }
+      maxDim = Math.max(320, Math.floor(maxDim * 0.82));
+      quality = Math.max(0.42, quality - 0.06);
+    }
+    const jpegFile = await fileToTrainerJpegFile(file, 320, 0.42);
+    return {
+      imageBase64: await fileToBase64(jpegFile),
+      imageMimeType: "image/jpeg",
+    };
   }
 
   /**
@@ -137,9 +164,9 @@ export default function AdminTrainers() {
         sortOrder: Number.isNaN(sortNum) ? 0 : sortNum,
       };
       if (imageFile) {
-        const img = await compressImageFile(imageFile);
-        payload.imageBase64 = await fileToBase64(img);
-        payload.imageMimeType = img.type || "image/jpeg";
+        const img = await prepareTrainerImageForUpload(imageFile);
+        payload.imageBase64 = img.imageBase64;
+        payload.imageMimeType = img.imageMimeType;
       }
 
       if (editingId) {

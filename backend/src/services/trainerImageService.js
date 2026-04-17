@@ -75,6 +75,9 @@ export async function saveTrainerImageFile(file) {
       process.env.CLOUDINARY_TRAINER_FOLDER?.trim() || "evolve-fitness/trainers";
 
     const timeoutMs = cloudinaryUploadTimeoutMs();
+    /** Data URI upload is usually more reliable than `upload_stream` for small buffers from JSON base64. */
+    const dataUri = `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
+
     const result = await new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         reject(
@@ -83,14 +86,14 @@ export async function saveTrainerImageFile(file) {
           )
         );
       }, timeoutMs);
-      const stream = cloudinary.uploader.upload_stream(
+      cloudinary.uploader.upload(
+        dataUri,
+        { folder, resource_type: "image" },
         (err, res) => {
           clearTimeout(timer);
           err ? reject(err) : resolve(res);
-        },
-        { folder, resource_type: "image" }
+        }
       );
-      stream.end(file.buffer);
     });
 
     return {
