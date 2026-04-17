@@ -6,6 +6,7 @@ import {
   listAdminContacts,
   listAdminLeads,
   patchAdminMember,
+  updateAdminMemberMembership,
 } from "../controllers/adminDataController.js";
 import {
   listTrainersAdmin,
@@ -36,6 +37,10 @@ router.get("/members", asyncHandler(listAdminMembers));
 /** POST alias: some proxies mis-handle PATCH; keep PATCH for API clients. */
 router.post("/members/:id/active", asyncHandler(patchAdminMember));
 router.patch("/members/:id", asyncHandler(patchAdminMember));
+router.post(
+  "/members/:id/membership",
+  asyncHandler(updateAdminMemberMembership)
+);
 router.get("/contacts", asyncHandler(listAdminContacts));
 router.get("/leads", asyncHandler(listAdminLeads));
 

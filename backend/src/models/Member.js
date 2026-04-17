@@ -61,6 +61,15 @@ const memberSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    /** Membership period (admin-set; optional — null means not set). */
+    membershipStartDate: {
+      type: Date,
+      default: null,
+    },
+    membershipEndDate: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true }
 );

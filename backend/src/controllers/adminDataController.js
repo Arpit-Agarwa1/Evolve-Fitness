@@ -96,6 +96,99 @@ export async function patchAdminMember(req, res, next) {
 }
 
 /**
+ * Parse `YYYY-MM-DD` from admin to a stable UTC noon Date (avoids timezone drift).
+ * @param {unknown} raw
+ * @returns {{ ok: true; date: Date | null } | { ok: false }}
+ */
+function parseMembershipDay(raw) {
+  if (raw === null || raw === undefined) {
+    return { ok: true, date: null };
+  }
+  if (raw === "") {
+    return { ok: true, date: null };
+  }
+  if (typeof raw !== "string") {
+    return { ok: false };
+  }
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw.trim());
+  if (!m) {
+    return { ok: false };
+  }
+  const y = Number(m[1]);
+  const mo = Number(m[2]);
+  const d = Number(m[3]);
+  if (mo < 1 || mo > 12 || d < 1 || d > 31) {
+    return { ok: false };
+  }
+  const date = new Date(Date.UTC(y, mo - 1, d, 12, 0, 0));
+  return { ok: true, date };
+}
+
+/**
+ * POST /api/admin/members/:id/membership — set membership start/end (calendar days).
+ * Body: `{ membershipStartDate?, membershipEndDate? }` each `YYYY-MM-DD` or `null` to clear.
+ * At least one field must be present in the JSON body.
+ */
+export async function updateAdminMemberMembership(req, res, next) {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return sendError(res, "Invalid member id", 400);
+    }
+
+    const body = req.body ?? {};
+    const hasStart = Object.prototype.hasOwnProperty.call(body, "membershipStartDate");
+    const hasEnd = Object.prototype.hasOwnProperty.call(body, "membershipEndDate");
+    if (!hasStart && !hasEnd) {
+      return sendError(
+        res,
+        "Provide membershipStartDate and/or membershipEndDate (YYYY-MM-DD or null)",
+        422
+      );
+    }
+
+    const startParsed = hasStart ? parseMembershipDay(body.membershipStartDate) : null;
+    const endParsed = hasEnd ? parseMembershipDay(body.membershipEndDate) : null;
+    if (hasStart && startParsed && !startParsed.ok) {
+      return sendError(res, "Invalid membershipStartDate (use YYYY-MM-DD)", 422);
+    }
+    if (hasEnd && endParsed && !endParsed.ok) {
+      return sendError(res, "Invalid membershipEndDate (use YYYY-MM-DD)", 422);
+    }
+
+    const member = await Member.findById(id).select("-passwordHash");
+    if (!member) {
+      return sendError(res, "Member not found", 404);
+    }
+
+    const nextStart = hasStart ? startParsed.date : member.membershipStartDate;
+    const nextEnd = hasEnd ? endParsed.date : member.membershipEndDate;
+
+    if (nextStart && nextEnd && nextEnd < nextStart) {
+      return sendError(
+        res,
+        "Membership end date must be on or after the start date",
+        422
+      );
+    }
+
+    if (hasStart) {
+      member.membershipStartDate = startParsed.date;
+    }
+    if (hasEnd) {
+      member.membershipEndDate = endParsed.date;
+    }
+
+    await member.save();
+    const lean = member.toObject();
+    delete lean.passwordHash;
+    return sendSuccess(res, { member: lean });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
  * GET /api/admin/contacts — contact form messages.
  */
 export async function listAdminContacts(req, res, next) {

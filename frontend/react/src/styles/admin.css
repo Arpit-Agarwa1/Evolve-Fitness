@@ -277,6 +277,117 @@
   vertical-align: middle;
 }
 
+.admin-table__membership-cell {
+  min-width: 11rem;
+  vertical-align: top;
+}
+
+.admin-membership-dates {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.35rem;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  margin-bottom: 0.4rem;
+}
+
+.admin-membership-dates__sep {
+  color: var(--ev-text-muted);
+  font-size: 0.75rem;
+}
+
+.admin-membership-expired {
+  display: inline-block;
+  margin-left: 0.35rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.12rem 0.35rem;
+  border-radius: 4px;
+  background: rgba(200, 100, 90, 0.25);
+  color: #e8a8a0;
+}
+
+.admin-membership-edit {
+  margin-top: 0.15rem;
+}
+
+.admin-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+}
+
+.admin-modal {
+  width: 100%;
+  max-width: 420px;
+  padding: 1.35rem 1.5rem;
+  border-radius: var(--ev-radius-lg);
+  border: 1px solid var(--ev-border);
+  background: var(--ev-bg-card);
+  box-shadow: var(--ev-shadow);
+}
+
+.admin-modal__title {
+  margin: 0 0 0.5rem;
+  font-family: var(--ev-serif);
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--ev-text);
+}
+
+.admin-modal__lede {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--ev-text-muted);
+}
+
+.admin-modal__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.admin-modal__label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ev-text-muted);
+}
+
+.admin-modal__label input[type="date"] {
+  padding: 0.55rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid var(--ev-border);
+  background: var(--ev-bg-elevated);
+  color: var(--ev-text);
+  font-size: 1rem;
+  font-family: inherit;
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 400;
+}
+
+.admin-modal__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
 .admin-table__nowrap {
   white-space: nowrap;
 }
