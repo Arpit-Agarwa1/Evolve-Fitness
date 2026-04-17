@@ -459,6 +459,159 @@
   letter-spacing: normal;
 }
 
+.admin-trainers-field--switch {
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.admin-trainers-field--switch > span:first-child {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ev-text-muted);
+}
+
+.admin-trainers-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 0.35rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.admin-trainers-switch input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  clip: rect(0, 0, 0, 0);
+}
+
+.admin-trainers-switch__track {
+  position: relative;
+  width: 2.5rem;
+  height: 1.35rem;
+  border-radius: 999px;
+  background: var(--ev-border);
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+}
+
+.admin-trainers-switch input:checked + .admin-trainers-switch__track {
+  background: rgba(255, 106, 43, 0.55);
+}
+
+.admin-trainers-switch__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: calc(1.35rem - 4px);
+  height: calc(1.35rem - 4px);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.admin-trainers-switch input:checked + .admin-trainers-switch__track .admin-trainers-switch__thumb {
+  transform: translateX(1.15rem);
+}
+
+.admin-trainers-switch__label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ev-text);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.admin-trainers-switch__hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--ev-text-muted);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.admin-trainers-switch--compact {
+  margin-top: 0;
+}
+
+.admin-trainers-switch--compact .admin-trainers-switch__track {
+  width: 2.15rem;
+  height: 1.2rem;
+}
+
+.admin-trainers-switch--compact .admin-trainers-switch__thumb {
+  width: calc(1.2rem - 4px);
+  height: calc(1.2rem - 4px);
+}
+
+.admin-trainers-switch--compact
+  input:checked
+  + .admin-trainers-switch__track
+  .admin-trainers-switch__thumb {
+  transform: translateX(0.95rem);
+}
+
+.admin-trainers-list__lede {
+  margin: -0.35rem 0 1rem;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.admin-trainers-card--inactive {
+  opacity: 0.88;
+  border-style: dashed;
+}
+
+.admin-trainers-card__status {
+  margin: 0 0 0.35rem;
+}
+
+.admin-trainers-pill {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.45rem;
+  border-radius: 6px;
+}
+
+.admin-trainers-pill--active {
+  background: rgba(80, 180, 120, 0.2);
+  color: #8fd4a8;
+}
+
+.admin-trainers-pill--inactive {
+  background: rgba(160, 160, 170, 0.25);
+  color: var(--ev-text-muted);
+}
+
+.admin-trainers-card__row-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: 0.5rem 0 0.65rem;
+  padding: 0.35rem 0;
+  border-top: 1px solid var(--ev-border);
+  border-bottom: 1px solid var(--ev-border);
+}
+
+.admin-trainers-card__toggle-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ev-text-muted);
+}
+
 .admin-trainers-preview-row {
   display: flex;
   align-items: center;

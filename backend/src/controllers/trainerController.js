@@ -42,11 +42,18 @@ function fileFromImageBase64(body) {
 }
 
 /**
+ * Public site only shows active trainers (legacy docs without `isActive` count as visible).
+ */
+const publicTrainerFilter = {
+  $or: [{ isActive: true }, { isActive: { $exists: false } }],
+};
+
+/**
  * GET /api/trainers — public list (sorted).
  */
 export async function listTrainersPublic(req, res, next) {
   try {
-    const items = await Trainer.find()
+    const items = await Trainer.find(publicTrainerFilter)
       .sort({ sortOrder: 1, createdAt: 1 })
       .lean();
     return sendSuccess(res, { items });
@@ -56,10 +63,17 @@ export async function listTrainersPublic(req, res, next) {
 }
 
 /**
- * GET /api/admin/trainers — same payload (owner console).
+ * GET /api/admin/trainers — all trainers (active + inactive) for owner console.
  */
 export async function listTrainersAdmin(req, res, next) {
-  return listTrainersPublic(req, res, next);
+  try {
+    const items = await Trainer.find()
+      .sort({ isActive: -1, sortOrder: 1, createdAt: 1 })
+      .lean();
+    return sendSuccess(res, { items });
+  } catch (err) {
+    next(err);
+  }
 }
 
 /**
@@ -84,6 +98,9 @@ export async function createTrainer(req, res, next) {
     if (!name || !role) {
       return sendError(res, "Name and role are required", 422);
     }
+
+    const isActive =
+      req.body?.isActive === undefined ? true : Boolean(req.body.isActive);
 
     let imagePath = null;
     let imageUrl = null;
@@ -116,6 +133,7 @@ export async function createTrainer(req, res, next) {
       name,
       role,
       sortOrder,
+      isActive,
       imagePath,
       imageUrl,
       cloudinaryPublicId,
@@ -154,6 +172,9 @@ export async function updateTrainer(req, res, next) {
     if (req.body?.sortOrder !== undefined && req.body.sortOrder !== "") {
       const n = Number.parseInt(String(req.body.sortOrder), 10);
       if (!Number.isNaN(n)) trainer.sortOrder = n;
+    }
+    if (req.body?.isActive !== undefined) {
+      trainer.isActive = Boolean(req.body.isActive);
     }
 
     let file = req.file;

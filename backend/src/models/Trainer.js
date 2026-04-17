@@ -40,6 +40,11 @@ const trainerSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    /** When false, hidden from the public site; admin still sees and can edit. */
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );

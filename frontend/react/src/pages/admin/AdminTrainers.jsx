@@ -18,6 +18,8 @@ export default function AdminTrainers() {
   const [name, setName] = useState("");
   const [role, setRole] = useState("");
   const [sortOrder, setSortOrder] = useState("0");
+  /** Shown on public /trainers when true; admin-only visibility toggle. */
+  const [isActive, setIsActive] = useState(true);
   const [imageFile, setImageFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
 
@@ -55,19 +57,41 @@ export default function AdminTrainers() {
     setName("");
     setRole("");
     setSortOrder("0");
+    setIsActive(true);
     setImageFile(null);
     setPreviewUrl(null);
   }
 
   /**
-   * @param {{ _id: string; name: string; role: string; sortOrder?: number; imagePath?: string | null; imageUrl?: string | null }} t
+   * @param {{ _id: string; name: string; role: string; sortOrder?: number; isActive?: boolean; imagePath?: string | null; imageUrl?: string | null }} t
    */
   function startEdit(t) {
     setEditingId(t._id);
     setName(t.name);
     setRole(t.role);
     setSortOrder(String(t.sortOrder ?? 0));
+    setIsActive(t.isActive !== false);
     setImageFile(null);
+  }
+
+  /**
+   * Flip visibility on the public site without opening the full form.
+   * @param {{ _id: string; isActive?: boolean }} t
+   */
+  async function handleToggleActive(t) {
+    const currentlyActive = t.isActive !== false;
+    setErrorMessage("");
+    try {
+      await request(`/api/admin/trainers/${t._id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ isActive: !currentlyActive }),
+      });
+      await load();
+    } catch (err) {
+      setErrorMessage(
+        err instanceof Error ? err.message : "Could not update visibility."
+      );
+    }
   }
 
   /**
@@ -157,11 +181,12 @@ export default function AdminTrainers() {
     setErrorMessage("");
     try {
       const sortNum = Number.parseInt(sortOrder, 10);
-      /** @type {{ name: string; role: string; sortOrder: number; imageBase64?: string; imageMimeType?: string }} */
+      /** @type {{ name: string; role: string; sortOrder: number; isActive: boolean; imageBase64?: string; imageMimeType?: string }} */
       const payload = {
         name: name.trim(),
         role: role.trim(),
         sortOrder: Number.isNaN(sortNum) ? 0 : sortNum,
+        isActive,
       };
       if (imageFile) {
         const img = await prepareTrainerImageForUpload(imageFile);
@@ -258,6 +283,28 @@ export default function AdminTrainers() {
                 placeholder="0"
               />
             </label>
+            <div className="admin-trainers-field admin-trainers-field--switch">
+              <span>On public site</span>
+              <label className="admin-trainers-switch">
+                <input
+                  type="checkbox"
+                  role="switch"
+                  aria-checked={isActive}
+                  checked={isActive}
+                  onChange={(ev) => setIsActive(ev.target.checked)}
+                />
+                <span className="admin-trainers-switch__track" aria-hidden>
+                  <span className="admin-trainers-switch__thumb" />
+                </span>
+                <span className="admin-trainers-switch__label">
+                  {isActive ? "Active" : "Inactive"}
+                </span>
+              </label>
+              <p className="admin-trainers-switch__hint">
+                Inactive trainers stay in this list but are hidden from the
+                website.
+              </p>
+            </div>
             <label className="admin-trainers-field admin-trainers-field--file">
               <span>Photo {editingId ? "(optional — replaces current)" : "(optional)"}</span>
               <input
@@ -329,7 +376,11 @@ export default function AdminTrainers() {
         </form>
 
         <div className="admin-trainers-list">
-          <h2 className="admin-trainers-list__title">Published trainers</h2>
+          <h2 className="admin-trainers-list__title">All trainers</h2>
+          <p className="admin-muted admin-trainers-list__lede">
+            Only <strong>active</strong> trainers appear on the public Trainers
+            page.
+          </p>
           {loading ? (
             <p className="admin-muted">Loading…</p>
           ) : items.length === 0 ? (
@@ -338,8 +389,12 @@ export default function AdminTrainers() {
             <ul className="admin-trainers-cards">
               {items.map((t) => {
                 const src = trainerDisplayPhotoUrl(t);
+                const active = t.isActive !== false;
                 return (
-                  <li key={t._id} className="admin-trainers-card">
+                  <li
+                    key={t._id}
+                    className={`admin-trainers-card${active ? "" : " admin-trainers-card--inactive"}`}
+                  >
                     <div className="admin-trainers-card__media">
                       {src ? (
                         <img src={src} alt="" className="admin-trainers-card__img" />
@@ -350,11 +405,43 @@ export default function AdminTrainers() {
                       )}
                     </div>
                     <div className="admin-trainers-card__body">
+                      <p className="admin-trainers-card__status">
+                        <span
+                          className={
+                            active
+                              ? "admin-trainers-pill admin-trainers-pill--active"
+                              : "admin-trainers-pill admin-trainers-pill--inactive"
+                          }
+                        >
+                          {active ? "Active" : "Inactive"}
+                        </span>
+                      </p>
                       <p className="admin-trainers-card__name">{t.name}</p>
                       <p className="admin-trainers-card__role">{t.role}</p>
                       <p className="admin-trainers-card__meta">
                         Sort: {t.sortOrder ?? 0}
                       </p>
+                      <div className="admin-trainers-card__row-toggle">
+                        <span className="admin-trainers-card__toggle-label">
+                          Public
+                        </span>
+                        <label className="admin-trainers-switch admin-trainers-switch--compact">
+                          <input
+                            type="checkbox"
+                            role="switch"
+                            aria-label={
+                              active
+                                ? `Hide ${t.name} from public site`
+                                : `Show ${t.name} on public site`
+                            }
+                            checked={active}
+                            onChange={() => handleToggleActive(t)}
+                          />
+                          <span className="admin-trainers-switch__track" aria-hidden>
+                            <span className="admin-trainers-switch__thumb" />
+                          </span>
+                        </label>
+                      </div>
                       <div className="admin-trainers-card__actions">
                         <button
                           type="button"
