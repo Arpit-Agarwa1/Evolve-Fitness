@@ -11,6 +11,8 @@ const PLAN_VALUES = [
   "unknown",
 ];
 
+const GENDER_VALUES = ["male", "female", "other", "prefer_not_say", ""];
+
 /**
  * Registered member account (signup). Password stored as hash only.
  */
@@ -41,6 +43,11 @@ const memberSchema = new mongoose.Schema(
       required: true,
       select: false,
     },
+    gender: {
+      type: String,
+      enum: GENDER_VALUES,
+      default: "",
+    },
     planInterest: {
       type: String,
       enum: PLAN_VALUES,
@@ -50,10 +57,24 @@ const memberSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    /** Legacy short location — prefer `address` when both set in UI. */
     city: {
       type: String,
       trim: true,
       maxlength: 120,
+      default: "",
+    },
+    /** Full street address (admin + optional at signup). */
+    address: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+      default: "",
+    },
+    emergencyContact: {
+      type: String,
+      trim: true,
+      maxlength: 200,
       default: "",
     },
     /** Admin can deactivate accounts (e.g. churned); inactive still listed in admin. */
@@ -69,6 +90,45 @@ const memberSchema = new mongoose.Schema(
     membershipEndDate: {
       type: Date,
       default: null,
+    },
+    /** Paused membership — clock stops until unfrozen (expiry extended by frozen days on unfreeze). */
+    membershipFrozen: {
+      type: Boolean,
+      default: false,
+    },
+    /** First day of freeze (UTC); set when freeze starts. */
+    membershipFreezeStartedAt: {
+      type: Date,
+      default: null,
+    },
+    /** Optional planned resume date (informational). */
+    membershipFreezeEndDate: {
+      type: Date,
+      default: null,
+    },
+    /** Optional assigned coach from Trainer collection. */
+    assignedTrainerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Trainer",
+      default: null,
+    },
+    heightCm: {
+      type: Number,
+      default: null,
+      min: [0, "Height must be positive"],
+      max: [300, "Height out of range"],
+    },
+    weightKg: {
+      type: Number,
+      default: null,
+      min: [0, "Weight must be positive"],
+      max: [500, "Weight out of range"],
+    },
+    fitnessGoal: {
+      type: String,
+      trim: true,
+      maxlength: 500,
+      default: "",
     },
     /** Internal notes — admin only, not shown to the member. */
     adminNotes: {
@@ -91,4 +151,4 @@ memberSchema.set("toJSON", {
 });
 
 export default mongoose.model("Member", memberSchema);
-export { PLAN_VALUES };
+export { PLAN_VALUES, GENDER_VALUES };

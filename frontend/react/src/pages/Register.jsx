@@ -5,6 +5,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { apiFetch } from "../services/api";
 import SEO from "../components/SEO";
+import { GENDER_OPTIONS } from "../constants/memberFields";
 
 const PLANS = [
   { value: "1month", label: "1 month — ₹7,999" },
@@ -56,6 +57,9 @@ export default function Register() {
     const confirmPassword = String(fd.get("confirmPassword") ?? "");
     const dateOfBirth = String(fd.get("dateOfBirth") ?? "").trim();
     const city = String(fd.get("city") ?? "").trim();
+    const gender = String(fd.get("gender") ?? "").trim();
+    const address = String(fd.get("address") ?? "").trim();
+    const emergencyContact = String(fd.get("emergencyContact") ?? "").trim();
     const planValue = String(fd.get("plan") ?? plan);
 
     if (password !== confirmPassword) {
@@ -78,6 +82,9 @@ export default function Register() {
           plan: planValue,
           dateOfBirth: dateOfBirth || undefined,
           city: city || undefined,
+          ...(gender ? { gender } : {}),
+          ...(address ? { address } : {}),
+          ...(emergencyContact ? { emergencyContact } : {}),
         }),
       });
       setWhatsappThankYouSent(Boolean(res?.data?.whatsappThankYouSent));
@@ -180,12 +187,47 @@ export default function Register() {
               </label>
 
               <label className="register-label">
+                <span className="register-label-text">Gender (optional)</span>
+                <select name="gender" disabled={status === "loading"}>
+                  {GENDER_OPTIONS.map((g) => (
+                    <option key={g.value || "unset"} value={g.value}>
+                      {g.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="register-label">
                 <span className="register-label-text">City (optional)</span>
                 <input
                   type="text"
                   name="city"
                   placeholder="Jaipur"
                   autoComplete="address-level2"
+                  disabled={status === "loading"}
+                />
+              </label>
+
+              <label className="register-label">
+                <span className="register-label-text">Address (optional)</span>
+                <textarea
+                  name="address"
+                  placeholder="Street, area, landmark"
+                  rows={3}
+                  autoComplete="street-address"
+                  disabled={status === "loading"}
+                />
+              </label>
+
+              <label className="register-label">
+                <span className="register-label-text">
+                  Emergency contact (optional)
+                </span>
+                <input
+                  type="text"
+                  name="emergencyContact"
+                  placeholder="Name and phone"
+                  autoComplete="off"
                   disabled={status === "loading"}
                 />
               </label>

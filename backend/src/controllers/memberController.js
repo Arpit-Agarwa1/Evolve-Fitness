@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
-import Member, { PLAN_VALUES } from "../models/Member.js";
+import Member, { PLAN_VALUES, GENDER_VALUES } from "../models/Member.js";
 import { sendRegistrationThankYou } from "../services/whatsappRegistrationThankYou.js";
 import { sendSuccess, sendError } from "../views/jsonResponse.js";
 
@@ -20,6 +20,9 @@ export async function registerMember(req, res, next) {
       plan,
       dateOfBirth,
       city,
+      gender,
+      address,
+      emergencyContact,
     } = req.body ?? {};
 
     if (!fullName || !email || !phone || !password) {
@@ -49,6 +52,9 @@ export async function registerMember(req, res, next) {
 
     const passwordHash = await bcrypt.hash(String(password), SALT_ROUNDS);
 
+    const genderRaw = gender ? String(gender).toLowerCase() : "";
+    const genderNorm = GENDER_VALUES.includes(genderRaw) ? genderRaw : "";
+
     const member = await Member.create({
       fullName: String(fullName).trim(),
       email: String(email).trim().toLowerCase(),
@@ -57,6 +63,11 @@ export async function registerMember(req, res, next) {
       planInterest,
       dateOfBirth: dob,
       city: city ? String(city).trim() : "",
+      gender: genderNorm,
+      address: address ? String(address).trim().slice(0, 500) : "",
+      emergencyContact: emergencyContact
+        ? String(emergencyContact).trim().slice(0, 200)
+        : "",
     });
 
     console.log(

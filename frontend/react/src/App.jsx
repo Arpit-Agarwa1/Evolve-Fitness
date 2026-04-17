@@ -12,6 +12,7 @@ const Register = lazy(() => import("./pages/Register"));
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminMembers = lazy(() => import("./pages/admin/AdminMembers"));
+const AdminMemberPage = lazy(() => import("./pages/admin/AdminMemberPage"));
 const AdminContacts = lazy(() => import("./pages/admin/AdminContacts"));
 const AdminLeads = lazy(() => import("./pages/admin/AdminLeads"));
 const AdminTrainers = lazy(() => import("./pages/admin/AdminTrainers"));
@@ -41,6 +42,14 @@ function App() {
           element={
             <ProtectedAdminRoute>
               <AdminMembers />
+            </ProtectedAdminRoute>
+          }
+        />
+        <Route
+          path="/admin/members/:id"
+          element={
+            <ProtectedAdminRoute>
+              <AdminMemberPage />
             </ProtectedAdminRoute>
           }
         />

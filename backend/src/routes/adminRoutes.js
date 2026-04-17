@@ -2,11 +2,16 @@ import { Router } from "express";
 import { adminLogin } from "../controllers/adminAuthController.js";
 import {
   getAdminDashboard,
-  listAdminMembers,
   listAdminContacts,
   listAdminLeads,
-  updateAdminMember,
 } from "../controllers/adminDataController.js";
+import {
+  listAdminMembers,
+  getAdminMember,
+  createAdminMember,
+  updateAdminMember,
+  deleteAdminMember,
+} from "../controllers/adminMemberController.js";
 import {
   listTrainersAdmin,
   createTrainer,
@@ -32,12 +37,16 @@ router.post("/login", adminLoginLimiter, asyncHandler(adminLogin));
 
 router.use(requireAdminAuth);
 router.get("/dashboard", asyncHandler(getAdminDashboard));
+
 router.get("/members", asyncHandler(listAdminMembers));
-/** Unified member updates (status, membership period, admin notes). */
+router.post("/members", asyncHandler(createAdminMember));
+router.get("/members/:id", asyncHandler(getAdminMember));
 router.patch("/members/:id", asyncHandler(updateAdminMember));
+router.delete("/members/:id", asyncHandler(deleteAdminMember));
 router.post("/members/:id/manage", asyncHandler(updateAdminMember));
 router.post("/members/:id/active", asyncHandler(updateAdminMember));
 router.post("/members/:id/membership", asyncHandler(updateAdminMember));
+
 router.get("/contacts", asyncHandler(listAdminContacts));
 router.get("/leads", asyncHandler(listAdminLeads));
 
