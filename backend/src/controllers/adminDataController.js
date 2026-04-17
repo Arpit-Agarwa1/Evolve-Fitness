@@ -67,6 +67,7 @@ export async function listAdminMembers(req, res, next) {
 
 /**
  * PATCH /api/admin/members/:id — set `isActive` (admin only).
+ * POST /api/admin/members/:id/active — same body `{ isActive }` (preferred from admin UI).
  */
 export async function patchAdminMember(req, res, next) {
   try {

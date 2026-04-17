@@ -62,8 +62,8 @@ export default function AdminMembers() {
     setErrorMessage("");
     setToggleBusyId(row._id);
     try {
-      await request(`/api/admin/members/${row._id}`, {
-        method: "PATCH",
+      await request(`/api/admin/members/${row._id}/active`, {
+        method: "POST",
         body: JSON.stringify({ isActive: !currentlyActive }),
       });
       await loadMembers();

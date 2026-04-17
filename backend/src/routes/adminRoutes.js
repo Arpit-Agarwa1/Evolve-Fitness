@@ -33,6 +33,8 @@ router.post("/login", adminLoginLimiter, asyncHandler(adminLogin));
 router.use(requireAdminAuth);
 router.get("/dashboard", asyncHandler(getAdminDashboard));
 router.get("/members", asyncHandler(listAdminMembers));
+/** POST alias: some proxies mis-handle PATCH; keep PATCH for API clients. */
+router.post("/members/:id/active", asyncHandler(patchAdminMember));
 router.patch("/members/:id", asyncHandler(patchAdminMember));
 router.get("/contacts", asyncHandler(listAdminContacts));
 router.get("/leads", asyncHandler(listAdminLeads));
