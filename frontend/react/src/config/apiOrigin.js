@@ -19,7 +19,7 @@ export function getApiBase() {
 /**
  * Owner admin API — always calls the Render host in production (not the Vercel `/api` rewrite).
  * Vercel rewrites often return **502** on multipart POST (trainer photo uploads), so we bypass them.
- * Requires **`CORS_ORIGIN`** on Render to include your site (e.g. `https://evolvestudio.fitness`).
+ * Requires **`CORS_ORIGIN`** on Render to include your frontend origin (e.g. `https://your-app.vercel.app`).
  * @returns {string}
  */
 export function getAdminApiBase() {

@@ -1,7 +1,8 @@
 /**
- * SEO / canonical URL helpers. Set `VITE_SITE_URL` in production (https://your-domain.com, no trailing slash).
+ * SEO / canonical URL helpers.
+ * Optional `VITE_SITE_URL` forces one canonical host; otherwise the browser uses `window.location.origin`
+ * (works for `*.vercel.app` until a custom domain has DNS).
  */
-const FALLBACK_SITE_URL = "https://evolvestudio.fitness";
 
 /**
  * Public canonical origin for meta tags, OG URLs, and JSON-LD.
@@ -15,7 +16,7 @@ export function getSiteUrl() {
   if (typeof window !== "undefined" && window.location?.origin) {
     return window.location.origin;
   }
-  return FALLBACK_SITE_URL;
+  return "http://localhost:5173";
 }
 
 /** Brand line used in titles */

@@ -17,7 +17,7 @@ export const evolveServices = [
     description:
       "Seamless arrival and an effortless experience from the moment you pull up.",
     image: s[0],
-    alt: "Evolve Fitness — arrival and luxury entrance experience",
+    alt: "Evolve Fitness reception desk — luxury arrival and member services",
   },
   {
     id: "space",
@@ -26,7 +26,7 @@ export const evolveServices = [
     description:
       "Room to train without limits in an environment built for performance and comfort.",
     image: s[1],
-    alt: "Evolve Fitness — spacious luxury training floor",
+    alt: "Evolve Fitness open floor with warm-up zones, wood arches, and branded entry glass",
   },
   {
     id: "equipment",
@@ -35,7 +35,7 @@ export const evolveServices = [
     description:
       "Professional-grade machines engineered for precision, safety, and results.",
     image: s[2],
-    alt: "Evolve Fitness — elite strength and cardio equipment",
+    alt: "Olympic power racks, bumper plates, and EVOLVE-branded lifting platforms",
   },
   {
     id: "training",
@@ -44,7 +44,7 @@ export const evolveServices = [
     description:
       "Personalised programming from coaches who know how to unlock your next level.",
     image: s[3],
-    alt: "Evolve Fitness — coaching and personal training",
+    alt: "Private coaching suite with Evolve branding for personal training consults",
   },
   {
     id: "pilates-yoga",
@@ -53,7 +53,7 @@ export const evolveServices = [
     description:
       "Flow, stretch, and align your body in dedicated mind-body sessions.",
     image: s[4],
-    alt: "Evolve Fitness — Pilates, yoga, and studio training",
+    alt: "Dedicated Pilates studio with reformers, mirrors, and premium lighting",
   },
   {
     id: "recovery",
@@ -62,7 +62,7 @@ export const evolveServices = [
     description:
       "Recover better so you can come back stronger, session after session.",
     image: s[5],
-    alt: "Evolve Fitness — recovery and wellness amenities",
+    alt: "Premium lockers and steam room recovery zone at Evolve Fitness",
   },
   {
     id: "amenities",
@@ -71,7 +71,7 @@ export const evolveServices = [
     description:
       "Spa-inspired spaces designed for comfort, privacy, and class.",
     image: s[6],
-    alt: "Evolve Fitness — luxury locker rooms and lounge",
+    alt: "Luxury locker vanities with backlit mirrors and spa-inspired finishes",
   },
   {
     id: "cafe",
@@ -80,6 +80,6 @@ export const evolveServices = [
     description:
       "Fresh meals and clean nutrition to complement your training.",
     image: s[7],
-    alt: "Evolve Fitness — healthy café and nutrition",
+    alt: "Member lounge and seating overlooking the Evolve Fitness training floor",
   },
 ];

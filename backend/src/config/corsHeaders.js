@@ -1,11 +1,20 @@
 /**
- * Pinned browser origins — always allowed even if CORS_ORIGIN on the server is misconfigured.
- * Keeps https://evolvestudio.fitness admin + forms working in production.
+ * Extra origins always allowed (e.g. apex + www). Set on Render:
+ * `CORS_PINNED_ORIGINS=https://example.com,https://www.example.com`
+ * Comma-separated, no spaces required (trimmed per entry).
  */
-export const CORS_PINNED_ORIGINS = new Set([
-  "https://evolvestudio.fitness",
-  "https://www.evolvestudio.fitness",
-]);
+function loadPinnedOrigins() {
+  const raw = process.env.CORS_PINNED_ORIGINS?.trim();
+  if (!raw) return new Set();
+  return new Set(
+    raw
+      .split(",")
+      .map((s) => s.trim().replace(/\/+$/, ""))
+      .filter(Boolean)
+  );
+}
+
+export const CORS_PINNED_ORIGINS = loadPinnedOrigins();
 
 /**
  * @param {string | undefined} origin

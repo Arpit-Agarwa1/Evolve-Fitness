@@ -3,7 +3,11 @@ import { Link } from "react-router-dom";
 import "../styles/home.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { evolveGalleryImages, evolveHeroImage } from "../assets/evolveMagazine";
+import {
+  evolveGalleryImageAlts,
+  evolveGalleryImages,
+  evolveHeroImage,
+} from "../assets/evolveMagazine";
 import { evolveServices } from "../data/services";
 import { INSTAGRAM_URL } from "../config/socialLinks";
 import EvolveImage from "../components/EvolveImage";
@@ -101,7 +105,7 @@ export default function Home() {
               >
                 <EvolveImage
                   src={src}
-                  alt={`Evolve Fitness interior and facilities, photo ${i + 1}`}
+                  alt={evolveGalleryImageAlts[i] ?? "Evolve Fitness facility photo"}
                   sizes="(max-width: 767px) 48vw, (max-width: 1199px) 32vw, 600px"
                   loading="lazy"
                   decoding="async"

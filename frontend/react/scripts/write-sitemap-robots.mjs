@@ -11,7 +11,6 @@ const root = join(__dirname, "..");
 const dist = join(root, "dist");
 
 function resolveBaseUrl() {
-  let base = "https://evolvestudio.fitness";
   if (process.env.VITE_SITE_URL?.trim()) {
     return process.env.VITE_SITE_URL.trim().replace(/\/$/, "");
   }
@@ -26,7 +25,15 @@ function resolveBaseUrl() {
         .replace(/^["']|["']$/g, "");
     }
   }
-  return base;
+  const vu = process.env.VERCEL_URL?.trim();
+  if (vu) {
+    const host = vu.replace(/^https?:\/\//i, "").replace(/\/$/, "");
+    return `https://${host}`;
+  }
+  console.warn(
+    "[write-sitemap-robots] No VITE_SITE_URL or VERCEL_URL — using http://localhost:5173 for sitemap base (set VITE_SITE_URL for production)."
+  );
+  return "http://localhost:5173";
 }
 
 const base = resolveBaseUrl();

@@ -68,15 +68,15 @@ function expandCorsOrigins(origins) {
 }
 
 /**
- * Public site URL for CORS (admin calls Render from the browser). Override with PUBLIC_SITE_ORIGIN.
- * Set CORS_SKIP_DEFAULT_SITE=1 to omit this merge (e.g. other deployments).
+ * Extra CORS allowlist entry for your public site (admin + forms from the browser).
+ * Set `PUBLIC_SITE_ORIGIN=https://your-domain.com` on Render (no default — avoids dead hostnames).
+ * Set CORS_SKIP_DEFAULT_SITE=1 to omit this merge.
  */
 function getPublicSiteOriginForCors() {
   if (process.env.CORS_SKIP_DEFAULT_SITE === "1") return null;
-  const raw = process.env.PUBLIC_SITE_ORIGIN;
-  if (raw === "") return null;
-  const base = (raw || "https://evolvestudio.fitness").trim().replace(/\/+$/, "");
-  return base || null;
+  const raw = process.env.PUBLIC_SITE_ORIGIN?.trim();
+  if (!raw || raw === "") return null;
+  return raw.replace(/\/+$/, "");
 }
 
 /**
