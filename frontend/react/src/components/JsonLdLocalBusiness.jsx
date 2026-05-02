@@ -1,5 +1,6 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
+import { EVOLVE_LOGO_OG_PATH } from "../config/brand";
 import { getSiteUrl } from "../config/seoConfig";
 import { INSTAGRAM_URL } from "../config/socialLinks";
 import { EVOLVE_MAP_LAT, EVOLVE_MAP_LNG } from "../config/googleMaps";
@@ -20,7 +21,9 @@ export default function JsonLdLocalBusiness() {
     url,
     telephone: "+91-90243-01606",
     email: "info@evolvefitness.com",
-    image: import.meta.env.VITE_OG_IMAGE_URL?.trim() || undefined,
+    image:
+      import.meta.env.VITE_OG_IMAGE_URL?.trim() ||
+      `${url}${EVOLVE_LOGO_OG_PATH}`,
     address: {
       "@type": "PostalAddress",
       streetAddress:
@@ -38,10 +41,6 @@ export default function JsonLdLocalBusiness() {
     sameAs: [INSTAGRAM_URL],
     priceRange: "$$",
   };
-
-  if (!data.image) {
-    delete data.image;
-  }
 
   return (
     <Helmet>

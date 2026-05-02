@@ -8,6 +8,7 @@
     "build": "vite build",
     "postbuild": "node scripts/write-sitemap-robots.mjs",
     "lint": "eslint .",
+    "build:brand": "node scripts/build-theme-logo.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -25,6 +26,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.4.0",
+    "sharp": "^0.34.5",
     "vite": "^8.0.4"
   }
 }

@@ -1,5 +1,6 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
+import { EVOLVE_LOGO_OG_PATH } from "../config/brand";
 import { getSiteUrl, SITE_NAME } from "../config/seoConfig";
 
 /**
@@ -29,11 +30,9 @@ export default function SEO({
 
   const robots = noIndex ? "noindex, nofollow" : "index, follow";
 
-  const ogImg =
-    ogImage ||
-    (import.meta.env.VITE_OG_IMAGE_URL?.trim()
-      ? import.meta.env.VITE_OG_IMAGE_URL.trim()
-      : "");
+  const envOg = import.meta.env.VITE_OG_IMAGE_URL?.trim();
+  const defaultOg = `${getSiteUrl()}${EVOLVE_LOGO_OG_PATH}`;
+  const ogImg = ogImage || (envOg || defaultOg);
 
   return (
     <Helmet>

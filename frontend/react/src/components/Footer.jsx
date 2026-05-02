@@ -1,5 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import {
+  EVOLVE_LOGO_ALT,
+  EVOLVE_LOGO_FOOTER_SRC,
+} from "../config/brand";
 import { GYM_HOURS_LINE } from "../data/membershipPlans";
 import { INSTAGRAM_URL } from "../config/socialLinks";
 import "../styles/footer.css";
@@ -13,12 +17,15 @@ export default function Footer() {
       <div className="footer-container">
         <div className="footer-col">
           <div className="footer-brand">
-            <span className="footer-logo-main">
-              <span className="footer-logo-e">E</span>
-              <span className="footer-logo-arrow">&gt;</span>
-              <span className="footer-logo-rest">OLVE</span>
-            </span>
-            <span className="footer-logo-sub">THE LUXURY FITNESS</span>
+            <img
+              className="footer-logo-img"
+              src={EVOLVE_LOGO_FOOTER_SRC}
+              alt={EVOLVE_LOGO_ALT}
+              width={640}
+              height={183}
+              loading="lazy"
+              decoding="async"
+            />
           </div>
           <p className="footer-about">
             Premium training, elite equipment, and a complete luxury fitness

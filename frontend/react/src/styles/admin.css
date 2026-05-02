@@ -18,12 +18,21 @@
   gap: 1.5rem;
 }
 
-.admin-brand__title {
-  font-family: var(--ev-serif);
-  font-size: 1.5rem;
-  color: var(--ev-text);
+.admin-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+}
+
+.admin-brand__logo {
   display: block;
-  letter-spacing: 0.04em;
+  height: 18px;
+  width: auto;
+  max-width: 102px;
+  object-fit: contain;
+  object-position: left center;
+  filter: drop-shadow(0 1px 5px rgba(0, 0, 0, 0.32));
 }
 
 .admin-brand__sub {

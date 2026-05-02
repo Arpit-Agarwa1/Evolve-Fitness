@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
+import { EVOLVE_LOGO_ALT, EVOLVE_LOGO_NAV_SRC } from "../config/brand";
 import "../styles/navbar.css";
 
 /**
@@ -23,14 +24,14 @@ export default function Navbar() {
     <header className="nav-wrap">
       <nav className="navbar" aria-label="Main">
         <Link to="/" className="logo" onClick={() => setMenuOpen(false)}>
-          <div className="logo-main">
-            <span className="logo-e">E</span>
-            <span className="logo-arrow" aria-hidden="true">
-              &gt;
-            </span>
-            <span className="logo-rest">OLVE</span>
-          </div>
-          <div className="logo-sub">THE LUXURY FITNESS</div>
+          <img
+            className="logo-img"
+            src={EVOLVE_LOGO_NAV_SRC}
+            alt={EVOLVE_LOGO_ALT}
+            width={520}
+            height={107}
+            decoding="async"
+          />
         </Link>
 
         <button

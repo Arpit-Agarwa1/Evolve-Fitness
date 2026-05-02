@@ -54,32 +54,20 @@
 .footer-brand {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  align-items: flex-start;
+  gap: 0.5rem;
   margin-bottom: 0.75rem;
 }
 
-.footer-logo-main {
-  font-family: var(--ev-sans);
-  font-size: 1.25rem;
-  font-weight: 600;
-  letter-spacing: 0.25em;
-  color: #fff;
-}
-
-.footer-logo-e,
-.footer-logo-rest {
-  color: #fff;
-}
-
-.footer-logo-arrow {
-  color: var(--ev-accent);
-  margin: 0 1px;
-}
-
-.footer-logo-sub {
-  font-size: 0.5rem;
-  letter-spacing: 0.35em;
-  color: var(--ev-text-muted);
+/* First column: lockup aligned with copy block, modest vs body text */
+.footer-logo-img {
+  display: block;
+  height: clamp(20px, 2.5vw, 26px);
+  width: auto;
+  max-width: min(148px, 68vw);
+  object-fit: contain;
+  object-position: left top;
+  filter: drop-shadow(0 1px 8px rgba(0, 0, 0, 0.4));
 }
 
 .footer-about {

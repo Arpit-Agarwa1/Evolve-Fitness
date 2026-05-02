@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
+import { EVOLVE_LOGO_NAV_SRC } from "../../config/brand";
 import { useAdminAuth } from "../../hooks/useAdminAuth";
 import "../../styles/admin.css";
 
@@ -22,7 +23,15 @@ export default function AdminLayout({ children, title }) {
     <div className="admin-shell">
       <aside className="admin-sidebar" aria-label="Admin">
         <div className="admin-brand">
-          <span className="admin-brand__title">Evolve</span>
+          <img
+            className="admin-brand__logo"
+            src={EVOLVE_LOGO_NAV_SRC}
+            alt=""
+            width={520}
+            height={107}
+            decoding="async"
+            aria-hidden="true"
+          />
           <span className="admin-brand__sub">Owner console</span>
         </div>
         <nav className="admin-nav">
