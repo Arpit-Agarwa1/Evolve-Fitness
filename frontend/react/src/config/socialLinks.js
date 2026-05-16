@@ -1,6 +1,8 @@
 /**
- * Official Evolve social profiles (single source for footer + homepage section).
+ * Official Evolve contact + social (footer, contact page, JSON-LD).
  * @see https://www.instagram.com/evolvefitnesclub
  */
+export const CONTACT_EMAIL = "evolvefitnesclub@gmail.com";
+
 export const INSTAGRAM_URL =
   "https://www.instagram.com/evolvefitnesclub";

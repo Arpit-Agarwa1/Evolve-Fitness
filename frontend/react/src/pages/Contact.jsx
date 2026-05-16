@@ -6,6 +6,7 @@ import WhatsAppPromptModal from "../components/WhatsAppPromptModal";
 import ContactMap from "../components/ContactMap";
 import { apiFetch } from "../services/api";
 import SEO from "../components/SEO";
+import { CONTACT_EMAIL } from "../config/socialLinks";
 
 /**
  * Contact page — submits enquiries to the MVC API (MongoDB).
@@ -111,9 +112,7 @@ export default function Contact() {
                 📧
               </span>
               <p>
-                <a href="mailto:info@evolvefitness.com">
-                  info@evolvefitness.com
-                </a>
+                <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
               </p>
             </div>
           </div>

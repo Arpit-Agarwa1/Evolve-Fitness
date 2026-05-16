@@ -5,7 +5,7 @@ import {
   EVOLVE_LOGO_FOOTER_SRC,
 } from "../config/brand";
 import { GYM_HOURS_LINE } from "../data/membershipPlans";
-import { INSTAGRAM_URL } from "../config/socialLinks";
+import { CONTACT_EMAIL, INSTAGRAM_URL } from "../config/socialLinks";
 import "../styles/footer.css";
 
 /**
@@ -70,7 +70,7 @@ export default function Footer() {
             <a href="tel:+919024301606">+91 90243 01606</a>
           </p>
           <p>
-            <a href="mailto:info@evolvefitness.com">info@evolvefitness.com</a>
+            <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
           </p>
           <p className="footer-hours">{GYM_HOURS_LINE}</p>
         </div>
