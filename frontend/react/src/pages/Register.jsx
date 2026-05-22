@@ -6,12 +6,13 @@ import Footer from "../components/Footer";
 import { apiFetch } from "../services/api";
 import SEO from "../components/SEO";
 import { GENDER_OPTIONS } from "../constants/memberFields";
+import { MEMBERSHIP_PLANS } from "../data/membershipPlans";
 
 const PLANS = [
-  { value: "1month", label: "1 month — ₹7,999" },
-  { value: "3months", label: "3 months — ₹17,999" },
-  { value: "6months", label: "6 months — ₹23,999" },
-  { value: "1year", label: "1 year — ₹34,999" },
+  ...MEMBERSHIP_PLANS.map((p) => ({
+    value: p.id,
+    label: `${p.title} — ${p.priceLabel}`,
+  })),
   { value: "unknown", label: "Not sure yet" },
 ];
 
