@@ -18,6 +18,12 @@ import {
   updateTrainer,
   deleteTrainer,
 } from "../controllers/trainerController.js";
+import {
+  listAdminBadmintonRegistrations,
+  exportAdminBadmintonCsv,
+  getAdminBadmintonSettings,
+  updateAdminBadmintonSettings,
+} from "../controllers/badmintonController.js";
 import { requireAdminAuth } from "../middleware/requireAdminAuth.js";
 import { adminLoginLimiter } from "../middleware/rateLimits.js";
 import { trainerImageUpload } from "../middleware/trainerUpload.js";
@@ -54,5 +60,10 @@ router.get("/trainers", asyncHandler(listTrainersAdmin));
 router.post("/trainers", trainerImageOptional, asyncHandler(createTrainer));
 router.patch("/trainers/:id", trainerImageOptional, asyncHandler(updateTrainer));
 router.delete("/trainers/:id", asyncHandler(deleteTrainer));
+
+router.get("/badminton", asyncHandler(listAdminBadmintonRegistrations));
+router.get("/badminton/export", asyncHandler(exportAdminBadmintonCsv));
+router.get("/badminton/settings", asyncHandler(getAdminBadmintonSettings));
+router.patch("/badminton/settings", asyncHandler(updateAdminBadmintonSettings));
 
 export default router;

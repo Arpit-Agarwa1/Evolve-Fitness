@@ -238,3 +238,17 @@ To **send a template message from Evolve’s WhatsApp Business number** to the m
 | `WHATSAPP_REGISTRATION_TEMPLATE_BODY_PARAMS` | `1` if template has one body variable (name); `0` if the message is static |
 
 If these are not set, registration still succeeds; the API returns `whatsappThankYouSent: false`. Phone numbers are normalized (10-digit India numbers get country code `91`).
+
+### Badminton Championship 2026
+
+Public portal: **`/badminton`** (QR → `https://evolvestudio.fitness/badminton`).
+
+| Env (Render) | Purpose |
+| ------------ | ------- |
+| `RAZORPAY_KEY_ID` | Razorpay Key ID (test or live) |
+| `RAZORPAY_KEY_SECRET` | Razorpay Key Secret |
+
+- **Members:** free confirmation (no Razorpay). **Open:** ₹500 / ₹750 / ₹1000 for 1 / 2 / 3 events.
+- **Admin:** `/admin/badminton` — list, CSV export, close categories, force-close registration.
+- Capacity: **16** confirmed entries per category; closes **6 Aug 2026**.
+- On-screen receipt + Registration ID (`EVB26-…`). Confirmation email not wired yet.

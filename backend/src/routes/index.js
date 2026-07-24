@@ -5,6 +5,7 @@ import membershipRoutes from "./membershipRoutes.js";
 import memberRoutes from "./memberRoutes.js";
 import adminRoutes from "./adminRoutes.js";
 import trainerRoutes from "./trainerRoutes.js";
+import badmintonRoutes from "./badmintonRoutes.js";
 import { apiWriteLimiter } from "../middleware/rateLimits.js";
 
 const router = Router();
@@ -14,6 +15,7 @@ router.use("/trainers", trainerRoutes);
 router.use("/contact", apiWriteLimiter, contactRoutes);
 router.use("/membership", apiWriteLimiter, membershipRoutes);
 router.use("/members", apiWriteLimiter, memberRoutes);
+router.use("/badminton", apiWriteLimiter, badmintonRoutes);
 router.use("/admin", adminRoutes);
 
 export default router;

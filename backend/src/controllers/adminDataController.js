@@ -2,6 +2,7 @@ import Member from "../models/Member.js";
 import ContactMessage from "../models/ContactMessage.js";
 import MembershipLead from "../models/MembershipLead.js";
 import Trainer from "../models/Trainer.js";
+import BadmintonRegistration from "../models/BadmintonRegistration.js";
 import { sendSuccess } from "../views/jsonResponse.js";
 
 /** Legacy members without `isActive` are treated as active everywhere. */
@@ -14,16 +15,25 @@ const activeMemberFilter = {
  */
 export async function getAdminDashboard(req, res, next) {
   try {
-    const [members, membersActive, contacts, leads, trainers] = await Promise.all([
-      Member.countDocuments(),
-      Member.countDocuments(activeMemberFilter),
-      ContactMessage.countDocuments(),
-      MembershipLead.countDocuments(),
-      Trainer.countDocuments(),
-    ]);
+    const [members, membersActive, contacts, leads, trainers, badminton] =
+      await Promise.all([
+        Member.countDocuments(),
+        Member.countDocuments(activeMemberFilter),
+        ContactMessage.countDocuments(),
+        MembershipLead.countDocuments(),
+        Trainer.countDocuments(),
+        BadmintonRegistration.countDocuments({ status: "confirmed" }),
+      ]);
 
     return sendSuccess(res, {
-      counts: { members, membersActive, contacts, leads, trainers },
+      counts: {
+        members,
+        membersActive,
+        contacts,
+        leads,
+        trainers,
+        badminton,
+      },
       generatedAt: new Date().toISOString(),
     });
   } catch (err) {

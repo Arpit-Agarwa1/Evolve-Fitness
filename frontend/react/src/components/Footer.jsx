@@ -52,6 +52,9 @@ export default function Footer() {
               <Link to="/membership">Membership</Link>
             </li>
             <li>
+              <Link to="/badminton">Badminton 2026</Link>
+            </li>
+            <li>
               <Link to="/register">Register</Link>
             </li>
             <li>

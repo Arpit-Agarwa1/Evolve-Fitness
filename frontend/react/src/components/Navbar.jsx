@@ -88,6 +88,11 @@ export default function Navbar() {
             </NavLink>
           </li>
           <li>
+            <NavLink to="/badminton" className={linkClass} onClick={() => setMenuOpen(false)}>
+              Badminton
+            </NavLink>
+          </li>
+          <li>
             <NavLink to="/contact" className={linkClass} onClick={() => setMenuOpen(false)}>
               Contact
             </NavLink>
