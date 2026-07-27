@@ -245,10 +245,12 @@ Public portal: **`/badminton`** (QR → `https://evolvestudio.fitness/badminton`
 
 | Env (Render) | Purpose |
 | ------------ | ------- |
-| `RAZORPAY_KEY_ID` | Razorpay Key ID (test or live) |
-| `RAZORPAY_KEY_SECRET` | Razorpay Key Secret |
+| `CASHFREE_APP_ID` | Cashfree App ID / Client ID |
+| `CASHFREE_SECRET_KEY` | Cashfree Secret Key |
+| `CASHFREE_ENV` | `sandbox` (local) or `production` (live) |
+| `PUBLIC_SITE_ORIGIN` | Site origin for payment return URL |
 
-- **Members:** free confirmation (no Razorpay). **Open:** ₹500 / ₹750 / ₹1000 for 1 / 2 / 3 events.
+- **Members:** free confirmation (no payment). **Open:** ₹500 / ₹750 / ₹1,000 / ₹1,250 for 1–4 events via Cashfree.
 - **Admin:** `/admin/badminton` — list, CSV export, close categories, force-close registration.
 - Capacity: **16** confirmed entries per category; closes **6 Aug 2026**.
 - On-screen receipt + Registration ID (`EVB26-…`). Confirmation email not wired yet.

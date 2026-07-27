@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import SEO from "../components/SEO";
 import { apiFetch } from "../services/api";
-import { loadRazorpayScript } from "../utils/loadRazorpay";
+import { loadCashfreeScript } from "../utils/loadCashfree";
 import {
   OPEN_CATEGORIES,
   OPEN_PLAYER_LEVEL_OPTIONS,
@@ -27,7 +27,7 @@ const EMPTY_DETAILS = {
 
 /**
  * Poster 2 — Evolve Open Tournament (QR → /badminton/open).
- * Cart of categories + partner per event → Razorpay checkout.
+ * Cart of categories + partner per event → Cashfree checkout.
  */
 export default function BadmintonOpen() {
   const [step, setStep] = useState(
@@ -57,6 +57,47 @@ export default function BadmintonOpen() {
 
   useEffect(() => {
     loadStatus();
+  }, [loadStatus]);
+
+  // After Cashfree redirect return, verify payment and show confirmation.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const registrationId = String(params.get("registrationId") || "")
+      .trim()
+      .toUpperCase();
+    const orderId = String(params.get("order_id") || "").trim();
+    if (!registrationId) return;
+
+    let cancelled = false;
+    (async () => {
+      setSubmitting(true);
+      setError("");
+      try {
+        const verifyRes = await apiFetch("/api/badminton/open/verify", {
+          method: "POST",
+          body: JSON.stringify({ registrationId, orderId }),
+        });
+        if (cancelled) return;
+        setConfirmed(verifyRes.data?.registration ?? null);
+        setStep("done");
+        await loadStatus();
+        window.history.replaceState({}, "", BADMINTON_OPEN_PATH);
+      } catch (err) {
+        if (!cancelled) {
+          setError(
+            err instanceof Error
+              ? err.message
+              : "Could not confirm payment. If you paid, contact Evolve with your registration ID."
+          );
+        }
+      } finally {
+        if (!cancelled) setSubmitting(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [loadStatus]);
 
   const feeInr = computeOpenFeeInr(cart.length);
@@ -180,9 +221,9 @@ export default function BadmintonOpen() {
       setError("Add at least one category to cart.");
       return;
     }
-    if (!status?.razorpayEnabled) {
+    if (!status?.cashfreeEnabled && !status?.razorpayEnabled) {
       setError(
-        "Payment is not configured yet. Add Razorpay keys on the server."
+        "Payment is not configured yet. Add Cashfree keys on the server."
       );
       return;
     }
@@ -209,51 +250,33 @@ export default function BadmintonOpen() {
       });
 
       const data = res.data;
-      const Razorpay = await loadRazorpayScript();
-
-      await new Promise((resolve, reject) => {
-        const rzp = new Razorpay({
-          key: data.keyId,
-          amount: data.amountPaise,
-          currency: data.currency || "INR",
-          name: "EVOLVE Fitness",
-          description: `Open Badminton — ${data.eventCount} event(s)`,
-          order_id: data.orderId,
-          prefill: data.prefill,
-          theme: { color: "#0d9488" },
-          handler: async (response) => {
-            try {
-              const verifyRes = await apiFetch("/api/badminton/open/verify", {
-                method: "POST",
-                body: JSON.stringify({
-                  registrationId: data.registrationId,
-                  razorpayOrderId: response.razorpay_order_id,
-                  razorpayPaymentId: response.razorpay_payment_id,
-                  razorpaySignature: response.razorpay_signature,
-                }),
-              });
-              setConfirmed(verifyRes.data?.registration ?? null);
-              setStep("done");
-              await loadStatus();
-              resolve();
-            } catch (err) {
-              reject(err);
-            }
-          },
-          modal: {
-            ondismiss: () =>
-              reject(new Error("Payment cancelled. You can try again.")),
-          },
-        });
-        rzp.on("payment.failed", (resp) => {
-          reject(
-            new Error(
-              resp?.error?.description || "Payment failed. Please try again."
-            )
-          );
-        });
-        rzp.open();
+      const Cashfree = await loadCashfreeScript();
+      const cashfree = Cashfree({
+        mode: data.mode === "production" ? "production" : "sandbox",
       });
+
+      const result = await cashfree.checkout({
+        paymentSessionId: data.paymentSessionId,
+        redirectTarget: "_modal",
+      });
+
+      // User closed modal without paying.
+      if (result?.error) {
+        throw new Error(
+          result.error.message || "Payment cancelled. You can try again."
+        );
+      }
+
+      const verifyRes = await apiFetch("/api/badminton/open/verify", {
+        method: "POST",
+        body: JSON.stringify({
+          registrationId: data.registrationId,
+          orderId: data.orderId,
+        }),
+      });
+      setConfirmed(verifyRes.data?.registration ?? null);
+      setStep("done");
+      await loadStatus();
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Checkout failed. Try again."
@@ -267,7 +290,7 @@ export default function BadmintonOpen() {
     <>
       <SEO
         title="EVOLVE Open Badminton Tournament 2026"
-        description="Register for the EVOLVE Open Badminton Tournament. Individual entries with partners, Razorpay checkout."
+        description="Register for the EVOLVE Open Badminton Tournament. Individual entries with partners, Cashfree checkout."
         path={BADMINTON_OPEN_PATH}
       />
       <Navbar />
@@ -558,7 +581,7 @@ export default function BadmintonOpen() {
               </dl>
               <p className="badminton-form__hint">
                 Fees: 1 event ₹500 · 2 ₹750 · 3 ₹1,000 · 4 ₹1,250. Pay securely
-                via Razorpay.
+                via Cashfree.
               </p>
               <div className="badminton-form__actions" style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
                 <button

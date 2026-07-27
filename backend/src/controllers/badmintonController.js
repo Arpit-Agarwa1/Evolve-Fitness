@@ -12,10 +12,13 @@ import {
   parseOpenRegistrationBody,
 } from "../services/badmintonService.js";
 import {
-  createRazorpayOrder,
-  isRazorpayConfigured,
-  verifyRazorpayPaymentSignature,
-} from "../services/razorpayService.js";
+  createCashfreeOrder,
+  fetchCashfreeOrder,
+  getCashfreeMode,
+  getPaymentReturnOrigin,
+  isCashfreeConfigured,
+  isCashfreeOrderPaid,
+} from "../services/cashfreeService.js";
 import { CATEGORY_IDS } from "../config/badmintonChampionship.js";
 
 /**
@@ -57,10 +60,10 @@ export async function getBadmintonStatus(req, res, next) {
     );
     return sendSuccess(res, {
       ...data,
-      razorpayEnabled: isRazorpayConfigured(),
-      razorpayKeyId: isRazorpayConfigured()
-        ? process.env.RAZORPAY_KEY_ID.trim()
-        : null,
+      cashfreeEnabled: isCashfreeConfigured(),
+      cashfreeMode: isCashfreeConfigured() ? getCashfreeMode() : null,
+      /** @deprecated kept briefly so older clients don't break */
+      razorpayEnabled: isCashfreeConfigured(),
     });
   } catch (err) {
     next(err);
@@ -113,7 +116,7 @@ export async function registerMemberTournament(req, res, next) {
 }
 
 /**
- * POST /api/badminton/open/checkout — create draft + Razorpay order.
+ * POST /api/badminton/open/checkout — create draft + Cashfree order.
  */
 export async function checkoutOpenTournament(req, res, next) {
   try {
@@ -134,16 +137,18 @@ export async function checkoutOpenTournament(req, res, next) {
       );
     }
 
-    if (!isRazorpayConfigured()) {
+    if (!isCashfreeConfigured()) {
       return sendError(
         res,
-        "Online payment is temporarily unavailable. Add Razorpay keys to the server and try again.",
+        "Online payment is temporarily unavailable. Add Cashfree keys to the server and try again.",
         503
       );
     }
 
     const registrationId = await generateRegistrationId();
     const { amountInr, ...fields } = parsed.data;
+    // Cashfree order_id: keep registration id (hyphen allowed).
+    const cashfreeOrderId = registrationId;
 
     const draft = await BadmintonRegistration.create({
       registrationId,
@@ -151,46 +156,51 @@ export async function checkoutOpenTournament(req, res, next) {
       amountInr,
       paymentStatus: "pending",
       status: "draft",
+      cashfreeOrderId,
     });
+
+    const returnUrl = `${getPaymentReturnOrigin()}/badminton/open?registrationId=${encodeURIComponent(registrationId)}&order_id={order_id}`;
 
     let order;
     try {
-      order = await createRazorpayOrder({
+      order = await createCashfreeOrder({
         amountInr,
-        receipt: registrationId,
-        notes: {
-          registrationId,
-          tournamentType: "open",
-          eventCount: String(fields.eventCount),
-          email: fields.email,
-        },
+        orderId: cashfreeOrderId,
+        customerId: `open_${fields.mobile}`,
+        customerPhone: fields.mobile,
+        customerName: fields.fullName,
+        customerEmail: fields.email || "",
+        returnUrl,
+        orderNote: `Open badminton ${fields.eventCount} event(s)`,
       });
     } catch (err) {
       await BadmintonRegistration.deleteOne({ _id: draft._id });
-      console.error("[badminton open] Razorpay order failed:", err);
+      console.error("[badminton open] Cashfree order failed:", err?.response?.data || err);
       return sendError(res, "Could not start payment. Please try again.", 502);
     }
 
-    draft.razorpayOrderId = order.id;
+    const paymentSessionId =
+      order?.payment_session_id || order?.paymentSessionId || "";
+    if (!paymentSessionId) {
+      await BadmintonRegistration.deleteOne({ _id: draft._id });
+      return sendError(res, "Could not start payment. Please try again.", 502);
+    }
+
+    draft.cashfreePaymentSessionId = paymentSessionId;
     await draft.save();
 
     return sendSuccess(
       res,
       {
-        keyId: process.env.RAZORPAY_KEY_ID.trim(),
-        orderId: order.id,
+        paymentSessionId,
+        orderId: cashfreeOrderId,
         amountInr,
-        amountPaise: order.amount,
-        currency: order.currency,
+        currency: "INR",
+        mode: getCashfreeMode(),
         registrationId,
         draftId: String(draft._id),
         eventCount: fields.eventCount,
         events: fields.events,
-        prefill: {
-          name: fields.fullName,
-          contact: fields.mobile,
-          ...(fields.email ? { email: fields.email } : {}),
-        },
       },
       201
     );
@@ -200,32 +210,22 @@ export async function checkoutOpenTournament(req, res, next) {
 }
 
 /**
- * POST /api/badminton/open/verify
+ * POST /api/badminton/open/verify — confirm Cashfree order is PAID.
  */
 export async function verifyOpenTournamentPayment(req, res, next) {
   try {
-    const razorpayOrderId = String(req.body?.razorpayOrderId ?? "").trim();
-    const razorpayPaymentId = String(req.body?.razorpayPaymentId ?? "").trim();
-    const razorpaySignature = String(req.body?.razorpaySignature ?? "").trim();
     const registrationId = String(req.body?.registrationId ?? "")
       .trim()
       .toUpperCase();
+    const orderIdBody = String(req.body?.orderId ?? "").trim();
 
-    if (
-      !razorpayOrderId ||
-      !razorpayPaymentId ||
-      !razorpaySignature ||
-      !registrationId
-    ) {
-      return sendError(res, "Payment verification details are required", 422);
+    if (!registrationId) {
+      return sendError(res, "registrationId is required", 422);
     }
 
-    const valid = verifyRazorpayPaymentSignature(
-      razorpayOrderId,
-      razorpayPaymentId,
-      razorpaySignature
-    );
-    if (!valid) return sendError(res, "Invalid payment signature", 400);
+    if (!isCashfreeConfigured()) {
+      return sendError(res, "Payment verification is unavailable", 503);
+    }
 
     const doc = await BadmintonRegistration.findOne({
       registrationId,
@@ -235,8 +235,26 @@ export async function verifyOpenTournamentPayment(req, res, next) {
     if (doc.status === "confirmed") {
       return sendSuccess(res, { registration: toPublicRegistration(doc) });
     }
-    if (doc.razorpayOrderId !== razorpayOrderId) {
+
+    const cashfreeOrderId = orderIdBody || doc.cashfreeOrderId || registrationId;
+    if (doc.cashfreeOrderId && doc.cashfreeOrderId !== cashfreeOrderId) {
       return sendError(res, "Order mismatch for this registration", 400);
+    }
+
+    let order;
+    try {
+      order = await fetchCashfreeOrder(cashfreeOrderId);
+    } catch (err) {
+      console.error("[badminton open] Cashfree fetch failed:", err?.response?.data || err);
+      return sendError(res, "Could not verify payment. Please try again.", 502);
+    }
+
+    if (!isCashfreeOrderPaid(order)) {
+      return sendError(
+        res,
+        `Payment not completed (status: ${order?.order_status || "unknown"}).`,
+        400
+      );
     }
 
     const availability = await assertCategoriesAvailable(doc.categories);
@@ -245,15 +263,17 @@ export async function verifyOpenTournamentPayment(req, res, next) {
       await doc.save();
       return sendError(
         res,
-        `${availability.message}. Contact Evolve with payment ID ${razorpayPaymentId} for a refund.`,
+        `${availability.message}. Contact Evolve with order ${cashfreeOrderId} for a refund.`,
         409
       );
     }
 
     doc.paymentStatus = "paid";
     doc.status = "confirmed";
-    doc.razorpayPaymentId = razorpayPaymentId;
-    doc.razorpaySignature = razorpaySignature;
+    doc.cashfreeOrderId = cashfreeOrderId;
+    doc.cashfreePaymentId = String(
+      order?.cf_payment_id || order?.payment_id || cashfreeOrderId
+    );
     doc.paidAt = new Date();
     await doc.save();
     invalidateBadmintonStatusCache();
@@ -334,7 +354,7 @@ export async function exportAdminBadmintonCsv(req, res, next) {
       "eventsPartners",
       "amountInr",
       "paymentStatus",
-      "razorpayPaymentId",
+      "cashfreePaymentId",
       "paidAt",
       "createdAt",
     ];
@@ -373,7 +393,7 @@ export async function exportAdminBadmintonCsv(req, res, next) {
           eventsPartners,
           row.amountInr,
           row.paymentStatus,
-          row.razorpayPaymentId,
+          row.cashfreePaymentId || row.razorpayPaymentId || "",
           row.paidAt ? new Date(row.paidAt).toISOString() : "",
           row.createdAt ? new Date(row.createdAt).toISOString() : "",
         ]

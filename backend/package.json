@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "cashfree-pg": "^6.0.4",
     "cloudinary": "^2.9.0",
     "compression": "^1.8.1",
     "cors": "^2.8.5",

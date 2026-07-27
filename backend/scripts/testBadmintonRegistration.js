@@ -75,7 +75,7 @@ async function main() {
     log(
       "GET /api/badminton/status",
       status === 200 && Array.isArray(cats) && cats.length >= 10,
-      `status=${status} open=${statusData?.open} razorpay=${statusData?.razorpayEnabled} categories=${cats.length} counts=${cats.map((c) => `${c.id}:${c.count}`).join(",")}`
+      `status=${status} open=${statusData?.open} cashfree=${statusData?.cashfreeEnabled ?? statusData?.razorpayEnabled} categories=${cats.length} counts=${cats.map((c) => `${c.id}:${c.count}`).join(",")}`
     );
   }
 

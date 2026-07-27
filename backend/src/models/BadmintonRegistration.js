@@ -127,11 +127,28 @@ const badmintonRegistrationSchema = new mongoose.Schema(
       default: "draft",
       index: true,
     },
-    razorpayOrderId: {
+    /** Cashfree merchant order id (usually registrationId with safe chars). */
+    cashfreeOrderId: {
       type: String,
       trim: true,
       default: "",
       index: true,
+    },
+    cashfreePaymentSessionId: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    cashfreePaymentId: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    /** Legacy Razorpay fields (kept for older documents). */
+    razorpayOrderId: {
+      type: String,
+      trim: true,
+      default: "",
     },
     razorpayPaymentId: {
       type: String,
