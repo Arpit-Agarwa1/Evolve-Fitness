@@ -82,9 +82,17 @@ const badmintonRegistrationSchema = new mongoose.Schema(
       enum: ["male", "female", "other", ""],
       default: "",
     },
+    /** Optional DOB (members); open flow uses `age` instead. */
     dateOfBirth: {
       type: Date,
-      required: [true, "Date of birth is required"],
+      default: null,
+    },
+    /** Age in years (open tournament form). */
+    age: {
+      type: Number,
+      min: 1,
+      max: 120,
+      default: null,
     },
     playerLevel: {
       type: String,

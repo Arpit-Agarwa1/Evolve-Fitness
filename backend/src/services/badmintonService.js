@@ -240,7 +240,7 @@ export function parseOpenRegistrationBody(body) {
   const email = String(body?.email ?? "")
     .trim()
     .toLowerCase();
-  const dobRaw = String(body?.dateOfBirth ?? "").trim();
+  const ageNum = Number(body?.age);
   const playerLevel = String(body?.playerLevel ?? "")
     .trim()
     .toLowerCase();
@@ -265,10 +265,10 @@ export function parseOpenRegistrationBody(body) {
       message: "Enter a valid 10-digit Indian mobile number",
     };
   }
-  const dateOfBirth = new Date(dobRaw);
-  if (!dobRaw || Number.isNaN(dateOfBirth.getTime())) {
-    return { ok: false, message: "Valid date of birth is required" };
+  if (!Number.isFinite(ageNum) || ageNum < 1 || ageNum > 120) {
+    return { ok: false, message: "Enter a valid age in years" };
   }
+  const age = Math.round(ageNum);
   if (!OPEN_PLAYER_LEVELS.includes(playerLevel)) {
     return { ok: false, message: "Select a valid player level" };
   }
@@ -276,7 +276,6 @@ export function parseOpenRegistrationBody(body) {
     return { ok: false, message: "Add 1–4 categories to your cart" };
   }
 
-  const age = ageAsOf(dateOfBirth);
   /** @type {{ categoryId: string; categoryLabel: string; partnerName: string; partnerAge: number | null; partnerMobile: string }[]} */
   const events = [];
   const seen = new Set();
@@ -309,7 +308,7 @@ export function parseOpenRegistrationBody(body) {
     if (typeof cat.minAge === "number" && age < cat.minAge) {
       return {
         ok: false,
-        message: `${cat.label} requires minimum age ${cat.minAge}+ (your DOB)`,
+        message: `${cat.label} requires minimum age ${cat.minAge}+`,
       };
     }
     if (!partnerFirstName || !partnerLastName) {
@@ -368,7 +367,8 @@ export function parseOpenRegistrationBody(body) {
       mobile,
       email: email || "",
       gender: "",
-      dateOfBirth,
+      age,
+      dateOfBirth: null,
       playerLevel,
       categories: events.map((e) => e.categoryId),
       events,

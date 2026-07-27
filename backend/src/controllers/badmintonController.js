@@ -33,6 +33,8 @@ function toPublicRegistration(doc) {
     email: o.email || "",
     mobile: o.mobile,
     gender: o.gender || "",
+    age: o.age ?? null,
+    dateOfBirth: o.dateOfBirth || null,
     playerLevel: o.playerLevel,
     categories: o.categories,
     events: o.events || [],
@@ -347,6 +349,7 @@ export async function exportAdminBadmintonCsv(req, res, next) {
       "mobile",
       "email",
       "gender",
+      "age",
       "dateOfBirth",
       "playerLevel",
       "eventCount",
@@ -384,6 +387,7 @@ export async function exportAdminBadmintonCsv(req, res, next) {
           row.mobile,
           row.email,
           row.gender,
+          row.age ?? "",
           row.dateOfBirth
             ? new Date(row.dateOfBirth).toISOString().slice(0, 10)
             : "",

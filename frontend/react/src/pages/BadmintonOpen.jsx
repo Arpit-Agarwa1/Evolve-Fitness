@@ -11,7 +11,6 @@ import {
   BADMINTON_OPEN_PATH,
   computeOpenFeeInr,
   formatInr,
-  ageAsOf,
   isValidIndianMobile,
   getCategoryById,
 } from "../data/badmintonChampionship";
@@ -21,7 +20,7 @@ const EMPTY_DETAILS = {
   firstName: "",
   lastName: "",
   mobile: "",
-  dateOfBirth: "",
+  age: "",
   playerLevel: "beginner",
 };
 
@@ -101,7 +100,9 @@ export default function BadmintonOpen() {
   }, [loadStatus]);
 
   const feeInr = computeOpenFeeInr(cart.length);
-  const age = details.dateOfBirth ? ageAsOf(details.dateOfBirth) : NaN;
+  const ageNum = Number(details.age);
+  const age =
+    details.age.trim() && Number.isFinite(ageNum) ? Math.round(ageNum) : NaN;
 
   const categoryMeta = useMemo(() => {
     /** @type {Record<string, { available: boolean; count: number }>} */
@@ -127,7 +128,10 @@ export default function BadmintonOpen() {
     if (!isValidIndianMobile(details.mobile)) {
       return "Enter a valid 10-digit Indian mobile number.";
     }
-    if (!details.dateOfBirth) return "Date of birth is required.";
+    const a = Number(details.age);
+    if (!details.age.trim() || !Number.isFinite(a) || a < 1 || a > 120) {
+      return "Enter a valid age in years.";
+    }
     return "";
   }
 
@@ -237,7 +241,7 @@ export default function BadmintonOpen() {
           lastName: details.lastName.trim(),
           fullName: fullNameFromDetails(),
           mobile: details.mobile.trim(),
-          dateOfBirth: details.dateOfBirth,
+          age: Math.round(Number(details.age)),
           playerLevel: details.playerLevel,
           cart: cart.map((item) => ({
             categoryId: item.categoryId,
@@ -359,11 +363,15 @@ export default function BadmintonOpen() {
                   />
                 </label>
                 <label>
-                  <span>Date of birth *</span>
+                  <span>Age *</span>
                   <input
-                    type="date"
-                    value={details.dateOfBirth}
-                    onChange={(e) => setDetail("dateOfBirth", e.target.value)}
+                    type="number"
+                    min={1}
+                    max={120}
+                    inputMode="numeric"
+                    placeholder="Age in years"
+                    value={details.age}
+                    onChange={(e) => setDetail("age", e.target.value)}
                   />
                 </label>
                 <label className="badminton-form__span2">
@@ -556,6 +564,10 @@ export default function BadmintonOpen() {
                 <div>
                   <dt>Mobile</dt>
                   <dd>{details.mobile}</dd>
+                </div>
+                <div>
+                  <dt>Age</dt>
+                  <dd>{details.age}</dd>
                 </div>
                 <div>
                   <dt>Events ({cart.length})</dt>
