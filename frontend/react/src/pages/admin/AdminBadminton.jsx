@@ -6,7 +6,10 @@ import { useAdminApi } from "../../hooks/useAdminApi";
 import { useAdminAuth } from "../../hooks/useAdminAuth";
 import { getAdminApiBase } from "../../config/apiOrigin";
 import { adminListQuery, adminPageCount } from "../../utils/adminPagination";
-import { BADMINTON_CATEGORIES } from "../../data/badmintonChampionship";
+import {
+  MEMBER_CATEGORIES,
+  OPEN_CATEGORIES,
+} from "../../data/badmintonChampionship";
 
 function formatWhen(iso) {
   if (!iso) return "—";
@@ -18,11 +21,14 @@ function formatWhen(iso) {
 }
 
 function categoryLabel(id) {
-  return BADMINTON_CATEGORIES.find((c) => c.id === id)?.label ?? id;
+  return (
+    [...MEMBER_CATEGORIES, ...OPEN_CATEGORIES].find((c) => c.id === id)
+      ?.label ?? id
+  );
 }
 
 /**
- * Admin — Badminton Championship registrations, export, category controls.
+ * Admin — Badminton Members + Open registrations.
  */
 export default function AdminBadminton() {
   const { request } = useAdminApi();
@@ -33,6 +39,7 @@ export default function AdminBadminton() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("confirmed");
+  const [typeFilter, setTypeFilter] = useState("all");
   const [settings, setSettings] = useState(null);
   const [categoryStatus, setCategoryStatus] = useState(null);
   const [savingSettings, setSavingSettings] = useState(false);
@@ -54,7 +61,13 @@ export default function AdminBadminton() {
         statusFilter && statusFilter !== "all"
           ? `&status=${encodeURIComponent(statusFilter)}`
           : "";
-      const res = await request(`/api/admin/badminton?${q}${statusParam}`);
+      const typeParam =
+        typeFilter && typeFilter !== "all"
+          ? `&tournamentType=${encodeURIComponent(typeFilter)}`
+          : "";
+      const res = await request(
+        `/api/admin/badminton?${q}${statusParam}${typeParam}`
+      );
       setItems(res.data?.items ?? []);
       setTotal(res.data?.total ?? 0);
     } catch (err) {
@@ -64,7 +77,7 @@ export default function AdminBadminton() {
     } finally {
       setLoading(false);
     }
-  }, [request, page, statusFilter]);
+  }, [request, page, statusFilter, typeFilter]);
 
   const loadSettings = useCallback(async () => {
     try {
@@ -72,7 +85,7 @@ export default function AdminBadminton() {
       setSettings(res.data?.settings ?? null);
       setCategoryStatus(res.data?.status ?? null);
     } catch {
-      /* list error surfaces separately */
+      /* ignore */
     }
   }, [request]);
 
@@ -133,12 +146,15 @@ export default function AdminBadminton() {
     setErrorMessage("");
     try {
       const API_BASE = getAdminApiBase();
-      const res = await fetch(`${API_BASE}/api/admin/badminton/export`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) {
-        throw new Error(`Export failed (${res.status})`);
-      }
+      const typeParam =
+        typeFilter !== "all"
+          ? `?tournamentType=${encodeURIComponent(typeFilter)}`
+          : "";
+      const res = await fetch(
+        `${API_BASE}/api/admin/badminton/export${typeParam}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (!res.ok) throw new Error(`Export failed (${res.status})`);
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -168,12 +184,26 @@ export default function AdminBadminton() {
       ) : null}
 
       <div className="admin-member-toolbar" style={{ marginBottom: "1.25rem" }}>
+        <label className="admin-member-toolbar__label" htmlFor="bd-type">
+          Tournament
+        </label>
+        <select
+          id="bd-type"
+          value={typeFilter}
+          onChange={(e) => {
+            setTypeFilter(e.target.value);
+            setPage(1);
+          }}
+        >
+          <option value="all">All</option>
+          <option value="member">Members</option>
+          <option value="open">Open</option>
+        </select>
         <label className="admin-member-toolbar__label" htmlFor="bd-status">
           Status
         </label>
         <select
           id="bd-status"
-          className="admin-member-toolbar__select"
           value={statusFilter}
           onChange={(e) => {
             setStatusFilter(e.target.value);
@@ -185,7 +215,7 @@ export default function AdminBadminton() {
           <option value="all">All</option>
         </select>
         <button type="button" className="admin-signout" onClick={handleExport}>
-          Export Excel (CSV)
+          Export CSV
         </button>
         <button
           type="button"
@@ -201,10 +231,7 @@ export default function AdminBadminton() {
 
       {categoryStatus?.categories ? (
         <div className="admin-table-wrap" style={{ marginBottom: "1.5rem" }}>
-          <p className="admin-muted admin-table-meta">
-            Categories — click Close to stop new entries (in addition to capacity
-            16).
-          </p>
+          <p className="admin-muted admin-table-meta">Category capacity</p>
           <table className="admin-table">
             <thead>
               <tr>
@@ -263,13 +290,13 @@ export default function AdminBadminton() {
             <tr>
               <th>When</th>
               <th>ID</th>
+              <th>Type</th>
               <th>Name</th>
               <th>Phone</th>
-              <th>Email</th>
-              <th>Categories</th>
+              <th>Events</th>
+              <th>Partners / categories</th>
               <th>Amount</th>
-              <th>Payment</th>
-              <th>Status</th>
+              <th>Pay</th>
             </tr>
           </thead>
           <tbody>
@@ -279,20 +306,23 @@ export default function AdminBadminton() {
                   {formatWhen(row.createdAt)}
                 </td>
                 <td className="admin-table__nowrap">{row.registrationId}</td>
+                <td>{row.tournamentType || "—"}</td>
                 <td>{row.fullName}</td>
                 <td>{row.mobile}</td>
-                <td>{row.email}</td>
-                <td>
-                  {(row.categories || []).map(categoryLabel).join(", ")}
-                  {row.partnerName
-                    ? ` · Partner: ${row.partnerName}${
-                        row.partnerMobile ? ` (${row.partnerMobile})` : ""
-                      }`
-                    : ""}
+                <td>{row.eventCount ?? (row.events || []).length}</td>
+                <td className="admin-table__message">
+                  {(row.events || []).length
+                    ? (row.events || [])
+                        .map((e) => {
+                          const age =
+                            e.partnerAge != null ? `, age ${e.partnerAge}` : "";
+                          return `${e.categoryLabel || categoryLabel(e.categoryId)}: ${e.partnerName || "chit"}${age}`;
+                        })
+                        .join(" · ")
+                    : (row.categories || []).map(categoryLabel).join(", ")}
                 </td>
                 <td>₹{row.amountInr}</td>
                 <td>{row.paymentStatus}</td>
-                <td>{row.status}</td>
               </tr>
             ))}
           </tbody>

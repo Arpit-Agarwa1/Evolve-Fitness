@@ -31,9 +31,9 @@ function resolveBaseUrl() {
     return `https://${host}`;
   }
   console.warn(
-    "[write-sitemap-robots] No VITE_SITE_URL or VERCEL_URL — using http://localhost:5173 for sitemap base (set VITE_SITE_URL for production)."
+    "[write-sitemap-robots] No VITE_SITE_URL or VERCEL_URL — using http://localhost:5175 for sitemap base (set VITE_SITE_URL for production)."
   );
-  return "http://localhost:5173";
+  return "http://localhost:5175";
 }
 
 const base = resolveBaseUrl();
@@ -45,6 +45,8 @@ const entries = [
   { loc: "/membership", priority: "0.9", changefreq: "weekly" },
   { loc: "/register", priority: "0.85", changefreq: "monthly" },
   { loc: "/badminton", priority: "0.95", changefreq: "daily" },
+  { loc: "/badminton/members", priority: "0.95", changefreq: "daily" },
+  { loc: "/badminton/open", priority: "0.95", changefreq: "daily" },
   { loc: "/contact", priority: "0.9", changefreq: "monthly" },
 ];
 

@@ -16,7 +16,7 @@ export function getSiteUrl() {
   if (typeof window !== "undefined" && window.location?.origin) {
     return window.location.origin;
   }
-  return "http://localhost:5173";
+  return "http://localhost:5175";
 }
 
 /** Brand line used in titles */

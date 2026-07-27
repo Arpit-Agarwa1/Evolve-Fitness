@@ -6,7 +6,7 @@ import { evolveMagazineImages } from "../assets/evolveMagazine";
 /** Eight service images: magazine indices 1–8 */
 const s = evolveMagazineImages.slice(1, 9);
 
-/** @typedef {{ id: string; title: string; tagline: string; description: string; image: string; alt: string }} EvolveService */
+/** @typedef {{ id: string; title: string; tagline: string; description: string; image: { src: string; srcSet?: string; width?: number; height?: number } | string; alt: string }} EvolveService */
 
 /** @type {EvolveService[]} */
 export const evolveServices = [

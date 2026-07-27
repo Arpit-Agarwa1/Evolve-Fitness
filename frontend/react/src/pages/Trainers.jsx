@@ -58,15 +58,15 @@ export default function Trainers() {
 
       <section className="trainers-hero">
         <div className="trainers-hero-bg" aria-hidden="true">
-          <img
+          <EvolveImage
             className="trainers-hero-img"
             src={evolveTrainersHeroImage}
             alt=""
-            width={1920}
-            height={1080}
-            decoding="async"
+            loading="eager"
             fetchPriority="high"
+            decoding="async"
             sizes="100vw"
+            fadeIn={false}
           />
           <div className="trainers-hero-scrim" />
         </div>

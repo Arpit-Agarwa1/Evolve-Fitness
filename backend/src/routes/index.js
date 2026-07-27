@@ -15,7 +15,8 @@ router.use("/trainers", trainerRoutes);
 router.use("/contact", apiWriteLimiter, contactRoutes);
 router.use("/membership", apiWriteLimiter, membershipRoutes);
 router.use("/members", apiWriteLimiter, memberRoutes);
-router.use("/badminton", apiWriteLimiter, badmintonRoutes);
+// Badminton GETs (status) stay unlimited; write limiter only on POST register routes.
+router.use("/badminton", badmintonRoutes);
 router.use("/admin", adminRoutes);
 
 export default router;

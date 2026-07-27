@@ -10,6 +10,8 @@ const Membership = lazy(() => import("./pages/Membership"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Register = lazy(() => import("./pages/Register"));
 const Badminton = lazy(() => import("./pages/Badminton"));
+const BadmintonMembers = lazy(() => import("./pages/BadmintonMembers"));
+const BadmintonOpen = lazy(() => import("./pages/BadmintonOpen"));
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminMembers = lazy(() => import("./pages/admin/AdminMembers"));
@@ -30,6 +32,8 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/badminton" element={<Badminton />} />
+        <Route path="/badminton/members" element={<BadmintonMembers />} />
+        <Route path="/badminton/open" element={<BadmintonOpen />} />
 
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route

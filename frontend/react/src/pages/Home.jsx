@@ -1,4 +1,5 @@
 import React from "react";
+import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import "../styles/home.css";
 import Navbar from "../components/Navbar";
@@ -25,6 +26,16 @@ export default function Home() {
         description="Evolve Fitness, also searched as Evolve Gym — premium luxury gym in Jaipur on the 5th floor of Vivacity Mall, Jagatpura. Elite USA-grade equipment, personal training, recovery zone, membership & café. Phone +91 90243 01606."
         path="/"
       />
+      <Helmet>
+        <link
+          rel="preload"
+          as="image"
+          href={evolveHeroImage.src}
+          imageSrcSet={evolveHeroImage.srcSet}
+          imageSizes="100vw"
+          fetchPriority="high"
+        />
+      </Helmet>
       <JsonLdLocalBusiness />
       <Navbar />
       <div className="home">
@@ -35,8 +46,6 @@ export default function Home() {
               className="hero-bg-img"
               src={evolveHeroImage}
               alt=""
-              width={1920}
-              height={1080}
               sizes="100vw"
               loading="eager"
               fetchPriority="high"
@@ -98,13 +107,13 @@ export default function Home() {
             </p>
           </header>
           <div className="evolve-gallery-grid">
-            {evolveGalleryImages.map((src, i) => (
+            {evolveGalleryImages.map((photo, i) => (
               <figure
-                key={src}
+                key={photo.src}
                 className={`evolve-gallery-cell evolve-gallery-cell--${i}`}
               >
                 <EvolveImage
-                  src={src}
+                  src={photo}
                   alt={evolveGalleryImageAlts[i] ?? "Evolve Fitness facility photo"}
                   sizes="(max-width: 767px) 48vw, (max-width: 1199px) 32vw, 600px"
                   loading="lazy"

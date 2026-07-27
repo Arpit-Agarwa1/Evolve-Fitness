@@ -1,40 +1,28 @@
 import crypto from "crypto";
 import BadmintonRegistration from "../models/BadmintonRegistration.js";
 import BadmintonSettings from "../models/BadmintonSettings.js";
-import Member from "../models/Member.js";
+import { createTtlCache } from "../utils/ttlCache.js";
 import {
-  BADMINTON_CATEGORIES,
-  CATEGORY_IDS,
+  MEMBER_CATEGORIES,
+  OPEN_CATEGORIES,
+  MEMBER_PLAYER_LEVELS,
+  OPEN_PLAYER_LEVELS,
   MAX_ENTRIES_PER_CATEGORY,
-  ageAsOf,
-  computeRegistrationFeeInr,
+  computeOpenFeeInr,
   getCategoryById,
-  isRegistrationWindowOpen,
+  ageAsOf,
   isValidIndianMobile,
   normalizeIndianMobile,
-  selectionNeedsPartner,
+  isRegistrationWindowOpen,
 } from "../config/badmintonChampionship.js";
-import { createTtlCache } from "../utils/ttlCache.js";
 
-/** Public status poll cache — invalidated on confirm / settings change. */
-const STATUS_TTL_MS = 10_000;
-const SETTINGS_TTL_MS = 30_000;
-const statusCache = createTtlCache(STATUS_TTL_MS);
-const settingsCache = createTtlCache(SETTINGS_TTL_MS);
+const statusCache = createTtlCache(8_000);
 
-/** Drop cached badminton status/settings (call after confirm or admin settings PATCH). */
 export function invalidateBadmintonStatusCache() {
   statusCache.clear();
-  settingsCache.clear();
 }
 
-/**
- * @returns {Promise<{ closedCategories: string[]; registrationForceClosed: boolean }>}
- */
 export async function getBadmintonSettings() {
-  const cached = settingsCache.get();
-  if (cached) return cached;
-
   let doc = await BadmintonSettings.findOne({ key: "default" }).lean();
   if (!doc) {
     doc = (
@@ -45,18 +33,12 @@ export async function getBadmintonSettings() {
       })
     ).toObject();
   }
-  const value = {
+  return {
     closedCategories: doc.closedCategories ?? [],
     registrationForceClosed: Boolean(doc.registrationForceClosed),
   };
-  settingsCache.set(value);
-  return value;
 }
 
-/**
- * Confirmed seat counts per category (paid or waived).
- * @returns {Promise<Record<string, number>>}
- */
 export async function getCategoryCounts() {
   const rows = await BadmintonRegistration.aggregate([
     { $match: { status: "confirmed" } },
@@ -65,7 +47,9 @@ export async function getCategoryCounts() {
   ]);
   /** @type {Record<string, number>} */
   const map = {};
-  for (const id of CATEGORY_IDS) map[id] = 0;
+  for (const c of [...MEMBER_CATEGORIES, ...OPEN_CATEGORIES]) {
+    map[c.id] = 0;
+  }
   for (const row of rows) {
     map[row._id] = row.count;
   }
@@ -73,32 +57,11 @@ export async function getCategoryCounts() {
 }
 
 /**
- * @param {{ bypassCache?: boolean }} [opts] — set bypassCache for capacity checks on initiate/verify
- * @returns {Promise<{
- *   open: boolean;
- *   closesAt: string;
- *   forceClosed: boolean;
- *   categories: Array<{
- *     id: string;
- *     label: string;
- *     group: string;
- *     shortLabel?: string;
- *     doubles?: boolean;
- *     minAge?: number;
- *     count: number;
- *     max: number;
- *     full: boolean;
- *     closed: boolean;
- *     available: boolean;
- *   }>;
- * }>}
+ * @param {'member' | 'open' | 'all'} [tournamentType]
  */
-export async function getPublicCategoryStatus(opts = {}) {
-  const bypassCache = Boolean(opts.bypassCache);
-  if (!bypassCache) {
-    const cached = statusCache.get();
-    if (cached) return cached;
-  }
+export async function getPublicCategoryStatus(tournamentType = "all") {
+  const cached = statusCache.get(`status:${tournamentType}`);
+  if (cached) return cached;
 
   const [settings, counts] = await Promise.all([
     getBadmintonSettings(),
@@ -107,7 +70,17 @@ export async function getPublicCategoryStatus(opts = {}) {
   const windowOpen =
     isRegistrationWindowOpen() && !settings.registrationForceClosed;
 
-  const categories = BADMINTON_CATEGORIES.map((c) => {
+  const lists = [];
+  if (tournamentType === "member" || tournamentType === "all") {
+    lists.push(
+      ...MEMBER_CATEGORIES.map((c) => ({ ...c, group: "member" }))
+    );
+  }
+  if (tournamentType === "open" || tournamentType === "all") {
+    lists.push(...OPEN_CATEGORIES.map((c) => ({ ...c, group: "open" })));
+  }
+
+  const categories = lists.map((c) => {
     const count = counts[c.id] ?? 0;
     const manuallyClosed = settings.closedCategories.includes(c.id);
     const full = count >= MAX_ENTRIES_PER_CATEGORY;
@@ -122,19 +95,16 @@ export async function getPublicCategoryStatus(opts = {}) {
     };
   });
 
-  const value = {
+  const payload = {
     open: windowOpen,
     closesAt: "2026-08-06T23:59:59+05:30",
     forceClosed: settings.registrationForceClosed,
     categories,
   };
-  statusCache.set(value);
-  return value;
+  statusCache.set(`status:${tournamentType}`, payload);
+  return payload;
 }
 
-/**
- * Generate unique registration ID like EVB26-A1B2C3.
- */
 export async function generateRegistrationId() {
   for (let i = 0; i < 8; i += 1) {
     const suffix = crypto.randomBytes(3).toString("hex").toUpperCase();
@@ -146,31 +116,10 @@ export async function generateRegistrationId() {
 }
 
 /**
- * Active Evolve member by email or phone (for free member path).
- * @param {string} email
  * @param {string} mobile10
+ * @param {'member' | 'open'} tournamentType
  */
-export async function findActiveEvolveMember(email, mobile10) {
-  const phoneVariants = [
-    mobile10,
-    `+91${mobile10}`,
-    `91${mobile10}`,
-    `0${mobile10}`,
-  ];
-  return Member.findOne({
-    isActive: true,
-    $or: [{ email }, { phone: { $in: phoneVariants } }],
-  })
-    .select("_id fullName email phone")
-    .lean();
-}
-
-/**
- * Block a second confirmed entry for the same email or mobile.
- * @param {string} email
- * @param {string} mobile10
- */
-export async function findConfirmedDuplicate(email, mobile10) {
+export async function findConfirmedDuplicate(mobile10, tournamentType) {
   const phoneVariants = [
     mobile10,
     `+91${mobile10}`,
@@ -179,204 +128,25 @@ export async function findConfirmedDuplicate(email, mobile10) {
   ];
   return BadmintonRegistration.findOne({
     status: "confirmed",
-    $or: [{ email }, { mobile: { $in: phoneVariants } }],
+    tournamentType,
+    mobile: { $in: phoneVariants },
   })
-    .select("registrationId email mobile")
+    .select("registrationId mobile")
     .lean();
 }
 
 /**
- * Validate and normalize registration payload.
- * @param {Record<string, unknown>} body
- * @returns {{
- *   ok: true;
- *   data: {
- *     fullName: string;
- *     mobile: string;
- *     email: string;
- *     gender: string;
- *     dateOfBirth: Date;
- *     city: string;
- *     state: string;
- *     emergencyContact: string;
- *     isEvolveMember: boolean;
- *     membershipId: string;
- *     playerLevel: string;
- *     clubName: string;
- *     partnerName: string;
- *     partnerMobile: string;
- *     categories: string[];
- *     amountInr: number;
- *   };
- * } | { ok: false; message: string }}
+ * @param {string[]} categoryIds
  */
-export function parseRegistrationBody(body) {
-  const fullName = String(body?.fullName ?? "").trim();
-  const mobileRaw = String(body?.mobile ?? "").trim();
-  const mobile = normalizeIndianMobile(mobileRaw);
-  const email = String(body?.email ?? "")
-    .trim()
-    .toLowerCase();
-  const gender = String(body?.gender ?? "")
-    .trim()
-    .toLowerCase();
-  const dobRaw = String(body?.dateOfBirth ?? "").trim();
-  const city = String(body?.city ?? "").trim();
-  const state = String(body?.state ?? "").trim();
-  const emergencyContact = String(body?.emergencyContact ?? "").trim();
-  const isEvolveMember = Boolean(body?.isEvolveMember);
-  const membershipId = String(body?.membershipId ?? "").trim();
-  const playerLevel = String(body?.playerLevel ?? "")
-    .trim()
-    .toLowerCase();
-  const clubName = String(body?.clubName ?? "").trim();
-  const partnerName = String(body?.partnerName ?? "").trim();
-  const partnerMobileRaw = String(body?.partnerMobile ?? "").trim();
-  const partnerMobile = partnerMobileRaw
-    ? normalizeIndianMobile(partnerMobileRaw)
-    : "";
-  const categoriesRaw = Array.isArray(body?.categories)
-    ? body.categories.map((c) => String(c).trim())
-    : [];
-
-  if (!fullName || !mobileRaw || !email) {
-    return { ok: false, message: "Name, mobile, and email are required" };
-  }
-  if (!isValidIndianMobile(mobileRaw)) {
-    return {
-      ok: false,
-      message: "Enter a valid 10-digit Indian mobile number",
-    };
-  }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return { ok: false, message: "Enter a valid email address" };
-  }
-  if (!["male", "female", "other"].includes(gender)) {
-    return { ok: false, message: "Valid gender is required" };
-  }
-  const dateOfBirth = new Date(dobRaw);
-  if (!dobRaw || Number.isNaN(dateOfBirth.getTime())) {
-    return { ok: false, message: "Valid date of birth is required" };
-  }
-  if (!city || !state || !emergencyContact) {
-    return {
-      ok: false,
-      message: "City, state, and emergency contact are required",
-    };
-  }
-  if (playerLevel === "professional") {
-    return {
-      ok: false,
-      message: "Professional players are not eligible for this championship",
-    };
-  }
-  if (!["amateur", "club", "semi_pro"].includes(playerLevel)) {
-    return { ok: false, message: "Select a valid player level" };
-  }
-  if (playerLevel === "semi_pro" && !clubName) {
-    return {
-      ok: false,
-      message: "Semi-professional players must provide their club name",
-    };
-  }
-
-  const uniqueCategories = [...new Set(categoriesRaw)];
-  if (uniqueCategories.length < 1 || uniqueCategories.length > 3) {
-    return { ok: false, message: "Select between 1 and 3 categories" };
-  }
-
-  const age = ageAsOf(dateOfBirth);
-
-  for (const id of uniqueCategories) {
-    const cat = getCategoryById(id);
-    if (!cat) {
-      return { ok: false, message: `Unknown category: ${id}` };
-    }
-    if (isEvolveMember && cat.group !== "member") {
-      return {
-        ok: false,
-        message: "EVOLVE members may only enter member (free) categories",
-      };
-    }
-    if (!isEvolveMember && cat.group !== "open") {
-      return {
-        ok: false,
-        message: "Open entries may only select open tournament categories",
-      };
-    }
-    if (typeof cat.minAge === "number" && age < cat.minAge) {
-      return {
-        ok: false,
-        message: `${cat.label} requires age ${cat.minAge}+ (as of 6 Aug 2026)`,
-      };
-    }
-  }
-
-  if (selectionNeedsPartner(uniqueCategories)) {
-    if (!partnerName) {
-      return {
-        ok: false,
-        message: "Partner name is required for doubles categories",
-      };
-    }
-    if (!isValidIndianMobile(partnerMobileRaw)) {
-      return {
-        ok: false,
-        message: "Enter a valid 10-digit partner mobile number",
-      };
-    }
-    if (partnerMobile === mobile) {
-      return {
-        ok: false,
-        message: "Partner mobile must be different from yours",
-      };
-    }
-  }
-
-  const amountInr = computeRegistrationFeeInr(
-    isEvolveMember,
-    uniqueCategories.length
-  );
-
-  return {
-    ok: true,
-    data: {
-      fullName,
-      mobile,
-      email,
-      gender,
-      dateOfBirth,
-      city,
-      state,
-      emergencyContact,
-      isEvolveMember,
-      membershipId,
-      playerLevel,
-      clubName,
-      partnerName: selectionNeedsPartner(uniqueCategories) ? partnerName : "",
-      partnerMobile: selectionNeedsPartner(uniqueCategories)
-        ? partnerMobile
-        : "",
-      categories: uniqueCategories,
-      amountInr,
-    },
-  };
-}
-
-/**
- * Ensure window + capacity for selected categories.
- * @param {string[]} categories
- */
-export async function assertCategoriesAvailable(categories) {
-  // Always fresh counts for seat reservation (avoid stale cache under FCFS rush).
-  const status = await getPublicCategoryStatus({ bypassCache: true });
+export async function assertCategoriesAvailable(categoryIds) {
+  const status = await getPublicCategoryStatus("all");
   if (!status.open) {
     return {
       ok: false,
       message: "Registration is closed for the EVOLVE Badminton Championship",
     };
   }
-  for (const id of categories) {
+  for (const id of categoryIds) {
     const row = status.categories.find((c) => c.id === id);
     if (!row?.available) {
       return {
@@ -386,4 +156,224 @@ export async function assertCategoriesAvailable(categories) {
     }
   }
   return { ok: true };
+}
+
+/**
+ * Member poster — free registration, chit pairing (no partner collected).
+ * @param {Record<string, unknown>} body
+ */
+export function parseMemberRegistrationBody(body) {
+  const fullName = String(body?.fullName ?? "").trim();
+  const mobileRaw = String(body?.mobile ?? "").trim();
+  const mobile = normalizeIndianMobile(mobileRaw);
+  const gender = String(body?.gender ?? "")
+    .trim()
+    .toLowerCase();
+  const dobRaw = String(body?.dateOfBirth ?? "").trim();
+  const playerLevel = String(body?.playerLevel ?? "")
+    .trim()
+    .toLowerCase();
+  const categoryId = String(body?.categoryId ?? body?.category ?? "").trim();
+
+  if (!fullName || !mobileRaw) {
+    return { ok: false, message: "Name and mobile are required" };
+  }
+  if (!isValidIndianMobile(mobileRaw)) {
+    return {
+      ok: false,
+      message: "Enter a valid 10-digit Indian mobile number",
+    };
+  }
+  if (!["male", "female", "other"].includes(gender)) {
+    return { ok: false, message: "Select gender" };
+  }
+  const dateOfBirth = new Date(dobRaw);
+  if (!dobRaw || Number.isNaN(dateOfBirth.getTime())) {
+    return { ok: false, message: "Valid date of birth is required" };
+  }
+  if (!MEMBER_PLAYER_LEVELS.includes(playerLevel)) {
+    return { ok: false, message: "Select a valid player level" };
+  }
+  const cat = getCategoryById(categoryId, "member");
+  if (!cat) {
+    return { ok: false, message: "Select a valid category" };
+  }
+
+  return {
+    ok: true,
+    data: {
+      tournamentType: /** @type {const} */ ("member"),
+      fullName,
+      mobile,
+      email: "",
+      gender,
+      dateOfBirth,
+      playerLevel,
+      categories: [cat.id],
+      events: [
+        {
+          categoryId: cat.id,
+          categoryLabel: cat.label,
+          partnerName: "",
+          partnerAge: null,
+          partnerMobile: "",
+        },
+      ],
+      eventCount: 1,
+      amountInr: 0,
+    },
+  };
+}
+
+/**
+ * Open poster — details + cart of categories with partners.
+ * @param {Record<string, unknown>} body
+ */
+export function parseOpenRegistrationBody(body) {
+  const firstName = String(body?.firstName ?? "").trim();
+  const lastName = String(body?.lastName ?? "").trim();
+  const fullName =
+    String(body?.fullName ?? "").trim() ||
+    [firstName, lastName].filter(Boolean).join(" ").trim();
+  const mobileRaw = String(body?.mobile ?? "").trim();
+  const mobile = normalizeIndianMobile(mobileRaw);
+  const email = String(body?.email ?? "")
+    .trim()
+    .toLowerCase();
+  const dobRaw = String(body?.dateOfBirth ?? "").trim();
+  const playerLevel = String(body?.playerLevel ?? "")
+    .trim()
+    .toLowerCase();
+  const cart = Array.isArray(body?.cart)
+    ? body.cart
+    : Array.isArray(body?.events)
+      ? body.events
+      : [];
+
+  if (!firstName || !lastName || !mobileRaw) {
+    return {
+      ok: false,
+      message: "First name, last name, and mobile are required",
+    };
+  }
+  if (!fullName) {
+    return { ok: false, message: "Name is required" };
+  }
+  if (!isValidIndianMobile(mobileRaw)) {
+    return {
+      ok: false,
+      message: "Enter a valid 10-digit Indian mobile number",
+    };
+  }
+  const dateOfBirth = new Date(dobRaw);
+  if (!dobRaw || Number.isNaN(dateOfBirth.getTime())) {
+    return { ok: false, message: "Valid date of birth is required" };
+  }
+  if (!OPEN_PLAYER_LEVELS.includes(playerLevel)) {
+    return { ok: false, message: "Select a valid player level" };
+  }
+  if (cart.length < 1 || cart.length > 4) {
+    return { ok: false, message: "Add 1–4 categories to your cart" };
+  }
+
+  const age = ageAsOf(dateOfBirth);
+  /** @type {{ categoryId: string; categoryLabel: string; partnerName: string; partnerAge: number | null; partnerMobile: string }[]} */
+  const events = [];
+  const seen = new Set();
+
+  for (const item of cart) {
+    const categoryId = String(item?.categoryId ?? "").trim();
+    const partnerFirstName = String(
+      item?.partnerFirstName ?? ""
+    ).trim();
+    const partnerLastName = String(item?.partnerLastName ?? "").trim();
+    const partnerName =
+      String(item?.partnerName ?? "").trim() ||
+      [partnerFirstName, partnerLastName].filter(Boolean).join(" ").trim();
+    const partnerAgeRaw = item?.partnerAge;
+    const partnerAgeNum = Number(partnerAgeRaw);
+    const partnerMobileRaw = String(item?.partnerMobile ?? "").trim();
+    const partnerMobile = partnerMobileRaw
+      ? normalizeIndianMobile(partnerMobileRaw)
+      : "";
+
+    if (seen.has(categoryId)) {
+      return { ok: false, message: "Each category can only be added once" };
+    }
+    seen.add(categoryId);
+
+    const cat = getCategoryById(categoryId, "open");
+    if (!cat) {
+      return { ok: false, message: `Unknown category: ${categoryId}` };
+    }
+    if (typeof cat.minAge === "number" && age < cat.minAge) {
+      return {
+        ok: false,
+        message: `${cat.label} requires minimum age ${cat.minAge}+ (your DOB)`,
+      };
+    }
+    if (!partnerFirstName || !partnerLastName) {
+      return {
+        ok: false,
+        message: `Partner first and last name are required for ${cat.label}`,
+      };
+    }
+    if (!partnerName) {
+      return {
+        ok: false,
+        message: `Partner name is required for ${cat.label}`,
+      };
+    }
+    if (
+      partnerAgeRaw === "" ||
+      partnerAgeRaw == null ||
+      !Number.isFinite(partnerAgeNum) ||
+      partnerAgeNum < 1 ||
+      partnerAgeNum > 120
+    ) {
+      return {
+        ok: false,
+        message: `Partner age is required for ${cat.label}`,
+      };
+    }
+    if (typeof cat.minAge === "number" && partnerAgeNum < cat.minAge) {
+      return {
+        ok: false,
+        message: `Partner must be age ${cat.minAge}+ for ${cat.label}`,
+      };
+    }
+    if (partnerMobileRaw && !isValidIndianMobile(partnerMobileRaw)) {
+      return {
+        ok: false,
+        message: `Enter a valid partner mobile for ${cat.label}`,
+      };
+    }
+
+    events.push({
+      categoryId: cat.id,
+      categoryLabel: cat.label,
+      partnerName,
+      partnerAge: Math.round(partnerAgeNum),
+      partnerMobile,
+    });
+  }
+
+  const amountInr = computeOpenFeeInr(events.length);
+
+  return {
+    ok: true,
+    data: {
+      tournamentType: /** @type {const} */ ("open"),
+      fullName,
+      mobile,
+      email: email || "",
+      gender: "",
+      dateOfBirth,
+      playerLevel,
+      categories: events.map((e) => e.categoryId),
+      events,
+      eventCount: events.length,
+      amountInr,
+    },
+  };
 }

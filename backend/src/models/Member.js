@@ -138,6 +138,11 @@ const memberSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+memberSchema.index({ phone: 1 });
+memberSchema.index({ isActive: 1, createdAt: -1 });
+memberSchema.index({ membershipEndDate: 1 });
+memberSchema.index({ membershipFrozen: 1 });
+
 memberSchema.set("toJSON", {
   virtuals: true,
   transform(_doc, ret) {

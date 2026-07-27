@@ -126,8 +126,8 @@ export default function Register() {
               </p>
               {whatsappThankYouSent ? (
                 <p className="register-success-wa" role="status">
-                  A thank-you message from Evolve Fitness has been sent to your
-                  WhatsApp number.
+                  A thank-you message from Evolve Fitness is on its way to your
+                  WhatsApp.
                 </p>
               ) : null}
               <div className="register-success-actions">

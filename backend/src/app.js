@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import express from "express";
+import compression from "compression";
 import cors from "cors";
 import helmet from "helmet";
 import apiRoutes from "./routes/index.js";
@@ -9,10 +10,19 @@ import { isPinnedCorsOrigin } from "./config/corsHeaders.js";
 
 const app = express();
 
+app.use(compression());
+
 /** Uploaded trainer photos (persisted on disk; use external object storage for multi-instance hosts). */
 const uploadsDir = path.join(process.cwd(), "uploads");
 fs.mkdirSync(uploadsDir, { recursive: true });
-app.use("/api/uploads", express.static(uploadsDir));
+app.use(
+  "/api/uploads",
+  express.static(uploadsDir, {
+    maxAge: "7d",
+    etag: true,
+    lastModified: true,
+  })
+);
 
 /** Required for express-rate-limit and correct client IP on Render / reverse proxies */
 app.set("trust proxy", 1);
@@ -28,6 +38,8 @@ const IS_PROD = process.env.NODE_ENV === "production";
 
 /** Vite dev server & preview — always merged in non-production when using an explicit allowlist. */
 const CORS_DEV_ORIGINS = [
+  "http://localhost:5175",
+  "http://127.0.0.1:5175",
   "http://localhost:5173",
   "http://127.0.0.1:5173",
   "http://localhost:4173",

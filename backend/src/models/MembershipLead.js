@@ -47,5 +47,7 @@ const membershipLeadSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+membershipLeadSchema.index({ createdAt: -1 });
+
 export default mongoose.model("MembershipLead", membershipLeadSchema);
 export { PLAN_VALUES };

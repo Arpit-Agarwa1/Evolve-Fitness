@@ -173,6 +173,23 @@
   }
 }
 
+/* Skip continuous GPU hero motion on small screens (battery + scroll jank). */
+@media (max-width: 768px) {
+  .hero-bg-img,
+  .hero-bg-mesh,
+  .hero-orb {
+    animation: none !important;
+  }
+
+  .hero-bg-img {
+    transform: none;
+  }
+
+  .hero-orbs {
+    display: none;
+  }
+}
+
 .hero-inner {
   position: relative;
   z-index: 2;

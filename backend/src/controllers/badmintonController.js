@@ -7,7 +7,9 @@ import {
   generateRegistrationId,
   getBadmintonSettings,
   getPublicCategoryStatus,
-  parseRegistrationBody,
+  invalidateBadmintonStatusCache,
+  parseMemberRegistrationBody,
+  parseOpenRegistrationBody,
 } from "../services/badmintonService.js";
 import {
   createRazorpayOrder,
@@ -17,34 +19,42 @@ import {
 import { CATEGORY_IDS } from "../config/badmintonChampionship.js";
 
 /**
- * Shape returned to clients after confirmation.
  * @param {import("mongoose").Document | Record<string, unknown>} doc
  */
 function toPublicRegistration(doc) {
   const o = typeof doc.toObject === "function" ? doc.toObject() : doc;
   return {
     registrationId: o.registrationId,
+    tournamentType: o.tournamentType,
     fullName: o.fullName,
-    email: o.email,
+    email: o.email || "",
     mobile: o.mobile,
+    gender: o.gender || "",
+    playerLevel: o.playerLevel,
     categories: o.categories,
-    partnerName: o.partnerName || "",
-    partnerMobile: o.partnerMobile || "",
+    events: o.events || [],
+    eventCount: o.eventCount ?? (o.events?.length || 0),
     amountInr: o.amountInr,
     paymentStatus: o.paymentStatus,
     status: o.status,
-    isEvolveMember: o.isEvolveMember,
     paidAt: o.paidAt,
     createdAt: o.createdAt,
   };
 }
 
 /**
- * GET /api/badminton/status — public category availability.
+ * GET /api/badminton/status?type=member|open|all
  */
 export async function getBadmintonStatus(req, res, next) {
   try {
-    const data = await getPublicCategoryStatus();
+    const typeRaw = String(req.query?.type ?? "all").trim().toLowerCase();
+    const type =
+      typeRaw === "member" || typeRaw === "open" ? typeRaw : "all";
+    const data = await getPublicCategoryStatus(type);
+    res.set(
+      "Cache-Control",
+      "public, max-age=10, stale-while-revalidate=20"
+    );
     return sendSuccess(res, {
       ...data,
       razorpayEnabled: isRazorpayConfigured(),
@@ -58,63 +68,82 @@ export async function getBadmintonStatus(req, res, next) {
 }
 
 /**
- * POST /api/badminton/register/initiate
- * Creates draft (or free confirmed) registration; returns Razorpay order when fee > 0.
+ * POST /api/badminton/members/register — free, confirmed immediately.
  */
-export async function initiateBadmintonRegistration(req, res, next) {
+export async function registerMemberTournament(req, res, next) {
   try {
-    const parsed = parseRegistrationBody(req.body ?? {});
-    if (!parsed.ok) {
-      return sendError(res, parsed.message, 422);
-    }
+    const parsed = parseMemberRegistrationBody(req.body ?? {});
+    if (!parsed.ok) return sendError(res, parsed.message, 422);
 
-    const availability = await assertCategoriesAvailable(parsed.data.categories);
-    if (!availability.ok) {
-      return sendError(res, availability.message, 409);
-    }
+    const availability = await assertCategoriesAvailable(
+      parsed.data.categories
+    );
+    if (!availability.ok) return sendError(res, availability.message, 409);
 
     const duplicate = await findConfirmedDuplicate(
-      parsed.data.email,
-      parsed.data.mobile
+      parsed.data.mobile,
+      "member"
     );
     if (duplicate) {
       return sendError(
         res,
-        `You already have a confirmed registration (${duplicate.registrationId}). Contact Evolve to change categories.`,
+        `This mobile is already registered for the Members tournament (${duplicate.registrationId}).`,
         409
       );
     }
 
     const registrationId = await generateRegistrationId();
-    const { amountInr, ...fields } = parsed.data;
+    const doc = await BadmintonRegistration.create({
+      registrationId,
+      ...parsed.data,
+      paymentStatus: "waived",
+      status: "confirmed",
+      paidAt: new Date(),
+    });
+    invalidateBadmintonStatusCache();
 
-    // Free path (EVOLVE members) — confirm immediately.
-    if (amountInr === 0) {
-      const doc = await BadmintonRegistration.create({
-        registrationId,
-        ...fields,
-        amountInr: 0,
-        paymentStatus: "waived",
-        status: "confirmed",
-        paidAt: new Date(),
-      });
-      return sendSuccess(
+    return sendSuccess(
+      res,
+      { registration: toPublicRegistration(doc) },
+      201
+    );
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/badminton/open/checkout — create draft + Razorpay order.
+ */
+export async function checkoutOpenTournament(req, res, next) {
+  try {
+    const parsed = parseOpenRegistrationBody(req.body ?? {});
+    if (!parsed.ok) return sendError(res, parsed.message, 422);
+
+    const availability = await assertCategoriesAvailable(
+      parsed.data.categories
+    );
+    if (!availability.ok) return sendError(res, availability.message, 409);
+
+    const duplicate = await findConfirmedDuplicate(parsed.data.mobile, "open");
+    if (duplicate) {
+      return sendError(
         res,
-        {
-          free: true,
-          registration: toPublicRegistration(doc),
-        },
-        201
+        `This mobile is already registered for the Open tournament (${duplicate.registrationId}).`,
+        409
       );
     }
 
     if (!isRazorpayConfigured()) {
       return sendError(
         res,
-        "Online payment is temporarily unavailable. Please try again later or contact Evolve.",
+        "Online payment is temporarily unavailable. Add Razorpay keys to the server and try again.",
         503
       );
     }
+
+    const registrationId = await generateRegistrationId();
+    const { amountInr, ...fields } = parsed.data;
 
     const draft = await BadmintonRegistration.create({
       registrationId,
@@ -131,12 +160,14 @@ export async function initiateBadmintonRegistration(req, res, next) {
         receipt: registrationId,
         notes: {
           registrationId,
+          tournamentType: "open",
+          eventCount: String(fields.eventCount),
           email: fields.email,
         },
       });
     } catch (err) {
       await BadmintonRegistration.deleteOne({ _id: draft._id });
-      console.error("[badminton] Razorpay order failed:", err);
+      console.error("[badminton open] Razorpay order failed:", err);
       return sendError(res, "Could not start payment. Please try again.", 502);
     }
 
@@ -146,7 +177,6 @@ export async function initiateBadmintonRegistration(req, res, next) {
     return sendSuccess(
       res,
       {
-        free: false,
         keyId: process.env.RAZORPAY_KEY_ID.trim(),
         orderId: order.id,
         amountInr,
@@ -154,10 +184,12 @@ export async function initiateBadmintonRegistration(req, res, next) {
         currency: order.currency,
         registrationId,
         draftId: String(draft._id),
+        eventCount: fields.eventCount,
+        events: fields.events,
         prefill: {
           name: fields.fullName,
-          email: fields.email,
           contact: fields.mobile,
+          ...(fields.email ? { email: fields.email } : {}),
         },
       },
       201
@@ -168,10 +200,9 @@ export async function initiateBadmintonRegistration(req, res, next) {
 }
 
 /**
- * POST /api/badminton/register/verify
- * Confirms registration after successful Razorpay checkout.
+ * POST /api/badminton/open/verify
  */
-export async function verifyBadmintonPayment(req, res, next) {
+export async function verifyOpenTournamentPayment(req, res, next) {
   try {
     const razorpayOrderId = String(req.body?.razorpayOrderId ?? "").trim();
     const razorpayPaymentId = String(req.body?.razorpayPaymentId ?? "").trim();
@@ -194,14 +225,13 @@ export async function verifyBadmintonPayment(req, res, next) {
       razorpayPaymentId,
       razorpaySignature
     );
-    if (!valid) {
-      return sendError(res, "Invalid payment signature", 400);
-    }
+    if (!valid) return sendError(res, "Invalid payment signature", 400);
 
-    const doc = await BadmintonRegistration.findOne({ registrationId });
-    if (!doc) {
-      return sendError(res, "Registration not found", 404);
-    }
+    const doc = await BadmintonRegistration.findOne({
+      registrationId,
+      tournamentType: "open",
+    });
+    if (!doc) return sendError(res, "Registration not found", 404);
     if (doc.status === "confirmed") {
       return sendSuccess(res, { registration: toPublicRegistration(doc) });
     }
@@ -209,7 +239,6 @@ export async function verifyBadmintonPayment(req, res, next) {
       return sendError(res, "Order mismatch for this registration", 400);
     }
 
-    // Re-check capacity before confirming (race with FCFS).
     const availability = await assertCategoriesAvailable(doc.categories);
     if (!availability.ok) {
       doc.paymentStatus = "failed";
@@ -227,6 +256,7 @@ export async function verifyBadmintonPayment(req, res, next) {
     doc.razorpaySignature = razorpaySignature;
     doc.paidAt = new Date();
     await doc.save();
+    invalidateBadmintonStatusCache();
 
     return sendSuccess(res, { registration: toPublicRegistration(doc) });
   } catch (err) {
@@ -235,7 +265,7 @@ export async function verifyBadmintonPayment(req, res, next) {
 }
 
 /**
- * GET /api/admin/badminton — list registrations.
+ * GET /api/admin/badminton
  */
 export async function listAdminBadmintonRegistrations(req, res, next) {
   try {
@@ -249,9 +279,14 @@ export async function listAdminBadmintonRegistrations(req, res, next) {
       Number.parseInt(String(req.query.skip ?? "0"), 10) || 0
     );
     const status = String(req.query.status ?? "").trim();
+    const tournamentType = String(req.query.tournamentType ?? "").trim();
+    /** @type {Record<string, unknown>} */
     const filter = {};
     if (status === "confirmed" || status === "draft" || status === "cancelled") {
       filter.status = status;
+    }
+    if (tournamentType === "member" || tournamentType === "open") {
+      filter.tournamentType = tournamentType;
     }
 
     const [items, total] = await Promise.all([
@@ -270,31 +305,33 @@ export async function listAdminBadmintonRegistrations(req, res, next) {
 }
 
 /**
- * GET /api/admin/badminton/export — CSV of confirmed registrations.
+ * GET /api/admin/badminton/export
  */
 export async function exportAdminBadmintonCsv(req, res, next) {
   try {
-    const items = await BadmintonRegistration.find({ status: "confirmed" })
+    const tournamentType = String(req.query.tournamentType ?? "").trim();
+    /** @type {Record<string, unknown>} */
+    const filter = { status: "confirmed" };
+    if (tournamentType === "member" || tournamentType === "open") {
+      filter.tournamentType = tournamentType;
+    }
+
+    const items = await BadmintonRegistration.find(filter)
       .sort({ createdAt: -1 })
       .lean();
 
     const header = [
       "registrationId",
+      "tournamentType",
       "fullName",
       "mobile",
       "email",
       "gender",
       "dateOfBirth",
-      "city",
-      "state",
-      "emergencyContact",
-      "isEvolveMember",
-      "membershipId",
       "playerLevel",
-      "clubName",
-      "partnerName",
-      "partnerMobile",
+      "eventCount",
       "categories",
+      "eventsPartners",
       "amountInr",
       "paymentStatus",
       "razorpayPaymentId",
@@ -310,9 +347,19 @@ export async function exportAdminBadmintonCsv(req, res, next) {
 
     const lines = [header.join(",")];
     for (const row of items) {
+      const eventsPartners = (row.events || [])
+        .map((e) => {
+          const agePart =
+            e.partnerAge != null && e.partnerAge !== ""
+              ? ` age ${e.partnerAge}`
+              : "";
+          return `${e.categoryLabel || e.categoryId}: ${e.partnerName || "-"}${agePart} (${e.partnerMobile || "-"})`;
+        })
+        .join(" | ");
       lines.push(
         [
           row.registrationId,
+          row.tournamentType,
           row.fullName,
           row.mobile,
           row.email,
@@ -320,16 +367,10 @@ export async function exportAdminBadmintonCsv(req, res, next) {
           row.dateOfBirth
             ? new Date(row.dateOfBirth).toISOString().slice(0, 10)
             : "",
-          row.city,
-          row.state,
-          row.emergencyContact,
-          row.isEvolveMember ? "yes" : "no",
-          row.membershipId,
           row.playerLevel,
-          row.clubName,
-          row.partnerName,
-          row.partnerMobile,
+          row.eventCount ?? (row.events || []).length,
           (row.categories || []).join("; "),
+          eventsPartners,
           row.amountInr,
           row.paymentStatus,
           row.razorpayPaymentId,
@@ -341,26 +382,22 @@ export async function exportAdminBadmintonCsv(req, res, next) {
       );
     }
 
-    const csv = lines.join("\n");
     res.setHeader("Content-Type", "text/csv; charset=utf-8");
     res.setHeader(
       "Content-Disposition",
       'attachment; filename="evolve-badminton-registrations.csv"'
     );
-    return res.status(200).send(csv);
+    return res.status(200).send(lines.join("\n"));
   } catch (err) {
     next(err);
   }
 }
 
-/**
- * GET /api/admin/badminton/settings
- */
 export async function getAdminBadmintonSettings(req, res, next) {
   try {
     const [settings, status] = await Promise.all([
       getBadmintonSettings(),
-      getPublicCategoryStatus(),
+      getPublicCategoryStatus("all"),
     ]);
     return sendSuccess(res, { settings, status });
   } catch (err) {
@@ -368,10 +405,6 @@ export async function getAdminBadmintonSettings(req, res, next) {
   }
 }
 
-/**
- * PATCH /api/admin/badminton/settings
- * Body: { closedCategories?: string[], registrationForceClosed?: boolean }
- */
 export async function updateAdminBadmintonSettings(req, res, next) {
   try {
     const body = req.body ?? {};
@@ -379,10 +412,9 @@ export async function updateAdminBadmintonSettings(req, res, next) {
     const update = {};
 
     if (Array.isArray(body.closedCategories)) {
-      const nextClosed = body.closedCategories
+      update.closedCategories = body.closedCategories
         .map((c) => String(c).trim())
         .filter((id) => CATEGORY_IDS.includes(id));
-      update.closedCategories = nextClosed;
     }
     if (typeof body.registrationForceClosed === "boolean") {
       update.registrationForceClosed = body.registrationForceClosed;
@@ -398,7 +430,8 @@ export async function updateAdminBadmintonSettings(req, res, next) {
       { upsert: true, new: true }
     ).lean();
 
-    const status = await getPublicCategoryStatus();
+    invalidateBadmintonStatusCache();
+    const status = await getPublicCategoryStatus("all");
     return sendSuccess(res, {
       settings: {
         closedCategories: doc.closedCategories ?? [],

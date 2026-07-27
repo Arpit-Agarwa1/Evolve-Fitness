@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "optimize:images": "node scripts/optimize-magazine-images.mjs",
+    "prebuild": "npm run optimize:images",
     "build": "vite build",
     "postbuild": "node scripts/write-sitemap-robots.mjs",
     "lint": "eslint .",

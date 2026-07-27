@@ -49,4 +49,6 @@ const trainerSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+trainerSchema.index({ isActive: 1, sortOrder: 1, createdAt: 1 });
+
 export default mongoose.model("Trainer", trainerSchema);

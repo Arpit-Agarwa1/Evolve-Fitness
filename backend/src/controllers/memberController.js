@@ -74,18 +74,22 @@ export async function registerMember(req, res, next) {
       `[mongo] members inserted ${member._id} db=${mongoose.connection.name}`
     );
 
-    let whatsappThankYouSent = false;
-    try {
-      const wa = await sendRegistrationThankYou({
+    // Fire-and-forget — do not block signup on WhatsApp latency (up to ~15s).
+    const waConfigured = Boolean(
+      process.env.WHATSAPP_CLOUD_API_TOKEN?.trim() &&
+        process.env.WHATSAPP_PHONE_NUMBER_ID?.trim() &&
+        process.env.WHATSAPP_REGISTRATION_TEMPLATE_NAME?.trim()
+    );
+    if (waConfigured) {
+      void sendRegistrationThankYou({
         phone: member.phone,
         fullName: member.fullName,
+      }).catch((waErr) => {
+        console.error(
+          "[whatsapp] thank-you send threw:",
+          waErr instanceof Error ? waErr.message : waErr
+        );
       });
-      whatsappThankYouSent = Boolean(wa.sent);
-    } catch (waErr) {
-      console.error(
-        "[whatsapp] thank-you send threw:",
-        waErr instanceof Error ? waErr.message : waErr
-      );
     }
 
     return sendSuccess(
@@ -96,7 +100,7 @@ export async function registerMember(req, res, next) {
         fullName: member.fullName,
         planInterest: member.planInterest,
         createdAt: member.createdAt,
-        whatsappThankYouSent,
+        whatsappThankYouSent: waConfigured,
       },
       201
     );

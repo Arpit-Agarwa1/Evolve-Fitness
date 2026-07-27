@@ -39,4 +39,6 @@ const contactMessageSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+contactMessageSchema.index({ createdAt: -1 });
+
 export default mongoose.model("ContactMessage", contactMessageSchema);

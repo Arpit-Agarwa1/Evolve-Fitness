@@ -56,6 +56,9 @@ export async function connectDB() {
   await mongoose.connect(uri, {
     serverSelectionTimeoutMS: 20_000,
     connectTimeoutMS: 20_000,
+    maxPoolSize: 10,
+    minPoolSize: 1,
+    maxIdleTimeMS: 30_000,
   });
 
   console.log("MongoDB connected");

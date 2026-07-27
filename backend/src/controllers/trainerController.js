@@ -5,10 +5,18 @@ import {
   saveTrainerImageFile,
   removeTrainerStoredImage,
 } from "../services/trainerImageService.js";
+import { createTtlCache } from "../utils/ttlCache.js";
 
 const MAX_TRAINER_IMAGE_BYTES = 5 * 1024 * 1024;
 /** ~5MB binary in base64 + overhead */
 const MAX_BASE64_CHARS = 7 * 1024 * 1024;
+
+/** Public trainers list — short TTL; cleared on admin writes. */
+const publicTrainersCache = createTtlCache(60_000);
+
+function invalidatePublicTrainersCache() {
+  publicTrainersCache.clear();
+}
 
 /**
  * Build a multer-like file object from JSON `{ imageBase64, imageMimeType }`.
@@ -53,9 +61,23 @@ const publicTrainerFilter = {
  */
 export async function listTrainersPublic(req, res, next) {
   try {
+    const cached = publicTrainersCache.get();
+    if (cached) {
+      res.set(
+        "Cache-Control",
+        "public, max-age=30, stale-while-revalidate=60"
+      );
+      return sendSuccess(res, { items: cached });
+    }
+
     const items = await Trainer.find(publicTrainerFilter)
       .sort({ sortOrder: 1, createdAt: 1 })
       .lean();
+    publicTrainersCache.set(items);
+    res.set(
+      "Cache-Control",
+      "public, max-age=30, stale-while-revalidate=60"
+    );
     return sendSuccess(res, { items });
   } catch (err) {
     next(err);
@@ -138,6 +160,7 @@ export async function createTrainer(req, res, next) {
       imageUrl,
       cloudinaryPublicId,
     });
+    invalidatePublicTrainersCache();
     return sendSuccess(res, { trainer: doc.toObject() }, 201);
   } catch (err) {
     next(err);
@@ -208,6 +231,7 @@ export async function updateTrainer(req, res, next) {
       await trainer.save();
     }
 
+    invalidatePublicTrainersCache();
     return sendSuccess(res, { trainer: trainer.toObject() });
   } catch (err) {
     next(err);
@@ -234,6 +258,7 @@ export async function deleteTrainer(req, res, next) {
       cloudinaryPublicId: trainer.cloudinaryPublicId,
     });
 
+    invalidatePublicTrainersCache();
     return sendSuccess(res, { deleted: true });
   } catch (err) {
     next(err);

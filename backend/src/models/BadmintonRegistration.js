@@ -1,12 +1,47 @@
 import mongoose from "mongoose";
 import {
+  ALL_PLAYER_LEVELS,
   CATEGORY_IDS,
-  PLAYER_LEVELS,
 } from "../config/badmintonChampionship.js";
 
 /**
- * Badminton Championship registration — confirmed only after payment (or free member path).
+ * One championship registration — either member (free) or open (paid cart).
  */
+const eventEntrySchema = new mongoose.Schema(
+  {
+    categoryId: {
+      type: String,
+      required: true,
+      enum: CATEGORY_IDS,
+    },
+    categoryLabel: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    partnerName: {
+      type: String,
+      trim: true,
+      maxlength: 120,
+      default: "",
+    },
+    /** Partner age in years (open tournament cart). */
+    partnerAge: {
+      type: Number,
+      min: 1,
+      max: 120,
+      default: null,
+    },
+    partnerMobile: {
+      type: String,
+      trim: true,
+      maxlength: 20,
+      default: "",
+    },
+  },
+  { _id: false }
+);
+
 const badmintonRegistrationSchema = new mongoose.Schema(
   {
     registrationId: {
@@ -15,6 +50,12 @@ const badmintonRegistrationSchema = new mongoose.Schema(
       unique: true,
       trim: true,
       uppercase: true,
+    },
+    tournamentType: {
+      type: String,
+      enum: ["member", "open"],
+      required: true,
+      index: true,
     },
     fullName: {
       type: String,
@@ -27,75 +68,30 @@ const badmintonRegistrationSchema = new mongoose.Schema(
       required: [true, "Mobile is required"],
       trim: true,
       maxlength: 20,
+      index: true,
     },
     email: {
       type: String,
-      required: [true, "Email is required"],
       trim: true,
       lowercase: true,
       maxlength: 254,
+      default: "",
     },
     gender: {
       type: String,
-      enum: ["male", "female", "other"],
-      required: true,
+      enum: ["male", "female", "other", ""],
+      default: "",
     },
     dateOfBirth: {
       type: Date,
       required: [true, "Date of birth is required"],
     },
-    city: {
-      type: String,
-      required: true,
-      trim: true,
-      maxlength: 80,
-    },
-    state: {
-      type: String,
-      required: true,
-      trim: true,
-      maxlength: 80,
-    },
-    emergencyContact: {
-      type: String,
-      required: true,
-      trim: true,
-      maxlength: 120,
-    },
-    isEvolveMember: {
-      type: Boolean,
-      default: false,
-    },
-    membershipId: {
-      type: String,
-      trim: true,
-      maxlength: 64,
-      default: "",
-    },
     playerLevel: {
       type: String,
-      enum: PLAYER_LEVELS,
+      enum: ALL_PLAYER_LEVELS,
       required: true,
     },
-    clubName: {
-      type: String,
-      trim: true,
-      maxlength: 120,
-      default: "",
-    },
-    /** Required when any doubles category is selected. */
-    partnerName: {
-      type: String,
-      trim: true,
-      maxlength: 120,
-      default: "",
-    },
-    partnerMobile: {
-      type: String,
-      trim: true,
-      maxlength: 20,
-      default: "",
-    },
+    /** Flattened category ids (for counts / admin filters). */
     categories: {
       type: [
         {
@@ -103,12 +99,17 @@ const badmintonRegistrationSchema = new mongoose.Schema(
           enum: CATEGORY_IDS,
         },
       ],
-      validate: {
-        validator(v) {
-          return Array.isArray(v) && v.length >= 1 && v.length <= 3;
-        },
-        message: "Select 1–3 categories",
-      },
+      default: [],
+    },
+    /** Per-event partner info (open cart / member single category). */
+    events: {
+      type: [eventEntrySchema],
+      default: [],
+    },
+    eventCount: {
+      type: Number,
+      default: 0,
+      min: 0,
     },
     amountInr: {
       type: Number,
@@ -124,6 +125,7 @@ const badmintonRegistrationSchema = new mongoose.Schema(
       type: String,
       enum: ["draft", "confirmed", "cancelled"],
       default: "draft",
+      index: true,
     },
     razorpayOrderId: {
       type: String,
@@ -149,8 +151,7 @@ const badmintonRegistrationSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-badmintonRegistrationSchema.index({ status: 1, "categories": 1 });
-badmintonRegistrationSchema.index({ email: 1 });
+badmintonRegistrationSchema.index({ tournamentType: 1, status: 1 });
 badmintonRegistrationSchema.index({ createdAt: -1 });
 
 export default mongoose.model(

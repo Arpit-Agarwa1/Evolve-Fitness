@@ -515,8 +515,90 @@
   color: var(--bd-gold);
 }
 
-.badminton-confirm .badminton-review {
-  text-align: left;
-  max-width: 28rem;
-  margin-inline: auto;
+.badminton-hero--compact {
+  padding-bottom: clamp(1.5rem, 4vw, 2.5rem);
 }
+
+.badminton-hub {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 clamp(1.25rem, 4vw, 2.5rem) clamp(3.5rem, 8vw, 5rem);
+  display: grid;
+  gap: 1.25rem;
+}
+
+@media (min-width: 720px) {
+  .badminton-hub {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.badminton-hub-card {
+  padding: 1.5rem;
+  border-radius: var(--ev-radius-lg);
+  border: 1px solid var(--ev-border);
+  background: var(--ev-bg-card);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.badminton-hub-card h2 {
+  margin: 0;
+  font-family: var(--ev-serif);
+  font-size: 1.65rem;
+  font-weight: 500;
+  color: var(--ev-text);
+}
+
+.badminton-hub-card p {
+  margin: 0;
+  flex: 1;
+  line-height: 1.55;
+}
+
+.badminton-hub-path {
+  font-size: 0.75rem;
+  color: var(--ev-text-muted);
+  word-break: break-all;
+}
+
+.badminton-form__subtitle {
+  margin: 1.5rem 0 0.75rem;
+  font-family: var(--ev-serif);
+  font-size: 1.25rem;
+  color: var(--ev-text);
+}
+
+.badminton-cart-list {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.badminton-cart-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+  border-radius: var(--ev-radius);
+  border: 1px solid var(--ev-border);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.badminton-cart-item div {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.badminton-cart-item strong {
+  color: var(--ev-text);
+}
+
+.badminton-cart-item span {
+  font-size: 0.875rem;
+}
+
