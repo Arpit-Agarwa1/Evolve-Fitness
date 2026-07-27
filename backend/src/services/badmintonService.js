@@ -276,7 +276,7 @@ export function parseOpenRegistrationBody(body) {
     return { ok: false, message: "Add 1–4 categories to your cart" };
   }
 
-  /** @type {{ categoryId: string; categoryLabel: string; partnerName: string; partnerAge: number | null; partnerMobile: string }[]} */
+  /** @type {{ categoryId: string; categoryLabel: string; partnerName: string; partnerFirstName: string; partnerLastName: string; partnerAge: number | null; partnerMobile: string }[]} */
   const events = [];
   const seen = new Set();
 
@@ -348,9 +348,12 @@ export function parseOpenRegistrationBody(body) {
       };
     }
 
+    // Persist every partner field the user entered for this event.
     events.push({
       categoryId: cat.id,
       categoryLabel: cat.label,
+      partnerFirstName,
+      partnerLastName,
       partnerName,
       partnerAge: Math.round(partnerAgeNum),
       partnerMobile,

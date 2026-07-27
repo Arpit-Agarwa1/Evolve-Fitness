@@ -25,6 +25,19 @@ const eventEntrySchema = new mongoose.Schema(
       maxlength: 120,
       default: "",
     },
+    /** As entered on the open cart form (also merged into partnerName). */
+    partnerFirstName: {
+      type: String,
+      trim: true,
+      maxlength: 60,
+      default: "",
+    },
+    partnerLastName: {
+      type: String,
+      trim: true,
+      maxlength: 60,
+      default: "",
+    },
     /** Partner age in years (open tournament cart). */
     partnerAge: {
       type: Number,

@@ -314,9 +314,18 @@ export default function AdminBadminton() {
                   {(row.events || []).length
                     ? (row.events || [])
                         .map((e) => {
+                          const name =
+                            e.partnerName ||
+                            [e.partnerFirstName, e.partnerLastName]
+                              .filter(Boolean)
+                              .join(" ") ||
+                            "—";
                           const age =
                             e.partnerAge != null ? `, age ${e.partnerAge}` : "";
-                          return `${e.categoryLabel || categoryLabel(e.categoryId)}: ${e.partnerName || "chit"}${age}`;
+                          const mobile = e.partnerMobile
+                            ? `, ${e.partnerMobile}`
+                            : "";
+                          return `${e.categoryLabel || categoryLabel(e.categoryId)}: ${name}${age}${mobile}`;
                         })
                         .join(" · ")
                     : (row.categories || []).map(categoryLabel).join(", ")}

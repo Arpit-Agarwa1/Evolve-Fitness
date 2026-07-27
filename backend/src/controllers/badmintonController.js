@@ -372,11 +372,15 @@ export async function exportAdminBadmintonCsv(req, res, next) {
     for (const row of items) {
       const eventsPartners = (row.events || [])
         .map((e) => {
+          const name =
+            e.partnerName ||
+            [e.partnerFirstName, e.partnerLastName].filter(Boolean).join(" ") ||
+            "-";
           const agePart =
             e.partnerAge != null && e.partnerAge !== ""
               ? ` age ${e.partnerAge}`
               : "";
-          return `${e.categoryLabel || e.categoryId}: ${e.partnerName || "-"}${agePart} (${e.partnerMobile || "-"})`;
+          return `${e.categoryLabel || e.categoryId}: ${name}${agePart} (${e.partnerMobile || "-"})`;
         })
         .join(" | ");
       lines.push(
