@@ -85,9 +85,9 @@ export const OPEN_CATEGORIES = [
     hint: "Male min 30+ · Female age open",
   },
   {
-    id: "open_xd_70",
-    label: "Mixed Doubles 70+",
-    shortLabel: "XD 70+",
+    id: "open_xd_75",
+    label: "Mixed Doubles 75+",
+    shortLabel: "XD 75+",
     division: "mixed_doubles",
     requiresPartner: true,
     minAgeMale: 35,
@@ -110,6 +110,7 @@ export const LEGACY_OPEN_CATEGORY_IDS = [
   "open_70",
   "open_80",
   "open_90",
+  "open_xd_70", // renamed to open_xd_75 (Mixed Doubles 75+)
 ];
 
 export const MEMBER_CATEGORY_IDS = MEMBER_CATEGORIES.map((c) => c.id);
@@ -139,9 +140,9 @@ export const ALL_PLAYER_LEVELS = [
 export function computeOpenFeeInr(eventCount) {
   if (eventCount <= 0) return 0;
   if (eventCount === 1) return 500;
-  if (eventCount === 2) return 750;
+  if (eventCount === 2) return 800;
   if (eventCount === 3) return 1000;
-  return 1250;
+  return 1200;
 }
 
 /**

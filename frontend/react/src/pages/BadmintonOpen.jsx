@@ -7,7 +7,9 @@ import { apiFetch } from "../services/api";
 import { loadCashfreeScript } from "../utils/loadCashfree";
 import {
   OPEN_CATEGORIES,
+  OPEN_FEE_LADDER,
   OPEN_PLAYER_LEVEL_OPTIONS,
+  OPEN_POSTER,
   BADMINTON_OPEN_PATH,
   REGISTRATION_CLOSES_LABEL,
   computeOpenFeeInr,
@@ -359,19 +361,25 @@ export default function BadmintonOpen() {
   return (
     <>
       <SEO
-        title="EVOLVE Open Badminton Championship 2026"
-        description="Register for the EVOLVE Open Badminton Championship — Men's, Mixed & Women's Doubles. Online payment via Cashfree."
+        title="Evolve Badminton Open Championship 2026"
+        description="Register for the Evolve Badminton Open Championship — Men's, Mixed & Women's Doubles. Online payment via Cashfree."
         path={BADMINTON_OPEN_PATH}
       />
       <Navbar />
-      <div className="badminton-page">
-        <section className="badminton-hero badminton-hero--compact">
-          <p className="badminton-eyebrow">Open championship · 9 Aug 2026</p>
-          <h1 className="badminton-hero__title">Evolve Open Tournament</h1>
+      <div className="badminton-page badminton-page--court">
+        <section className="badminton-hero badminton-hero--arena">
+          <div className="badminton-hero__veil" aria-hidden="true" />
+          <div className="badminton-hero__court-lines" aria-hidden="true" />
+          <div className="badminton-hero__net" aria-hidden="true" />
+          <p className="badminton-eyebrow">
+            Open championship · {OPEN_POSTER.dateLabel}
+          </p>
+          <h1 className="badminton-hero__title">
+            Evolve Badminton Open Championship
+          </h1>
           <p className="badminton-hero__lede">
-            Men&apos;s Doubles, Mixed Doubles &amp; Women&apos;s Doubles. Add up
-            to 4 events, then pay online. Registration closes{" "}
-            {REGISTRATION_CLOSES_LABEL}.
+            Register for Men&apos;s, Mixed &amp; Women&apos;s Doubles — up to 4
+            events. Closes {REGISTRATION_CLOSES_LABEL}.
           </p>
         </section>
 
@@ -486,7 +494,7 @@ export default function BadmintonOpen() {
             <div className="badminton-form">
               <h2 className="badminton-form__title">Add events to cart</h2>
               <p className="badminton-form__hint">
-                Men&apos;s Doubles (60+/70+/80+/90+), Mixed Doubles (55+/70+),
+                Men&apos;s Doubles (60+/70+/80+/90+), Mixed Doubles (55+/75+),
                 Women&apos;s Doubles (chit pairing). Max 4 events.
               </p>
 
@@ -682,7 +690,7 @@ export default function BadmintonOpen() {
                 </div>
               </dl>
               <p className="badminton-form__hint">
-                Fees: 1 event ₹500 · 2 ₹750 · 3 ₹1,000 · 4 ₹1,250. Pay securely
+                Fees: 1 event ₹500 · 2 ₹800 · 3 ₹1,000 · 4 ₹1,200. Pay securely
                 via Cashfree.
               </p>
               <p className="badminton-payee-note">
@@ -759,6 +767,95 @@ export default function BadmintonOpen() {
               </Link>
             </p>
           ) : null}
+        </section>
+
+        <section className="badminton-details" aria-label="Tournament details">
+          <h2 className="badminton-section-title">Tournament details</h2>
+          <ul className="badminton-detail-list">
+            <li>
+              <span>Date &amp; time</span>
+              <strong>
+                {OPEN_POSTER.dateLabel} · {OPEN_POSTER.timeLabel}
+              </strong>
+            </li>
+            <li>
+              <span>Venue</span>
+              <strong>{OPEN_POSTER.venue}</strong>
+            </li>
+            <li>
+              <span>Organized by</span>
+              <strong>{OPEN_POSTER.organizer}</strong>
+            </li>
+            <li>
+              <span>Powered by</span>
+              <strong>{OPEN_POSTER.poweredBy}</strong>
+            </li>
+            <li>
+              <span>Registration</span>
+              <strong>
+                Online only · closes {OPEN_POSTER.registrationClosesLabel}
+              </strong>
+            </li>
+            <li>
+              <span>Contact</span>
+              <strong>
+                {OPEN_POSTER.contactName} ·{" "}
+                <a href={`tel:+91${OPEN_POSTER.contactPhone}`}>
+                  {OPEN_POSTER.contactPhone}
+                </a>
+              </strong>
+            </li>
+            <li>
+              <span>Official shuttle</span>
+              <strong>{OPEN_POSTER.shuttle}</strong>
+            </li>
+            <li>
+              <span>Hospitality</span>
+              <strong>{OPEN_POSTER.hospitality}</strong>
+            </li>
+            <li>
+              <span>Prizes</span>
+              <strong>{OPEN_POSTER.prizes}</strong>
+            </li>
+            <li>
+              <span>Participation gift</span>
+              <strong>{OPEN_POSTER.participationGift}</strong>
+            </li>
+            <li>
+              <span>Entry cap</span>
+              <strong>{OPEN_POSTER.maxEntriesNote}</strong>
+            </li>
+            <li>
+              <span>Fees (per participant)</span>
+              <strong>
+                {OPEN_FEE_LADDER.map(
+                  (row) =>
+                    `${row.events} event${row.events > 1 ? "s" : ""} ${formatInr(row.amountInr)}`
+                ).join(" · ")}
+              </strong>
+            </li>
+          </ul>
+        </section>
+
+        <section className="badminton-rules" aria-label="Categories and rules">
+          <h2 className="badminton-section-title">Categories &amp; rules</h2>
+          <ul className="badminton-rules-list">
+            <li>
+              <strong>Men&apos;s Doubles:</strong> 60+ (min age 27), 70+ (min
+              30), 80+ (min 35), 90+ (min 40) — combined age brackets.
+            </li>
+            <li>
+              <strong>Mixed Doubles:</strong> 55+ (male min 30+, female open) ·
+              75+ (female min 30+, male min 35+).
+            </li>
+            <li>
+              <strong>Women&apos;s Doubles:</strong> pairing via chit system —
+              no partner at signup.
+            </li>
+            {OPEN_POSTER.rules.map((rule) => (
+              <li key={rule}>{rule}</li>
+            ))}
+          </ul>
         </section>
       </div>
       <Footer />

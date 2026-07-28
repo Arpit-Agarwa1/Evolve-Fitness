@@ -1,5 +1,5 @@
 /**
- * Badminton Championship portal — black / emerald / gold accents on Evolve dark base.
+ * Badminton Championship portal — court atmosphere, emerald / gold on Evolve dark.
  */
 
 .badminton-page {
@@ -7,6 +7,8 @@
   --bd-emerald-bright: #14b8a6;
   --bd-gold: #d4a84b;
   --bd-gold-soft: rgba(212, 168, 75, 0.18);
+  --bd-court: #0a3d32;
+  --bd-court-line: rgba(255, 255, 255, 0.09);
   flex: 1;
   width: 100%;
   max-width: 100%;
@@ -17,6 +19,93 @@
   color: var(--ev-text-muted);
 }
 
+/* Open page — indoor court floor + line grid + soft stadium wash */
+.badminton-page--court {
+  position: relative;
+  isolation: isolate;
+  background-color: #071a16;
+  background-image:
+    radial-gradient(ellipse 100% 60% at 50% -8%, rgba(212, 168, 75, 0.14), transparent 50%),
+    radial-gradient(ellipse 55% 40% at 0% 40%, rgba(13, 148, 136, 0.18), transparent 55%),
+    radial-gradient(ellipse 50% 35% at 100% 65%, rgba(10, 90, 75, 0.28), transparent 55%),
+    linear-gradient(
+      180deg,
+      #0b2a24 0%,
+      #071a16 42%,
+      #061412 100%
+    );
+}
+
+.badminton-page--court::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='180' viewBox='0 0 160 180'%3E%3Cg fill='none' stroke='%23e8ecea' stroke-width='1.1'%3E%3Cpath d='M80 22c-8 16-22 32-22 48 0 14 10 25 22 25s22-11 22-25c0-16-14-32-22-48z'/%3E%3Cpath d='M58 68c8 5 15 8 22 8s14-3 22-8'/%3E%3Ccircle cx='80' cy='98' r='3.2' fill='%23e8ecea' stroke='none'/%3E%3Cpath d='M80 102v34'/%3E%3Cpath d='M70 140h20'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 160px 180px;
+  background-repeat: repeat;
+  animation: bd-shuttle-drift 56s linear infinite;
+}
+
+.badminton-page--court::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.11;
+  background-image:
+    linear-gradient(
+      90deg,
+      transparent 0,
+      transparent calc(50% - 0.5px),
+      rgba(255, 255, 255, 0.35) calc(50% - 0.5px),
+      rgba(255, 255, 255, 0.35) calc(50% + 0.5px),
+      transparent calc(50% + 0.5px)
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0,
+      transparent 79px,
+      rgba(255, 255, 255, 0.045) 79px,
+      rgba(255, 255, 255, 0.045) 80px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0,
+      transparent 79px,
+      rgba(255, 255, 255, 0.045) 79px,
+      rgba(255, 255, 255, 0.045) 80px
+    );
+}
+
+.badminton-page--court > * {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes bd-shuttle-drift {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 160px 180px;
+  }
+}
+
+@keyframes bd-arena-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .badminton-hero {
   position: relative;
   isolation: isolate;
@@ -24,6 +113,95 @@
     clamp(3rem, 7vw, 4.5rem);
   text-align: center;
   overflow: hidden;
+}
+
+/* Clean stadium hero — no poster art */
+.badminton-hero--arena {
+  min-height: min(48vh, 26rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: clamp(5.75rem, 14vw, 7.25rem);
+  padding-bottom: clamp(2.25rem, 5vw, 3.25rem);
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 0%, rgba(212, 168, 75, 0.2), transparent 62%),
+    radial-gradient(ellipse 90% 70% at 50% 100%, rgba(13, 148, 136, 0.28), transparent 55%),
+    linear-gradient(180deg, #0d332b 0%, #0a241f 55%, #071a16 100%);
+}
+
+.badminton-hero__veil {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.05), transparent 28%),
+    radial-gradient(circle at 80% 25%, rgba(255, 255, 255, 0.04), transparent 26%),
+    linear-gradient(180deg, transparent 55%, rgba(7, 26, 22, 0.75) 100%);
+}
+
+.badminton-hero__court-lines {
+  position: absolute;
+  left: 50%;
+  bottom: 12%;
+  width: min(92%, 42rem);
+  height: 46%;
+  z-index: 0;
+  pointer-events: none;
+  translate: -50% 0;
+  opacity: 0.45;
+  border: 1.5px solid rgba(255, 255, 255, 0.32);
+  border-radius: 3px;
+  background:
+    linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent)
+      center / 100% 1.5px no-repeat,
+    linear-gradient(0deg, transparent 18%, rgba(255, 255, 255, 0.4) 18%, rgba(255, 255, 255, 0.4) calc(18% + 1.5px), transparent calc(18% + 1.5px)),
+    linear-gradient(0deg, transparent, rgba(255, 255, 255, 0.28), transparent)
+      center / 1.5px 100% no-repeat;
+  box-shadow: inset 0 0 0 1px rgba(212, 168, 75, 0.08);
+  transform: perspective(520px) rotateX(62deg) scale(1.08);
+  transform-origin: center bottom;
+  animation: bd-court-pulse 7s ease-in-out infinite;
+}
+
+.badminton-hero__net {
+  position: absolute;
+  left: 50%;
+  bottom: 34%;
+  width: min(78%, 34rem);
+  height: 2.75rem;
+  z-index: 0;
+  pointer-events: none;
+  translate: -50% 0;
+  opacity: 0.5;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.35) 0 1px,
+      transparent 1px 8px
+    ),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.55) 0,
+      rgba(255, 255, 255, 0.55) 2px,
+      transparent 2px
+    );
+  border-top: 2px solid rgba(232, 236, 234, 0.65);
+  border-bottom: 1px solid rgba(232, 236, 234, 0.35);
+  transform: perspective(520px) rotateX(55deg);
+  transform-origin: center bottom;
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+
+@keyframes bd-court-pulse {
+  0%,
+  100% {
+    opacity: 0.38;
+  }
+  50% {
+    opacity: 0.55;
+  }
 }
 
 .badminton-hero__glow {
@@ -49,6 +227,7 @@
   letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--bd-gold);
+  animation: bd-arena-rise 0.7s ease both;
 }
 
 .badminton-hero__title {
@@ -60,16 +239,29 @@
   font-weight: 500;
   line-height: 1.15;
   color: var(--ev-text);
+  text-shadow: 0 2px 28px rgba(0, 0, 0, 0.35);
+  animation: bd-arena-rise 0.85s 0.08s ease both;
+  max-width: 18ch;
+  margin-left: auto;
+  margin-right: auto;
+  text-wrap: balance;
 }
 
 .badminton-hero__lede {
   position: relative;
   z-index: 1;
-  max-width: 36rem;
+  max-width: 34rem;
   margin: 0 auto 1.75rem;
   font-size: 1.0625rem;
   font-weight: 300;
   line-height: 1.65;
+  animation: bd-arena-rise 0.9s 0.14s ease both;
+  padding-inline: 0.5rem;
+}
+
+.badminton-hero--arena .badminton-hero__lede {
+  margin-bottom: 0;
+  color: rgba(232, 236, 234, 0.9);
 }
 
 .badminton-hero__actions {
@@ -158,6 +350,47 @@
   max-width: 720px;
   margin: 0 auto;
   padding: 0 clamp(1.25rem, 4vw, 2.5rem) clamp(3.5rem, 8vw, 5rem);
+}
+
+.badminton-page--court .badminton-register {
+  padding-top: clamp(1.25rem, 3vw, 2rem);
+  padding-bottom: clamp(2rem, 5vw, 3rem);
+  animation: bd-arena-rise 0.85s 0.2s ease both;
+}
+
+.badminton-page--court .badminton-details,
+.badminton-page--court .badminton-rules {
+  padding-bottom: clamp(2.5rem, 6vw, 3.5rem);
+}
+
+.badminton-page--court .badminton-form {
+  backdrop-filter: blur(14px);
+  background: linear-gradient(
+    165deg,
+    rgba(12, 36, 30, 0.92) 0%,
+    rgba(8, 26, 22, 0.88) 100%
+  );
+  border-color: rgba(212, 168, 75, 0.22);
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.badminton-page--court .badminton-detail-list li {
+  backdrop-filter: blur(8px);
+  background: rgba(10, 32, 28, 0.72);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badminton-page--court::before,
+  .badminton-hero__court-lines,
+  .badminton-eyebrow,
+  .badminton-hero__title,
+  .badminton-hero__lede,
+  .badminton-page--court .badminton-register {
+    animation: none;
+  }
 }
 
 .badminton-section-title {
@@ -650,8 +883,31 @@
     padding-bottom: 1.25rem;
   }
 
+  .badminton-hero--arena {
+    min-height: 0;
+    padding-top: 5rem;
+    padding-bottom: 1.75rem;
+    justify-content: flex-start;
+  }
+
+  .badminton-hero--arena .badminton-hero__court-lines {
+    height: 38%;
+    bottom: 8%;
+    opacity: 0.28;
+    transform: perspective(420px) rotateX(64deg) scale(1.02);
+  }
+
+  .badminton-hero--arena .badminton-hero__net {
+    bottom: 28%;
+    height: 2rem;
+    opacity: 0.32;
+  }
+
   .badminton-hero__title {
-    font-size: clamp(1.75rem, 8vw, 2.35rem);
+    font-size: clamp(1.65rem, 7.2vw, 2.15rem);
+    line-height: 1.2;
+    max-width: 12.5ch;
+    margin-bottom: 0.75rem;
   }
 
   .badminton-hero__lede {
@@ -660,9 +916,17 @@
     padding: 0 0.15rem;
   }
 
+  .badminton-hero--arena .badminton-hero__lede {
+    margin-bottom: 0;
+  }
+
   .badminton-eyebrow {
-    letter-spacing: 0.18em;
-    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    font-size: 0.65rem;
+    max-width: 22rem;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.4;
   }
 
   .badminton-hero__actions {
@@ -680,6 +944,15 @@
     padding-left: 1rem;
     padding-right: 1rem;
     padding-bottom: 2.75rem;
+  }
+
+  .badminton-page--court .badminton-register {
+    padding-top: 1rem;
+    padding-bottom: 2rem;
+  }
+
+  .badminton-page--court .badminton-form {
+    backdrop-filter: blur(10px);
   }
 
   .badminton-hub {
@@ -770,6 +1043,21 @@
     padding: 0.35rem 0;
   }
 
+  .badminton-detail-list li {
+    padding: 0.85rem 0.95rem;
+  }
+
+  .badminton-detail-list strong {
+    font-size: 0.9375rem;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+
+  .badminton-rules-list {
+    padding-left: 1.1rem;
+    font-size: 0.9375rem;
+  }
+
   .badminton-confirm {
     padding: 1.5rem 1rem;
   }
@@ -777,11 +1065,24 @@
   .badminton-btn {
     padding: 0.9rem 1.25rem;
   }
+
+  .badminton-section-title {
+    font-size: clamp(1.45rem, 6vw, 1.85rem);
+  }
 }
 
 @media (max-width: 380px) {
   .badminton-hero {
     padding-top: 4.25rem;
+  }
+
+  .badminton-hero--arena {
+    padding-top: 4.5rem;
+  }
+
+  .badminton-hero__title {
+    font-size: 1.5rem;
+    max-width: 11.5ch;
   }
 
   .badminton-form {
@@ -791,6 +1092,10 @@
   .badminton-steps li span {
     width: 1.35rem;
     height: 1.35rem;
+  }
+
+  .badminton-eyebrow {
+    letter-spacing: 0.1em;
   }
 }
 

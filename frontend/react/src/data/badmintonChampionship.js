@@ -78,9 +78,9 @@ export const OPEN_CATEGORIES = [
     hint: "Male min 30+ · Female age open",
   },
   {
-    id: "open_xd_70",
-    label: "Mixed Doubles 70+",
-    shortLabel: "XD 70+",
+    id: "open_xd_75",
+    label: "Mixed Doubles 75+",
+    shortLabel: "XD 75+",
     division: "mixed_doubles",
     requiresPartner: true,
     minAgeMale: 35,
@@ -110,16 +110,51 @@ export const OPEN_PLAYER_LEVEL_OPTIONS = [
   { value: "semi_professional", label: "Semi professional" },
 ];
 
+/** Poster fee ladder (per participant, by number of events). */
+export const OPEN_FEE_LADDER = [
+  { events: 1, amountInr: 500 },
+  { events: 2, amountInr: 800 },
+  { events: 3, amountInr: 1000 },
+  { events: 4, amountInr: 1200 },
+];
+
 /**
  * @param {number} eventCount
  */
 export function computeOpenFeeInr(eventCount) {
   if (eventCount <= 0) return 0;
   if (eventCount === 1) return 500;
-  if (eventCount === 2) return 750;
+  if (eventCount === 2) return 800;
   if (eventCount === 3) return 1000;
-  return 1250;
+  return 1200;
 }
+
+/** Open poster facts shown on /badminton/open. */
+export const OPEN_POSTER = {
+  title: "Open Badminton Championship",
+  organizer: "EVOLVE — The Luxury Fitness",
+  poweredBy: "Achievers Badminton Academy",
+  dateLabel: "9 August 2026",
+  timeLabel: "7:00 AM",
+  venue: "Khelcity, Jagatpura, Jaipur",
+  registrationClosesLabel: REGISTRATION_CLOSES_LABEL,
+  contactName: "Ujjwal Bajaj",
+  contactPhone: "9829063727",
+  shuttle: "Yonex Mavis 350",
+  hospitality: "Premium refreshments (snacks + lunch)",
+  prizes:
+    "Cash prize, trophy, Evolve gift hamper & exclusive Evolve gift (winners / runners-up)",
+  participationGift: "Special gift for every participant",
+  maxEntriesNote: `Maximum ${MAX_ENTRIES_PER_CATEGORY} entries per event (first come, first served)`,
+  rules: [
+    "Professional players are NOT allowed.",
+    "Semi-professional players may partner ONLY with a Club player.",
+    "Club players may partner with any eligible category.",
+    "A list of professional and semi-professional players is available with the organizers.",
+    "Women's Doubles pairing is done through a chit system.",
+    "Online registration only. Registration closes on 7 August.",
+  ],
+};
 
 /**
  * @param {string} id
