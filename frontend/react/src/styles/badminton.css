@@ -8,6 +8,9 @@
   --bd-gold: #d4a84b;
   --bd-gold-soft: rgba(212, 168, 75, 0.18);
   flex: 1;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
   background:
     radial-gradient(ellipse 80% 50% at 50% -10%, rgba(13, 148, 136, 0.18), transparent 55%),
     var(--ev-bg);
@@ -297,6 +300,18 @@
   line-height: 1.5;
 }
 
+.badminton-form__field-note {
+  display: block;
+  margin: 0.35rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+  color: var(--ev-text-muted);
+  opacity: 0.9;
+}
+
 .badminton-payee-note {
   margin: 0 0 1rem;
   font-size: 0.75rem;
@@ -413,6 +428,13 @@
 
 .badminton-form__actions {
   margin-top: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.badminton-form__actions .badminton-btn {
+  min-height: 2.75rem;
 }
 
 .badminton-category-list {
@@ -461,6 +483,12 @@
   font-size: 0.8125rem;
   color: var(--bd-gold);
   white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.badminton-category__label {
+  min-width: 0;
+  word-break: break-word;
 }
 
 .badminton-fee {
@@ -493,6 +521,7 @@
   margin: 0;
   color: var(--ev-text);
   font-weight: 500;
+  overflow-wrap: anywhere;
 }
 
 .badminton-review__amount {
@@ -521,9 +550,11 @@
   margin: 0 0 1.5rem;
   font-size: 1.0625rem;
   color: var(--bd-gold);
+  overflow-wrap: anywhere;
 }
 
 .badminton-hero--compact {
+  padding-top: clamp(4.5rem, 10vw, 6rem);
   padding-bottom: clamp(1.5rem, 4vw, 2.5rem);
 }
 
@@ -549,12 +580,13 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  min-width: 0;
 }
 
 .badminton-hub-card h2 {
   margin: 0;
   font-family: var(--ev-serif);
-  font-size: 1.65rem;
+  font-size: clamp(1.35rem, 4vw, 1.65rem);
   font-weight: 500;
   color: var(--ev-text);
 }
@@ -569,13 +601,6 @@
   font-size: 0.75rem;
   color: var(--ev-text-muted);
   word-break: break-all;
-}
-
-.badminton-form__subtitle {
-  margin: 1.5rem 0 0.75rem;
-  font-family: var(--ev-serif);
-  font-size: 1.25rem;
-  color: var(--ev-text);
 }
 
 .badminton-cart-list {
@@ -595,11 +620,14 @@
   border-radius: var(--ev-radius);
   border: 1px solid var(--ev-border);
   background: rgba(0, 0, 0, 0.25);
+  min-width: 0;
 }
 
 .badminton-cart-item div {
   display: grid;
   gap: 0.25rem;
+  min-width: 0;
+  flex: 1;
 }
 
 .badminton-cart-item strong {
@@ -608,5 +636,161 @@
 
 .badminton-cart-item span {
   font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+/* —— Mobile / small screens —— */
+@media (max-width: 639px) {
+  .badminton-hero {
+    padding: 4.75rem 1rem 2rem;
+  }
+
+  .badminton-hero--compact {
+    padding-top: 4.5rem;
+    padding-bottom: 1.25rem;
+  }
+
+  .badminton-hero__title {
+    font-size: clamp(1.75rem, 8vw, 2.35rem);
+  }
+
+  .badminton-hero__lede {
+    font-size: 0.975rem;
+    margin-bottom: 1.25rem;
+    padding: 0 0.15rem;
+  }
+
+  .badminton-eyebrow {
+    letter-spacing: 0.18em;
+    font-size: 0.6875rem;
+  }
+
+  .badminton-hero__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .badminton-hero__actions .badminton-btn {
+    width: 100%;
+  }
+
+  .badminton-details,
+  .badminton-rules,
+  .badminton-register {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-bottom: 2.75rem;
+  }
+
+  .badminton-hub {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-bottom: 2.75rem;
+  }
+
+  .badminton-hub-card {
+    padding: 1.15rem;
+  }
+
+  .badminton-hub-card .badminton-btn {
+    width: 100%;
+  }
+
+  .badminton-banner {
+    margin-left: 0;
+    margin-right: 0;
+    max-width: none;
+  }
+
+  .badminton-steps {
+    gap: 0.4rem 0.65rem;
+    margin-bottom: 1rem;
+  }
+
+  .badminton-steps li {
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+  }
+
+  .badminton-form {
+    padding: 1.1rem;
+  }
+
+  .badminton-form__title {
+    font-size: 1.3rem;
+  }
+
+  .badminton-form__hint {
+    font-size: 0.875rem;
+  }
+
+  .badminton-form input,
+  .badminton-form select {
+    /* 16px prevents iOS focus zoom */
+    font-size: 16px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .badminton-form select {
+    text-overflow: ellipsis;
+  }
+
+  .badminton-form__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .badminton-form__actions .badminton-btn {
+    width: 100%;
+  }
+
+  .badminton-category {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+    padding: 0.85rem 0.95rem;
+  }
+
+  .badminton-category__meta {
+    white-space: normal;
+  }
+
+  .badminton-cart-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.65rem;
+  }
+
+  .badminton-cart-item .badminton-back {
+    align-self: flex-start;
+    margin-bottom: 0;
+    min-height: 2.5rem;
+    padding: 0.35rem 0;
+  }
+
+  .badminton-confirm {
+    padding: 1.5rem 1rem;
+  }
+
+  .badminton-btn {
+    padding: 0.9rem 1.25rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .badminton-hero {
+    padding-top: 4.25rem;
+  }
+
+  .badminton-form {
+    padding: 0.9rem;
+  }
+
+  .badminton-steps li span {
+    width: 1.35rem;
+    height: 1.35rem;
+  }
 }
 

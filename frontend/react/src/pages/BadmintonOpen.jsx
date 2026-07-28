@@ -510,7 +510,6 @@ export default function BadmintonOpen() {
                           disabled={inCart || ageBlocked || unavailable}
                         >
                           {c.label}
-                          {c.hint ? ` — ${c.hint}` : ""}
                           {inCart ? " — in cart" : ""}
                           {ageBlocked ? " — not eligible" : ""}
                           {unavailable ? " — full/closed" : ""}
@@ -518,6 +517,11 @@ export default function BadmintonOpen() {
                       );
                     })}
                   </select>
+                  {draftCat?.hint ? (
+                    <span className="badminton-form__field-note">
+                      {draftCat.hint}
+                    </span>
+                  ) : null}
                 </label>
 
                 {draftNeedsPartner ? (
@@ -613,10 +617,7 @@ export default function BadmintonOpen() {
                   : ""}
               </p>
 
-              <div
-                className="badminton-form__actions"
-                style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}
-              >
+              <div className="badminton-form__actions">
                 <button
                   type="button"
                   className="badminton-btn badminton-btn--ghost"
@@ -688,10 +689,7 @@ export default function BadmintonOpen() {
                 Payment will be collected by Tuff Lad Pro Limited (legal
                 subsidiary of Evolve Fitness).
               </p>
-              <div
-                className="badminton-form__actions"
-                style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}
-              >
+              <div className="badminton-form__actions">
                 <button
                   type="button"
                   className="badminton-btn badminton-btn--ghost"
