@@ -297,6 +297,14 @@
   line-height: 1.5;
 }
 
+.badminton-payee-note {
+  margin: 0 0 1rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  opacity: 0.72;
+  letter-spacing: 0.01em;
+}
+
 .badminton-form__single .badminton-form__hint {
   display: block;
   margin: 0.5rem 0 0;

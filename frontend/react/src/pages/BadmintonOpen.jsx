@@ -9,10 +9,13 @@ import {
   OPEN_CATEGORIES,
   OPEN_PLAYER_LEVEL_OPTIONS,
   BADMINTON_OPEN_PATH,
+  REGISTRATION_CLOSES_LABEL,
   computeOpenFeeInr,
   formatInr,
   isValidIndianMobile,
   getCategoryById,
+  getOpenMinAgeForGender,
+  openCategoryNeedsPartner,
 } from "../data/badmintonChampionship";
 import "../styles/badminton.css";
 
@@ -21,12 +24,13 @@ const EMPTY_DETAILS = {
   lastName: "",
   mobile: "",
   age: "",
+  gender: "",
   playerLevel: "beginner",
 };
 
 /**
  * Poster 2 — Evolve Open Tournament (QR → /badminton/open).
- * Cart of categories + partner per event → Cashfree checkout.
+ * MD / XD / WD cart → Cashfree checkout.
  */
 export default function BadmintonOpen() {
   const [step, setStep] = useState(
@@ -58,7 +62,6 @@ export default function BadmintonOpen() {
     loadStatus();
   }, [loadStatus]);
 
-  // After Cashfree redirect return, verify payment and show confirmation.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const registrationId = String(params.get("registrationId") || "")
@@ -103,6 +106,10 @@ export default function BadmintonOpen() {
   const ageNum = Number(details.age);
   const age =
     details.age.trim() && Number.isFinite(ageNum) ? Math.round(ageNum) : NaN;
+  const draftCat = draftCategoryId
+    ? getCategoryById(draftCategoryId, "open")
+    : null;
+  const draftNeedsPartner = openCategoryNeedsPartner(draftCat);
 
   const categoryMeta = useMemo(() => {
     /** @type {Record<string, { available: boolean; count: number }>} */
@@ -128,6 +135,9 @@ export default function BadmintonOpen() {
     if (!isValidIndianMobile(details.mobile)) {
       return "Enter a valid 10-digit Indian mobile number.";
     }
+    if (!["male", "female"].includes(details.gender)) {
+      return "Select gender.";
+    }
     const a = Number(details.age);
     if (!details.age.trim() || !Number.isFinite(a) || a < 1 || a > 120) {
       return "Enter a valid age in years.";
@@ -137,6 +147,18 @@ export default function BadmintonOpen() {
 
   function fullNameFromDetails() {
     return `${details.firstName.trim()} ${details.lastName.trim()}`.trim();
+  }
+
+  function isCategoryBlockedForPlayer(cat) {
+    if (!cat || Number.isNaN(age) || !details.gender) return false;
+    if (cat.division === "womens_doubles" && details.gender !== "female") {
+      return true;
+    }
+    if (cat.division === "mens_doubles" && details.gender !== "male") {
+      return true;
+    }
+    const min = getOpenMinAgeForGender(cat, details.gender);
+    return typeof min === "number" && age < min;
   }
 
   function goToCart() {
@@ -168,10 +190,37 @@ export default function BadmintonOpen() {
       setError("Invalid category.");
       return;
     }
-    if (cat.minAge != null && !Number.isNaN(age) && age < cat.minAge) {
-      setError(`${cat.label} requires minimum age ${cat.minAge}+.`);
+    if (cat.division === "womens_doubles" && details.gender !== "female") {
+      setError("Women's Doubles is for female players only.");
       return;
     }
+    if (cat.division === "mens_doubles" && details.gender !== "male") {
+      setError("Men's Doubles is for male players only.");
+      return;
+    }
+    const playerMin = getOpenMinAgeForGender(cat, details.gender);
+    if (typeof playerMin === "number" && !Number.isNaN(age) && age < playerMin) {
+      setError(`${cat.label} requires minimum age ${playerMin}+ for you.`);
+      return;
+    }
+
+    const needsPartner = openCategoryNeedsPartner(cat);
+
+    if (!needsPartner) {
+      setCart((prev) => [
+        ...prev,
+        {
+          categoryId: draftCategoryId,
+          partnerFirstName: "",
+          partnerLastName: "",
+          partnerAge: "",
+          partnerMobile: "",
+        },
+      ]);
+      setDraftCategoryId("");
+      return;
+    }
+
     if (!draftPartnerFirstName.trim() || !draftPartnerLastName.trim()) {
       setError("Enter partner first and last name.");
       return;
@@ -186,8 +235,15 @@ export default function BadmintonOpen() {
       setError("Enter a valid partner age.");
       return;
     }
-    if (cat.minAge != null && partnerAgeNum < cat.minAge) {
-      setError(`Partner must be age ${cat.minAge}+ for ${cat.label}.`);
+    const partnerGender =
+      cat.division === "mixed_doubles"
+        ? details.gender === "male"
+          ? "female"
+          : "male"
+        : details.gender;
+    const partnerMin = getOpenMinAgeForGender(cat, partnerGender);
+    if (typeof partnerMin === "number" && partnerAgeNum < partnerMin) {
+      setError(`Partner must be age ${partnerMin}+ for ${cat.label}.`);
       return;
     }
     if (
@@ -219,6 +275,16 @@ export default function BadmintonOpen() {
     setCart((prev) => prev.filter((c) => c.categoryId !== categoryId));
   }
 
+  function cartItemPartnerLabel(item) {
+    const cat = getCategoryById(item.categoryId, "open");
+    if (!openCategoryNeedsPartner(cat)) {
+      return "Partner: chit system";
+    }
+    return `Partner: ${item.partnerFirstName} ${item.partnerLastName} · age ${item.partnerAge}${
+      item.partnerMobile ? ` · ${item.partnerMobile}` : ""
+    }`;
+  }
+
   async function handleCheckout() {
     setError("");
     if (cart.length < 1) {
@@ -242,12 +308,13 @@ export default function BadmintonOpen() {
           fullName: fullNameFromDetails(),
           mobile: details.mobile.trim(),
           age: Math.round(Number(details.age)),
+          gender: details.gender,
           playerLevel: details.playerLevel,
           cart: cart.map((item) => ({
             categoryId: item.categoryId,
             partnerFirstName: item.partnerFirstName,
             partnerLastName: item.partnerLastName,
-            partnerAge: Number(item.partnerAge),
+            partnerAge: item.partnerAge ? Number(item.partnerAge) : null,
             partnerMobile: item.partnerMobile,
           })),
         }),
@@ -264,7 +331,6 @@ export default function BadmintonOpen() {
         redirectTarget: "_modal",
       });
 
-      // User closed modal without paying.
       if (result?.error) {
         throw new Error(
           result.error.message || "Payment cancelled. You can try again."
@@ -293,18 +359,19 @@ export default function BadmintonOpen() {
   return (
     <>
       <SEO
-        title="EVOLVE Open Badminton Tournament 2026"
-        description="Register for the EVOLVE Open Badminton Tournament. Individual entries with partners, Cashfree checkout."
+        title="EVOLVE Open Badminton Championship 2026"
+        description="Register for the EVOLVE Open Badminton Championship — Men's, Mixed & Women's Doubles. Online payment via Cashfree."
         path={BADMINTON_OPEN_PATH}
       />
       <Navbar />
       <div className="badminton-page">
         <section className="badminton-hero badminton-hero--compact">
-          <p className="badminton-eyebrow">Poster 2 · Open tournament</p>
+          <p className="badminton-eyebrow">Open championship · 9 Aug 2026</p>
           <h1 className="badminton-hero__title">Evolve Open Tournament</h1>
           <p className="badminton-hero__lede">
-            Individual registration. Add categories with your partner details to
-            cart, then pay online. Categories: 60+ · 70+ · 80+ · 90+.
+            Men&apos;s Doubles, Mixed Doubles &amp; Women&apos;s Doubles. Add up
+            to 4 events, then pay online. Registration closes{" "}
+            {REGISTRATION_CLOSES_LABEL}.
           </p>
         </section>
 
@@ -374,7 +441,18 @@ export default function BadmintonOpen() {
                     onChange={(e) => setDetail("age", e.target.value)}
                   />
                 </label>
-                <label className="badminton-form__span2">
+                <label>
+                  <span>Gender *</span>
+                  <select
+                    value={details.gender}
+                    onChange={(e) => setDetail("gender", e.target.value)}
+                  >
+                    <option value="">Select</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                  </select>
+                </label>
+                <label>
                   <span>Player level *</span>
                   <select
                     value={details.playerLevel}
@@ -388,6 +466,10 @@ export default function BadmintonOpen() {
                   </select>
                 </label>
               </div>
+              <p className="badminton-form__hint">
+                Professionals are not eligible. Semi-professionals may partner
+                only with a Club player.
+              </p>
               <div className="badminton-form__actions">
                 <button
                   type="button"
@@ -404,13 +486,12 @@ export default function BadmintonOpen() {
             <div className="badminton-form">
               <h2 className="badminton-form__title">Add events to cart</h2>
               <p className="badminton-form__hint">
-                Select a category, enter partner details, add to cart. Repeat for
-                more events (max 4). Min ages: 60+ → 26 · 70+ → 30 · 80+ → 35 ·
-                90+ → 40.
+                Men&apos;s Doubles (60+/70+/80+/90+), Mixed Doubles (55+/70+),
+                Women&apos;s Doubles (chit pairing). Max 4 events.
               </p>
 
               <div className="badminton-form__grid">
-                <label>
+                <label className="badminton-form__span2">
                   <span>Category</span>
                   <select
                     value={draftCategoryId}
@@ -419,10 +500,7 @@ export default function BadmintonOpen() {
                     <option value="">Select</option>
                     {OPEN_CATEGORIES.map((c) => {
                       const inCart = cart.some((x) => x.categoryId === c.id);
-                      const ageBlocked =
-                        c.minAge != null &&
-                        !Number.isNaN(age) &&
-                        age < c.minAge;
+                      const ageBlocked = isCategoryBlockedForPlayer(c);
                       const meta = categoryMeta[c.id];
                       const unavailable = meta && !meta.available;
                       return (
@@ -432,51 +510,65 @@ export default function BadmintonOpen() {
                           disabled={inCart || ageBlocked || unavailable}
                         >
                           {c.label}
-                          {c.minAge != null ? ` (min age ${c.minAge}+)` : ""}
+                          {c.hint ? ` — ${c.hint}` : ""}
                           {inCart ? " — in cart" : ""}
-                          {ageBlocked ? " — age" : ""}
+                          {ageBlocked ? " — not eligible" : ""}
                           {unavailable ? " — full/closed" : ""}
                         </option>
                       );
                     })}
                   </select>
                 </label>
-                <label>
-                  <span>Partner first name *</span>
-                  <input
-                    value={draftPartnerFirstName}
-                    onChange={(e) => setDraftPartnerFirstName(e.target.value)}
-                    autoComplete="off"
-                  />
-                </label>
-                <label>
-                  <span>Partner last name *</span>
-                  <input
-                    value={draftPartnerLastName}
-                    onChange={(e) => setDraftPartnerLastName(e.target.value)}
-                    autoComplete="off"
-                  />
-                </label>
-                <label>
-                  <span>Partner age *</span>
-                  <input
-                    type="number"
-                    min={1}
-                    max={120}
-                    inputMode="numeric"
-                    placeholder="Age in years"
-                    value={draftPartnerAge}
-                    onChange={(e) => setDraftPartnerAge(e.target.value)}
-                  />
-                </label>
-                <label>
-                  <span>Partner mobile (optional)</span>
-                  <input
-                    value={draftPartnerMobile}
-                    onChange={(e) => setDraftPartnerMobile(e.target.value)}
-                    inputMode="tel"
-                  />
-                </label>
+
+                {draftNeedsPartner ? (
+                  <>
+                    <label>
+                      <span>Partner first name *</span>
+                      <input
+                        value={draftPartnerFirstName}
+                        onChange={(e) =>
+                          setDraftPartnerFirstName(e.target.value)
+                        }
+                        autoComplete="off"
+                      />
+                    </label>
+                    <label>
+                      <span>Partner last name *</span>
+                      <input
+                        value={draftPartnerLastName}
+                        onChange={(e) =>
+                          setDraftPartnerLastName(e.target.value)
+                        }
+                        autoComplete="off"
+                      />
+                    </label>
+                    <label>
+                      <span>Partner age *</span>
+                      <input
+                        type="number"
+                        min={1}
+                        max={120}
+                        inputMode="numeric"
+                        placeholder="Age in years"
+                        value={draftPartnerAge}
+                        onChange={(e) => setDraftPartnerAge(e.target.value)}
+                      />
+                    </label>
+                    <label>
+                      <span>Partner mobile (optional)</span>
+                      <input
+                        value={draftPartnerMobile}
+                        onChange={(e) => setDraftPartnerMobile(e.target.value)}
+                        inputMode="tel"
+                      />
+                    </label>
+                  </>
+                ) : draftCat?.division === "womens_doubles" ? (
+                  <p className="badminton-form__hint badminton-form__span2">
+                    Women&apos;s Doubles pairing is done through the chit system
+                    — no partner details needed.
+                  </p>
+                ) : null}
               </div>
               <div className="badminton-form__actions">
                 <button
@@ -499,13 +591,7 @@ export default function BadmintonOpen() {
                       <li key={item.categoryId} className="badminton-cart-item">
                         <div>
                           <strong>{cat?.label ?? item.categoryId}</strong>
-                          <span>
-                            Partner: {item.partnerFirstName}{" "}
-                            {item.partnerLastName} · age {item.partnerAge}
-                            {item.partnerMobile
-                              ? ` · ${item.partnerMobile}`
-                              : ""}
-                          </span>
+                          <span>{cartItemPartnerLabel(item)}</span>
                         </div>
                         <button
                           type="button"
@@ -527,7 +613,10 @@ export default function BadmintonOpen() {
                   : ""}
               </p>
 
-              <div className="badminton-form__actions" style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+              <div
+                className="badminton-form__actions"
+                style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}
+              >
                 <button
                   type="button"
                   className="badminton-btn badminton-btn--ghost"
@@ -566,8 +655,10 @@ export default function BadmintonOpen() {
                   <dd>{details.mobile}</dd>
                 </div>
                 <div>
-                  <dt>Age</dt>
-                  <dd>{details.age}</dd>
+                  <dt>Age / Gender</dt>
+                  <dd>
+                    {details.age} · {details.gender}
+                  </dd>
                 </div>
                 <div>
                   <dt>Events ({cart.length})</dt>
@@ -576,9 +667,7 @@ export default function BadmintonOpen() {
                       const cat = getCategoryById(item.categoryId, "open");
                       return (
                         <div key={item.categoryId}>
-                          {cat?.label}: {item.partnerFirstName}{" "}
-                          {item.partnerLastName}, age {item.partnerAge}
-                          {item.partnerMobile ? ` · ${item.partnerMobile}` : ""}
+                          {cat?.label}: {cartItemPartnerLabel(item)}
                         </div>
                       );
                     })}
@@ -595,7 +684,14 @@ export default function BadmintonOpen() {
                 Fees: 1 event ₹500 · 2 ₹750 · 3 ₹1,000 · 4 ₹1,250. Pay securely
                 via Cashfree.
               </p>
-              <div className="badminton-form__actions" style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+              <p className="badminton-payee-note">
+                Payment will be collected by Tuff Lad Pro Limited (legal
+                subsidiary of Evolve Fitness).
+              </p>
+              <div
+                className="badminton-form__actions"
+                style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}
+              >
                 <button
                   type="button"
                   className="badminton-btn badminton-btn--ghost"
@@ -632,9 +728,16 @@ export default function BadmintonOpen() {
                   <dd>
                     {(confirmed.events || []).map((ev) => (
                       <div key={ev.categoryId}>
-                        {ev.categoryLabel}: {ev.partnerName}
-                        {ev.partnerAge != null ? `, age ${ev.partnerAge}` : ""}
-                        {ev.partnerMobile ? ` · ${ev.partnerMobile}` : ""}
+                        {ev.categoryLabel}:{" "}
+                        {ev.partnerName
+                          ? `${ev.partnerName}${
+                              ev.partnerAge != null
+                                ? `, age ${ev.partnerAge}`
+                                : ""
+                            }${
+                              ev.partnerMobile ? ` · ${ev.partnerMobile}` : ""
+                            }`
+                          : "chit system"}
                       </div>
                     ))}
                   </dd>
@@ -644,13 +747,18 @@ export default function BadmintonOpen() {
                   <dd>{formatInr(confirmed.amountInr ?? 0)}</dd>
                 </div>
               </dl>
+              <p className="badminton-payee-note">
+                Paid to Tuff Lad Pro Limited (legal subsidiary of Evolve Fitness).
+              </p>
             </div>
           ) : null}
 
           {step !== "done" ? (
             <p className="badminton-form__hint" style={{ marginTop: "1.25rem" }}>
               Evolve member?{" "}
-              <Link to="/badminton/members">Members tournament registration</Link>
+              <Link to="/badminton/members">
+                Members tournament registration
+              </Link>
             </p>
           ) : null}
         </section>

@@ -10,6 +10,8 @@ import {
   MAX_ENTRIES_PER_CATEGORY,
   computeOpenFeeInr,
   getCategoryById,
+  getOpenMinAgeForGender,
+  openCategoryNeedsPartner,
   ageAsOf,
   isValidIndianMobile,
   normalizeIndianMobile,
@@ -97,7 +99,7 @@ export async function getPublicCategoryStatus(tournamentType = "all") {
 
   const payload = {
     open: windowOpen,
-    closesAt: "2026-08-06T23:59:59+05:30",
+    closesAt: "2026-08-07T23:59:59+05:30",
     forceClosed: settings.registrationForceClosed,
     categories,
   };
@@ -226,7 +228,7 @@ export function parseMemberRegistrationBody(body) {
 }
 
 /**
- * Open poster — details + cart of categories with partners.
+ * Open poster — details + cart of categories with partners (except WD chit).
  * @param {Record<string, unknown>} body
  */
 export function parseOpenRegistrationBody(body) {
@@ -238,6 +240,9 @@ export function parseOpenRegistrationBody(body) {
   const mobileRaw = String(body?.mobile ?? "").trim();
   const mobile = normalizeIndianMobile(mobileRaw);
   const email = String(body?.email ?? "")
+    .trim()
+    .toLowerCase();
+  const gender = String(body?.gender ?? "")
     .trim()
     .toLowerCase();
   const ageNum = Number(body?.age);
@@ -265,6 +270,12 @@ export function parseOpenRegistrationBody(body) {
       message: "Enter a valid 10-digit Indian mobile number",
     };
   }
+  if (!["male", "female"].includes(gender)) {
+    return {
+      ok: false,
+      message: "Select gender (required for Mixed Doubles age rules)",
+    };
+  }
   if (!Number.isFinite(ageNum) || ageNum < 1 || ageNum > 120) {
     return { ok: false, message: "Enter a valid age in years" };
   }
@@ -282,9 +293,7 @@ export function parseOpenRegistrationBody(body) {
 
   for (const item of cart) {
     const categoryId = String(item?.categoryId ?? "").trim();
-    const partnerFirstName = String(
-      item?.partnerFirstName ?? ""
-    ).trim();
+    const partnerFirstName = String(item?.partnerFirstName ?? "").trim();
     const partnerLastName = String(item?.partnerLastName ?? "").trim();
     const partnerName =
       String(item?.partnerName ?? "").trim() ||
@@ -305,12 +314,44 @@ export function parseOpenRegistrationBody(body) {
     if (!cat) {
       return { ok: false, message: `Unknown category: ${categoryId}` };
     }
-    if (typeof cat.minAge === "number" && age < cat.minAge) {
+
+    if (cat.division === "womens_doubles" && gender !== "female") {
       return {
         ok: false,
-        message: `${cat.label} requires minimum age ${cat.minAge}+`,
+        message: "Women's Doubles is for female players only",
       };
     }
+    if (cat.division === "mens_doubles" && gender !== "male") {
+      return {
+        ok: false,
+        message: "Men's Doubles is for male players only",
+      };
+    }
+
+    const playerMin = getOpenMinAgeForGender(cat, gender);
+    if (typeof playerMin === "number" && age < playerMin) {
+      return {
+        ok: false,
+        message: `${cat.label} requires minimum age ${playerMin}+ for you`,
+      };
+    }
+
+    const needsPartner = openCategoryNeedsPartner(cat);
+
+    if (!needsPartner) {
+      // Women's Doubles — chit pairing; no partner collected.
+      events.push({
+        categoryId: cat.id,
+        categoryLabel: cat.label,
+        partnerFirstName: "",
+        partnerLastName: "",
+        partnerName: "",
+        partnerAge: null,
+        partnerMobile: "",
+      });
+      continue;
+    }
+
     if (!partnerFirstName || !partnerLastName) {
       return {
         ok: false,
@@ -335,12 +376,21 @@ export function parseOpenRegistrationBody(body) {
         message: `Partner age is required for ${cat.label}`,
       };
     }
-    if (typeof cat.minAge === "number" && partnerAgeNum < cat.minAge) {
+
+    const partnerGender =
+      cat.division === "mixed_doubles"
+        ? gender === "male"
+          ? "female"
+          : "male"
+        : gender;
+    const partnerMin = getOpenMinAgeForGender(cat, partnerGender);
+    if (typeof partnerMin === "number" && partnerAgeNum < partnerMin) {
       return {
         ok: false,
-        message: `Partner must be age ${cat.minAge}+ for ${cat.label}`,
+        message: `Partner must be age ${partnerMin}+ for ${cat.label}`,
       };
     }
+
     if (partnerMobileRaw && !isValidIndianMobile(partnerMobileRaw)) {
       return {
         ok: false,
@@ -348,7 +398,6 @@ export function parseOpenRegistrationBody(body) {
       };
     }
 
-    // Persist every partner field the user entered for this event.
     events.push({
       categoryId: cat.id,
       categoryLabel: cat.label,
@@ -369,7 +418,7 @@ export function parseOpenRegistrationBody(body) {
       fullName,
       mobile,
       email: email || "",
-      gender: "",
+      gender,
       age,
       dateOfBirth: null,
       playerLevel,

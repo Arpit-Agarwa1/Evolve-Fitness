@@ -4,8 +4,8 @@
  */
 
 export const BADMINTON_EVENT_YEAR = 2026;
-export const REGISTRATION_CLOSES_LABEL = "6 August 2026";
-export const REGISTRATION_CLOSES_AT = new Date("2026-08-06T23:59:59+05:30");
+export const REGISTRATION_CLOSES_LABEL = "7 August 2026";
+export const REGISTRATION_CLOSES_AT = new Date("2026-08-07T23:59:59+05:30");
 export const MAX_ENTRIES_PER_CATEGORY = 16;
 
 export const MEMBER_CATEGORIES = [
@@ -14,11 +14,87 @@ export const MEMBER_CATEGORIES = [
   { id: "womens_doubles", label: "Women's Doubles", shortLabel: "WD" },
 ];
 
+/**
+ * Open poster — Men's / Mixed / Women's Doubles with poster age rules.
+ * @typedef {{
+ *   id: string;
+ *   label: string;
+ *   shortLabel?: string;
+ *   division: 'mens_doubles' | 'mixed_doubles' | 'womens_doubles';
+ *   requiresPartner: boolean;
+ *   minAge?: number;
+ *   minAgeMale?: number | null;
+ *   minAgeFemale?: number | null;
+ *   hint?: string;
+ * }} OpenCategory
+ */
+
+/** @type {OpenCategory[]} */
 export const OPEN_CATEGORIES = [
-  { id: "open_60", label: "60+", shortLabel: "60+", minAge: 26 },
-  { id: "open_70", label: "70+", shortLabel: "70+", minAge: 30 },
-  { id: "open_80", label: "80+", shortLabel: "80+", minAge: 35 },
-  { id: "open_90", label: "90+", shortLabel: "90+", minAge: 40 },
+  {
+    id: "open_md_60",
+    label: "Men's Doubles 60+",
+    shortLabel: "MD 60+",
+    division: "mens_doubles",
+    requiresPartner: true,
+    minAge: 27,
+    hint: "Combined age 60+ · each player min 27",
+  },
+  {
+    id: "open_md_70",
+    label: "Men's Doubles 70+",
+    shortLabel: "MD 70+",
+    division: "mens_doubles",
+    requiresPartner: true,
+    minAge: 30,
+    hint: "Combined age 70+ · each player min 30",
+  },
+  {
+    id: "open_md_80",
+    label: "Men's Doubles 80+",
+    shortLabel: "MD 80+",
+    division: "mens_doubles",
+    requiresPartner: true,
+    minAge: 35,
+    hint: "Combined age 80+ · each player min 35",
+  },
+  {
+    id: "open_md_90",
+    label: "Men's Doubles 90+",
+    shortLabel: "MD 90+",
+    division: "mens_doubles",
+    requiresPartner: true,
+    minAge: 40,
+    hint: "Combined age 90+ · each player min 40",
+  },
+  {
+    id: "open_xd_55",
+    label: "Mixed Doubles 55+",
+    shortLabel: "XD 55+",
+    division: "mixed_doubles",
+    requiresPartner: true,
+    minAgeMale: 30,
+    minAgeFemale: null,
+    hint: "Male min 30+ · Female age open",
+  },
+  {
+    id: "open_xd_70",
+    label: "Mixed Doubles 70+",
+    shortLabel: "XD 70+",
+    division: "mixed_doubles",
+    requiresPartner: true,
+    minAgeMale: 35,
+    minAgeFemale: 30,
+    hint: "Female min 30+ · Male min 35+",
+  },
+  {
+    id: "open_wd",
+    label: "Women's Doubles",
+    shortLabel: "WD",
+    division: "womens_doubles",
+    requiresPartner: false,
+    hint: "Pairing via chit system — no partner needed",
+  },
 ];
 
 export const MEMBER_PLAYER_LEVEL_OPTIONS = [
@@ -52,6 +128,30 @@ export function computeOpenFeeInr(eventCount) {
 export function getCategoryById(id, type) {
   const list = type === "member" ? MEMBER_CATEGORIES : OPEN_CATEGORIES;
   return list.find((c) => c.id === id) ?? null;
+}
+
+/**
+ * @param {OpenCategory | null | undefined} cat
+ * @param {'male' | 'female' | string} gender
+ * @returns {number | null}
+ */
+export function getOpenMinAgeForGender(cat, gender) {
+  if (!cat) return null;
+  if (typeof cat.minAge === "number") return cat.minAge;
+  if (gender === "male") {
+    return typeof cat.minAgeMale === "number" ? cat.minAgeMale : null;
+  }
+  if (gender === "female") {
+    return typeof cat.minAgeFemale === "number" ? cat.minAgeFemale : null;
+  }
+  return null;
+}
+
+/**
+ * @param {OpenCategory | null | undefined} cat
+ */
+export function openCategoryNeedsPartner(cat) {
+  return Boolean(cat?.requiresPartner);
 }
 
 /**
