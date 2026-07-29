@@ -137,6 +137,18 @@
   color: rgba(168, 165, 160, 0.75);
 }
 
+.footer-bottom p {
+  margin: 0;
+}
+
+.footer-subsidiary {
+  margin: 0 0 0.55rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  line-height: 1.45;
+  color: rgba(168, 165, 160, 0.62);
+}
+
 .footer-owner-link {
   color: rgba(168, 165, 160, 0.55);
   transition: color 0.15s ease;

@@ -93,6 +93,10 @@ export default function Footer() {
       </div>
 
       <div className="footer-bottom">
+        <p className="footer-subsidiary">
+          Evolve is the most luxurious subsidiary of Tuff Lad Pro Private
+          Limited.
+        </p>
         <p>
           © {new Date().getFullYear()} Evolve Fitness. All rights reserved.
           {" · "}
