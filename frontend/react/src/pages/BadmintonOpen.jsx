@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import SEO from "../components/SEO";
+import BadmintonPlayerListsModal from "../components/BadmintonPlayerListsModal";
 import { apiFetch } from "../services/api";
 import { loadCashfreeScript } from "../utils/loadCashfree";
 import {
@@ -50,6 +51,7 @@ export default function BadmintonOpen() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [confirmed, setConfirmed] = useState(null);
+  const [playerListsOpen, setPlayerListsOpen] = useState(false);
 
   const loadStatus = useCallback(async () => {
     try {
@@ -478,7 +480,14 @@ export default function BadmintonOpen() {
                 Professionals are not eligible. Semi-professionals may partner
                 only with a Club player.
               </p>
-              <div className="badminton-form__actions">
+              <div className="badminton-form__actions badminton-form__actions--stack">
+                <button
+                  type="button"
+                  className="badminton-btn badminton-btn--ghost"
+                  onClick={() => setPlayerListsOpen(true)}
+                >
+                  View pro &amp; semi-pro player list
+                </button>
                 <button
                   type="button"
                   className="badminton-btn badminton-btn--primary"
@@ -856,8 +865,19 @@ export default function BadmintonOpen() {
               <li key={rule}>{rule}</li>
             ))}
           </ul>
+          <button
+            type="button"
+            className="badminton-btn badminton-btn--ghost"
+            onClick={() => setPlayerListsOpen(true)}
+          >
+            View pro &amp; semi-pro player list
+          </button>
         </section>
       </div>
+      <BadmintonPlayerListsModal
+        open={playerListsOpen}
+        onClose={() => setPlayerListsOpen(false)}
+      />
       <Footer />
     </>
   );

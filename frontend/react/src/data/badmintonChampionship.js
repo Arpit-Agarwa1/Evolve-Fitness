@@ -150,11 +150,106 @@ export const OPEN_POSTER = {
     "Professional players are NOT allowed.",
     "Semi-professional players may partner ONLY with a Club player.",
     "Club players may partner with any eligible category.",
-    "A list of professional and semi-professional players is available with the organizers.",
     "Women's Doubles pairing is done through a chit system.",
     "Online registration only. Registration closes on 7 August.",
   ],
 };
+
+/**
+ * Official eligibility lists for Evolve Open (from organizers PDF).
+ * @typedef {{ sn: number; name: string; club: string }} OpenListedPlayer
+ */
+
+/** List A — semi-professionals (may pair only with a Club player). */
+export const OPEN_SEMI_PRO_PLAYERS = /** @type {OpenListedPlayer[]} */ ([
+  { sn: 1, name: "Naresh Dhalan", club: "ACE" },
+  { sn: 2, name: "Rakesh Choudhary", club: "ACE" },
+  { sn: 3, name: "Shashank Singh", club: "ACE" },
+  { sn: 4, name: "Nirmal Dhakad", club: "ACE" },
+  { sn: 5, name: "Dharamraj Sharma", club: "Aerial" },
+  { sn: 6, name: "Magan Singh", club: "Aerial" },
+  { sn: 7, name: "Ram Niwas", club: "Aerial" },
+  { sn: 8, name: "Rupesh Goyal", club: "Aerial" },
+  { sn: 9, name: "Hemendra Yadav", club: "Alwar" },
+  { sn: 10, name: "Sunil Karwasra", club: "Barmer" },
+  { sn: 11, name: "Abhinandan Jain", club: "Battledore" },
+  { sn: 12, name: "Piyush", club: "Battledore" },
+  { sn: 13, name: "Sandeep Arora", club: "County" },
+  { sn: 14, name: "Raman Pal", club: "Dausa" },
+  { sn: 15, name: "Ravikant Sharma", club: "Dausa" },
+  { sn: 16, name: "Anil Paswan", club: "Dess.Inn" },
+  { sn: 17, name: "Ghanshyam Yadav", club: "Extreme" },
+  { sn: 18, name: "Subham Agarwal", club: "Extreme" },
+  { sn: 19, name: "Jaswant Singh", club: "Ideal" },
+  { sn: 20, name: "Raunak", club: "Ideal" },
+  { sn: 21, name: "Rakesh Katta", club: "Jai Club" },
+  { sn: 22, name: "Raman Raina", club: "Jai Club" },
+  { sn: 23, name: "Aditya Harlalka", club: "Jpr Club" },
+  { sn: 24, name: "Pankaj Taneja", club: "Jpr Club" },
+  { sn: 25, name: "Pankaj Arora", club: "Pink City" },
+  { sn: 26, name: "Sanjiv Arora", club: "Pink City" },
+  { sn: 27, name: "Ravindra Joshi", club: "Racconact" },
+  { sn: 28, name: "Vinayak", club: "Racconact" },
+  { sn: 29, name: "Karan", club: "Racconact" },
+  { sn: 30, name: "Abhishek", club: "Shuttler" },
+  { sn: 31, name: "Ankush Joshi", club: "Shuttler" },
+  { sn: 32, name: "Sanjeev Chabra", club: "KHEL CITY" },
+  { sn: 33, name: "Akhil Mathur", club: "Sikar" },
+  { sn: 34, name: "Sandeep Jangir", club: "Sikar" },
+  { sn: 35, name: "Brijesh Singh", club: "Smriti Van" },
+  { sn: 36, name: "Deepak Sharma", club: "Smriti Van" },
+  { sn: 37, name: "Ayush", club: "SMS" },
+  { sn: 38, name: "Nikunj Chippa", club: "SMS" },
+  { sn: 39, name: "Arpit Sharma", club: "SMS" },
+  { sn: 40, name: "Vijay Prasad", club: "SMS" },
+  { sn: 41, name: "Aditya Shekhawat", club: "SMS" },
+  { sn: 42, name: "Divyanshu", club: "SMS" },
+  { sn: 43, name: "Hari Singh", club: "SMS" },
+  { sn: 44, name: "Kandarp Chaubey", club: "SMS" },
+  { sn: 45, name: "Kaustubh", club: "SMS" },
+  { sn: 46, name: "Manmohan", club: "SMS" },
+  { sn: 47, name: "Mohit Jain", club: "SMS" },
+  { sn: 48, name: "Mohit", club: "SMS" },
+  { sn: 49, name: "Alok Meena", club: "SMS" },
+  { sn: 50, name: "Vineet Sharma", club: "SMS" },
+  { sn: 51, name: "Vikram Singh", club: "SMS" },
+  { sn: 52, name: "Akshit", club: "Spofit" },
+  { sn: 53, name: "Ayush", club: "Spofit" },
+  { sn: 54, name: "Rishi Kumar", club: "Spofit" },
+  { sn: 55, name: "Shiv Shanker Sharma", club: "Spofit" },
+  { sn: 56, name: "Neeraj Sharma", club: "Sanskriti" },
+]);
+
+/** Notes appended to List A in the organizers PDF. */
+export const OPEN_SEMI_PRO_NOTES = [
+  "All Coaches / PTIs",
+  "All other National players",
+  "This list is not exhaustive.",
+];
+
+/** List B — professionals (cannot participate). */
+export const OPEN_PRO_PLAYERS = /** @type {OpenListedPlayer[]} */ ([
+  { sn: 1, name: "Aakash", club: "ACE" },
+  { sn: 2, name: "KD (Krishna Dutt)", club: "ACE" },
+  { sn: 3, name: "Puspender Singh", club: "ACE" },
+  { sn: 4, name: "Rajeev Sharma", club: "CAP" },
+  { sn: 5, name: "Rajesh Verma", club: "Chirawa" },
+  { sn: 6, name: "Krishan K Gupta", club: "County" },
+  { sn: 7, name: "Saurabh Chandel", club: "Jpr Sports" },
+  { sn: 8, name: "Himanshu", club: "Raconnect" },
+  { sn: 9, name: "Vikram Shekhawat", club: "Rajputana" },
+  { sn: 10, name: "Piyush Parihar", club: "Sanskriti" },
+  { sn: 11, name: "Nikhil Jangid", club: "SMS" },
+  { sn: 12, name: "Harish Goyal", club: "SMS" },
+  { sn: 13, name: "Ranveer RajPurohit", club: "SMS" },
+  { sn: 14, name: "Suraj Godara", club: "SMS" },
+  { sn: 15, name: "Kandarbh Choubey", club: "SMS" },
+  { sn: 16, name: "Rajesh Khandelwal", club: "SPOFIT" },
+  { sn: 17, name: "Tribuhuvan Bhist", club: "SPOFIT" },
+]);
+
+export const OPEN_PLAYER_LIST_NOTE =
+  "Club players can pair with any category.";
 
 /**
  * @param {string} id

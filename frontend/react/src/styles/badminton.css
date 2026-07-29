@@ -1071,6 +1071,153 @@
   }
 }
 
+/* Player eligibility lists modal */
+.badminton-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(2, 10, 8, 0.72);
+  backdrop-filter: blur(6px);
+}
+
+.badminton-modal {
+  width: min(640px, 100%);
+  max-height: min(88vh, 900px);
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--ev-radius);
+  border: 1px solid rgba(212, 168, 75, 0.28);
+  background: linear-gradient(
+    165deg,
+    rgba(12, 36, 30, 0.98) 0%,
+    rgba(8, 26, 22, 0.96) 100%
+  );
+  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.45);
+  color: var(--ev-text-muted);
+}
+
+.badminton-modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.15rem 1.25rem 0.85rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.badminton-modal__title {
+  margin: 0.15rem 0 0;
+  font-family: var(--ev-serif);
+  font-size: clamp(1.35rem, 3vw, 1.65rem);
+  font-weight: 500;
+  color: var(--ev-text);
+}
+
+.badminton-modal__close {
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ev-text);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.badminton-modal__close:hover {
+  border-color: rgba(212, 168, 75, 0.45);
+  color: var(--bd-gold);
+}
+
+.badminton-modal__body {
+  overflow: auto;
+  padding: 1rem 1.25rem 1.35rem;
+  display: grid;
+  gap: 1.5rem;
+}
+
+.badminton-player-list-block__title {
+  margin: 0 0 0.25rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--ev-text);
+}
+
+.badminton-player-list-block__lede {
+  margin: 0 0 0.75rem;
+  font-size: 0.875rem;
+  color: var(--bd-emerald-bright);
+}
+
+.badminton-player-table-wrap {
+  overflow-x: auto;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: calc(var(--ev-radius) - 2px);
+}
+
+.badminton-player-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.badminton-player-table th,
+.badminton-player-table td {
+  padding: 0.55rem 0.7rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.badminton-player-table th {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bd-gold);
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.badminton-player-table td:first-child,
+.badminton-player-table th:first-child {
+  width: 2.5rem;
+  color: rgba(232, 236, 234, 0.55);
+}
+
+.badminton-player-table td:nth-child(2) {
+  color: var(--ev-text);
+}
+
+.badminton-player-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.badminton-player-list-notes {
+  margin: 0.75rem 0 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.8125rem;
+  color: rgba(232, 236, 234, 0.7);
+}
+
+.badminton-player-list-footnote {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--bd-gold);
+}
+
+.badminton-form__actions--stack {
+  flex-wrap: wrap;
+}
+
+.badminton-rules .badminton-btn {
+  margin-top: 0.25rem;
+}
+
 @media (max-width: 380px) {
   .badminton-hero {
     padding-top: 4.25rem;
