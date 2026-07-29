@@ -89,7 +89,7 @@ export default function Navbar() {
           </li>
           <li>
             <NavLink to="/badminton" className={linkClass} onClick={() => setMenuOpen(false)}>
-              Badminton
+              Evolve Badminton Championship
             </NavLink>
           </li>
           <li>
