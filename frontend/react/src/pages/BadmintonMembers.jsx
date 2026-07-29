@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import SEO from "../components/SEO";
+import BadmintonWhatsAppInvite from "../components/BadmintonWhatsAppInvite";
 import { apiFetch } from "../services/api";
 import {
   MEMBER_CATEGORIES,
@@ -135,6 +136,7 @@ export default function BadmintonMembers() {
               <p className="badminton-form__hint">
                 Pairing is by chit system — no partner needed at registration.
               </p>
+              <BadmintonWhatsAppInvite />
             </div>
           ) : (
             <form className="badminton-form" onSubmit={handleSubmit}>

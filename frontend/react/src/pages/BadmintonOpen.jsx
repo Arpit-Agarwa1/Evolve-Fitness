@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import SEO from "../components/SEO";
 import BadmintonPlayerListsModal from "../components/BadmintonPlayerListsModal";
+import BadmintonWhatsAppInvite from "../components/BadmintonWhatsAppInvite";
 import { apiFetch } from "../services/api";
 import { loadCashfreeScript } from "../utils/loadCashfree";
 import {
@@ -765,6 +766,7 @@ export default function BadmintonOpen() {
               <p className="badminton-payee-note">
                 Paid to Tuff Lad Pro Limited (legal subsidiary of Evolve Fitness).
               </p>
+              <BadmintonWhatsAppInvite />
             </div>
           ) : null}
 

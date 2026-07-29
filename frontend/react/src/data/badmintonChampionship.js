@@ -333,3 +333,10 @@ export function formatInr(amountInr) {
 /** QR poster URLs (local / production). */
 export const BADMINTON_MEMBER_PATH = "/badminton/members";
 export const BADMINTON_OPEN_PATH = "/badminton/open";
+
+/** Tournament WhatsApp group invite (post-registration). */
+export const BADMINTON_WHATSAPP_GROUP_URL =
+  "https://chat.whatsapp.com/IyNo8yLfgNjDWUXPdIxhti";
+
+/** Seconds before optional auto-open of the WhatsApp invite. */
+export const BADMINTON_WHATSAPP_REDIRECT_SECONDS = 5;
