@@ -1229,6 +1229,21 @@
   color: var(--bd-gold);
 }
 
+.badminton-player-list-pdf {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.badminton-player-list-pdf a {
+  color: var(--bd-emerald-bright);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.badminton-player-list-pdf a:hover {
+  color: var(--bd-gold);
+}
+
 .badminton-form__actions--stack {
   flex-wrap: wrap;
 }

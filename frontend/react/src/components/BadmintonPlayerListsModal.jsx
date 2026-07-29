@@ -4,6 +4,7 @@ import {
   OPEN_SEMI_PRO_NOTES,
   OPEN_SEMI_PRO_PLAYERS,
   OPEN_PLAYER_LIST_NOTE,
+  OPEN_PLAYER_LISTS_PDF_PATH,
 } from "../data/badmintonChampionship";
 
 /**
@@ -84,6 +85,15 @@ export default function BadmintonPlayerListsModal({ open, onClose }) {
           </section>
 
           <p className="badminton-player-list-footnote">{OPEN_PLAYER_LIST_NOTE}</p>
+          <p className="badminton-player-list-pdf">
+            <a
+              href={OPEN_PLAYER_LISTS_PDF_PATH}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Download official PDF
+            </a>
+          </p>
         </div>
       </div>
     </div>
