@@ -17,7 +17,10 @@ export default function BadmintonWhatsAppInvite() {
     if (!autoRedirect) return undefined;
 
     if (secondsLeft <= 0) {
-      window.location.assign(BADMINTON_WHATSAPP_GROUP_URL);
+      // Keep confirmation page; open invite in a new tab (may be popup-blocked).
+      const tab = window.open(BADMINTON_WHATSAPP_GROUP_URL, "_blank");
+      if (tab) tab.opener = null;
+      setAutoRedirect(false);
       return undefined;
     }
 
@@ -45,7 +48,7 @@ export default function BadmintonWhatsAppInvite() {
       </a>
       {autoRedirect ? (
         <p className="badminton-whatsapp__countdown">
-          Opening invite in {secondsLeft}s…{" "}
+          Opening invite in a new tab in {secondsLeft}s…{" "}
           <button
             type="button"
             className="badminton-link-btn"
@@ -56,7 +59,8 @@ export default function BadmintonWhatsAppInvite() {
         </p>
       ) : (
         <p className="badminton-whatsapp__countdown">
-          Auto-redirect cancelled. Tap the button when you&apos;re ready.
+          Confirmation stays on this page. Tap the button if the invite didn&apos;t
+          open.
         </p>
       )}
     </div>
