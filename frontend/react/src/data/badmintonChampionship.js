@@ -239,6 +239,11 @@ export const OPEN_SEMI_PRO_PLAYERS = /** @type {OpenListedPlayer[]} */ ([
   { sn: 57, name: "Rishi Kumar", club: "Spofit" },
   { sn: 58, name: "Shiv Shanker Sharma", club: "Spofit" },
   { sn: 59, name: "Neeraj Sharma", club: "Sanskriti" },
+  { sn: 60, name: "Mahesh", club: "ACE" },
+  { sn: 61, name: "Hitesh", club: "CAP" },
+  { sn: 62, name: "Shubham", club: "Achievers" },
+  { sn: 63, name: "Rajesh Marwal", club: "Aerial" },
+  { sn: 64, name: "Atul Bhaskar", club: "Rajputana" },
 ]);
 
 /** Official PDF of Lists A & B (served from /public/pdf). */
