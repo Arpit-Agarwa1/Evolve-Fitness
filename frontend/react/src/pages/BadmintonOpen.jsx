@@ -12,6 +12,7 @@ import {
   OPEN_FEE_LADDER,
   OPEN_PLAYER_LEVEL_OPTIONS,
   OPEN_POSTER,
+  OPEN_PRO_MIXED_PARTNER_MIN_AGE,
   BADMINTON_OPEN_PATH,
   REGISTRATION_CLOSES_LABEL,
   computeOpenFeeInr,
@@ -19,7 +20,10 @@ import {
   isValidIndianMobile,
   getCategoryById,
   getOpenMinAgeForGender,
+  isOpenCategoryAllowedForLevel,
+  isYoungVeteranCategory,
   openCategoryNeedsPartner,
+  validateYoungVeteranAges,
 } from "../data/badmintonChampionship";
 import "../styles/badminton.css";
 
@@ -156,12 +160,17 @@ export default function BadmintonOpen() {
 
   function isCategoryBlockedForPlayer(cat) {
     if (!cat || Number.isNaN(age) || !details.gender) return false;
+    if (!isOpenCategoryAllowedForLevel(cat, details.playerLevel)) {
+      return true;
+    }
     if (cat.division === "womens_doubles" && details.gender !== "female") {
       return true;
     }
     if (cat.division === "mens_doubles" && details.gender !== "male") {
       return true;
     }
+    // Young Veteran: eligibility depends on partner age (checked on add).
+    if (isYoungVeteranCategory(cat)) return false;
     const min = getOpenMinAgeForGender(cat, details.gender);
     return typeof min === "number" && age < min;
   }
@@ -172,6 +181,15 @@ export default function BadmintonOpen() {
       setError(err);
       return;
     }
+    // Drop cart rows that the current level can no longer enter (e.g. pro → MD).
+    setCart((prev) =>
+      prev.filter((item) => {
+        const cat = getCategoryById(item.categoryId, "open");
+        return Boolean(
+          cat && isOpenCategoryAllowedForLevel(cat, details.playerLevel)
+        );
+      })
+    );
     setError("");
     setStep("cart");
   }
@@ -193,6 +211,12 @@ export default function BadmintonOpen() {
     const cat = getCategoryById(draftCategoryId, "open");
     if (!cat) {
       setError("Invalid category.");
+      return;
+    }
+    if (!isOpenCategoryAllowedForLevel(cat, details.playerLevel)) {
+      setError(
+        "Professionals may only enter Young Veteran and Mixed Doubles (partner aged 30+)."
+      );
       return;
     }
     if (cat.division === "womens_doubles" && details.gender !== "female") {
@@ -240,17 +264,43 @@ export default function BadmintonOpen() {
       setError("Enter a valid partner age.");
       return;
     }
-    const partnerGender =
-      cat.division === "mixed_doubles"
-        ? details.gender === "male"
-          ? "female"
-          : "male"
-        : details.gender;
-    const partnerMin = getOpenMinAgeForGender(cat, partnerGender);
-    if (typeof partnerMin === "number" && partnerAgeNum < partnerMin) {
-      setError(`Partner must be age ${partnerMin}+ for ${cat.label}.`);
+    const partnerAgeRounded = Math.round(partnerAgeNum);
+
+    if (isYoungVeteranCategory(cat)) {
+      const yv = validateYoungVeteranAges(
+        age,
+        partnerAgeRounded,
+        cat.veteranMinAge ?? 35
+      );
+      if (!yv.ok) {
+        setError(yv.message);
+        return;
+      }
+    } else {
+      const partnerGender =
+        cat.division === "mixed_doubles"
+          ? details.gender === "male"
+            ? "female"
+            : "male"
+          : details.gender;
+      const partnerMin = getOpenMinAgeForGender(cat, partnerGender);
+      if (typeof partnerMin === "number" && partnerAgeRounded < partnerMin) {
+        setError(`Partner must be age ${partnerMin}+ for ${cat.label}.`);
+        return;
+      }
+    }
+
+    if (
+      details.playerLevel === "professional" &&
+      cat.division === "mixed_doubles" &&
+      partnerAgeRounded < OPEN_PRO_MIXED_PARTNER_MIN_AGE
+    ) {
+      setError(
+        `Professionals need a partner aged ${OPEN_PRO_MIXED_PARTNER_MIN_AGE}+ for Mixed Doubles.`
+      );
       return;
     }
+
     if (
       draftPartnerMobile.trim() &&
       !isValidIndianMobile(draftPartnerMobile)
@@ -265,7 +315,7 @@ export default function BadmintonOpen() {
         categoryId: draftCategoryId,
         partnerFirstName: draftPartnerFirstName.trim(),
         partnerLastName: draftPartnerLastName.trim(),
-        partnerAge: String(Math.round(partnerAgeNum)),
+        partnerAge: String(partnerAgeRounded),
         partnerMobile: draftPartnerMobile.trim(),
       },
     ]);
@@ -365,7 +415,7 @@ export default function BadmintonOpen() {
     <>
       <SEO
         title="Evolve Badminton Open Championship 2026"
-        description="Register for the Evolve Badminton Open Championship — Men's, Mixed & Women's Doubles. Online payment via Cashfree."
+        description="Register for the Evolve Badminton Open Championship — Men's, Mixed & Women's Doubles plus Young Veteran. Online payment via Cashfree."
         path={BADMINTON_OPEN_PATH}
       />
       <Navbar />
@@ -381,8 +431,8 @@ export default function BadmintonOpen() {
             Evolve Badminton Open Championship
           </h1>
           <p className="badminton-hero__lede">
-            Register for Men&apos;s, Mixed &amp; Women&apos;s Doubles — up to 4
-            events. Closes {REGISTRATION_CLOSES_LABEL}.
+            Men&apos;s, Mixed &amp; Women&apos;s Doubles plus Young Veteran —
+            up to 4 events. Closes {REGISTRATION_CLOSES_LABEL}.
           </p>
         </section>
 
@@ -478,8 +528,9 @@ export default function BadmintonOpen() {
                 </label>
               </div>
               <p className="badminton-form__hint">
-                Professionals are not eligible. Semi-professionals may partner
-                only with a Club player.
+                Professionals may enter Young Veteran and Mixed Doubles (partner
+                aged 30+). Semi-professionals may partner only with a Club
+                player.
               </p>
               <div className="badminton-form__actions badminton-form__actions--stack">
                 <button
@@ -505,7 +556,7 @@ export default function BadmintonOpen() {
               <h2 className="badminton-form__title">Add events to cart</h2>
               <p className="badminton-form__hint">
                 Men&apos;s Doubles (60+/70+/80+/90+), Mixed Doubles (55+/75+),
-                Women&apos;s Doubles (chit pairing). Max 4 events.
+                Women&apos;s Doubles (chit), Young Veteran. Max 4 events.
               </p>
 
               <div className="badminton-form__grid">
@@ -852,8 +903,8 @@ export default function BadmintonOpen() {
           <h2 className="badminton-section-title">Categories &amp; rules</h2>
           <ul className="badminton-rules-list">
             <li>
-              <strong>Men&apos;s Doubles:</strong> 60+ (min age 27), 70+ (min
-              30), 80+ (min 35), 90+ (min 40) — combined age brackets.
+              <strong>Men&apos;s Doubles:</strong> 60+ (min age 25), 70+ (min
+              30), 80+ (min 35), 90+ (min 35) — combined age brackets.
             </li>
             <li>
               <strong>Mixed Doubles:</strong> 55+ (male min 30+, female open) ·
@@ -862,6 +913,10 @@ export default function BadmintonOpen() {
             <li>
               <strong>Women&apos;s Doubles:</strong> pairing via chit system —
               no partner at signup.
+            </li>
+            <li>
+              <strong>Young Veteran:</strong> young player age open · veteran
+              min age 35+.
             </li>
             {OPEN_POSTER.rules.map((rule) => (
               <li key={rule}>{rule}</li>

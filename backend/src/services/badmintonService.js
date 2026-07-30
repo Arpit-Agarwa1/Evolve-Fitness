@@ -7,11 +7,15 @@ import {
   OPEN_CATEGORIES,
   MEMBER_PLAYER_LEVELS,
   OPEN_PLAYER_LEVELS,
+  OPEN_PRO_MIXED_PARTNER_MIN_AGE,
   MAX_ENTRIES_PER_CATEGORY,
   computeOpenFeeInr,
   getCategoryById,
   getOpenMinAgeForGender,
+  isOpenCategoryAllowedForLevel,
+  isYoungVeteranCategory,
   openCategoryNeedsPartner,
+  validateYoungVeteranAges,
   ageAsOf,
   isValidIndianMobile,
   normalizeIndianMobile,
@@ -315,6 +319,14 @@ export function parseOpenRegistrationBody(body) {
       return { ok: false, message: `Unknown category: ${categoryId}` };
     }
 
+    if (!isOpenCategoryAllowedForLevel(cat, playerLevel)) {
+      return {
+        ok: false,
+        message:
+          "Professional players may only enter Young Veteran and Mixed Doubles (partner aged 30+)",
+      };
+    }
+
     if (cat.division === "womens_doubles" && gender !== "female") {
       return {
         ok: false,
@@ -377,17 +389,41 @@ export function parseOpenRegistrationBody(body) {
       };
     }
 
-    const partnerGender =
-      cat.division === "mixed_doubles"
-        ? gender === "male"
-          ? "female"
-          : "male"
-        : gender;
-    const partnerMin = getOpenMinAgeForGender(cat, partnerGender);
-    if (typeof partnerMin === "number" && partnerAgeNum < partnerMin) {
+    const partnerAgeRounded = Math.round(partnerAgeNum);
+
+    if (isYoungVeteranCategory(cat)) {
+      const yv = validateYoungVeteranAges(
+        age,
+        partnerAgeRounded,
+        cat.veteranMinAge ?? 35
+      );
+      if (!yv.ok) {
+        return { ok: false, message: yv.message };
+      }
+    } else {
+      const partnerGender =
+        cat.division === "mixed_doubles"
+          ? gender === "male"
+            ? "female"
+            : "male"
+          : gender;
+      const partnerMin = getOpenMinAgeForGender(cat, partnerGender);
+      if (typeof partnerMin === "number" && partnerAgeRounded < partnerMin) {
+        return {
+          ok: false,
+          message: `Partner must be age ${partnerMin}+ for ${cat.label}`,
+        };
+      }
+    }
+
+    if (
+      playerLevel === "professional" &&
+      cat.division === "mixed_doubles" &&
+      partnerAgeRounded < OPEN_PRO_MIXED_PARTNER_MIN_AGE
+    ) {
       return {
         ok: false,
-        message: `Partner must be age ${partnerMin}+ for ${cat.label}`,
+        message: `Professional players need a partner aged ${OPEN_PRO_MIXED_PARTNER_MIN_AGE}+ for Mixed Doubles`,
       };
     }
 
@@ -404,7 +440,7 @@ export function parseOpenRegistrationBody(body) {
       partnerFirstName,
       partnerLastName,
       partnerName,
-      partnerAge: Math.round(partnerAgeNum),
+      partnerAge: partnerAgeRounded,
       partnerMobile,
     });
   }

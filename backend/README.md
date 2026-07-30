@@ -253,5 +253,5 @@ Public portal: **`/badminton`** (QR → `https://evolvestudio.fitness/badminton`
 - **Members:** free confirmation (no payment). **Open:** ₹500 / ₹800 / ₹1,000 / ₹1,200 for 1–4 events via Cashfree.
 - **Admin:** `/admin/badminton` — list, CSV export, close categories, force-close registration.
 - Capacity: **16** confirmed entries per category; closes **7 Aug 2026**.
-- Open events: Men’s Doubles 60+/70+/80+/90+, Mixed Doubles 55+/75+, Women’s Doubles (chit pairing).
+- Open events: Men’s Doubles 60+/70+/80+/90+, Mixed Doubles 55+/75+, Women’s Doubles (chit pairing), Young Veteran.
 - On-screen receipt + Registration ID (`EVB26-…`). Confirmation email not wired yet.

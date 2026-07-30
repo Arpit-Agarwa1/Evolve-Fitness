@@ -15,16 +15,17 @@ export const MEMBER_CATEGORIES = [
 ];
 
 /**
- * Open poster — Men's / Mixed / Women's Doubles with poster age rules.
+ * Open poster — Men's / Mixed / Women's Doubles + Young Veteran.
  * @typedef {{
  *   id: string;
  *   label: string;
  *   shortLabel?: string;
- *   division: 'mens_doubles' | 'mixed_doubles' | 'womens_doubles';
+ *   division: 'mens_doubles' | 'mixed_doubles' | 'womens_doubles' | 'young_veteran';
  *   requiresPartner: boolean;
  *   minAge?: number;
  *   minAgeMale?: number | null;
  *   minAgeFemale?: number | null;
+ *   veteranMinAge?: number;
  *   hint?: string;
  * }} OpenCategory
  */
@@ -37,8 +38,8 @@ export const OPEN_CATEGORIES = [
     shortLabel: "MD 60+",
     division: "mens_doubles",
     requiresPartner: true,
-    minAge: 27,
-    hint: "Combined age 60+ · each player min 27",
+    minAge: 25,
+    hint: "Combined age 60+ · each player min 25",
   },
   {
     id: "open_md_70",
@@ -64,8 +65,8 @@ export const OPEN_CATEGORIES = [
     shortLabel: "MD 90+",
     division: "mens_doubles",
     requiresPartner: true,
-    minAge: 40,
-    hint: "Combined age 90+ · each player min 40",
+    minAge: 35,
+    hint: "Combined age 90+ · each player min 35",
   },
   {
     id: "open_xd_55",
@@ -95,6 +96,15 @@ export const OPEN_CATEGORIES = [
     requiresPartner: false,
     hint: "Pairing via chit system — no partner needed",
   },
+  {
+    id: "open_yv",
+    label: "Young Veteran",
+    shortLabel: "YV",
+    division: "young_veteran",
+    requiresPartner: true,
+    veteranMinAge: 35,
+    hint: "Young player: age open · Veteran: min 35+",
+  },
 ];
 
 export const MEMBER_PLAYER_LEVEL_OPTIONS = [
@@ -108,7 +118,14 @@ export const OPEN_PLAYER_LEVEL_OPTIONS = [
   { value: "beginner", label: "Beginner" },
   { value: "club", label: "Club" },
   { value: "semi_professional", label: "Semi professional" },
+  { value: "professional", label: "Professional" },
 ];
+
+/** Pros may only enter Young Veteran and Mixed Doubles (partner 30+). */
+export const OPEN_PRO_ALLOWED_DIVISIONS = ["young_veteran", "mixed_doubles"];
+
+/** Extra partner-age floor when a professional enters Mixed Doubles. */
+export const OPEN_PRO_MIXED_PARTNER_MIN_AGE = 30;
 
 /** Poster fee ladder (per participant, by number of events). */
 export const OPEN_FEE_LADDER = [
@@ -141,15 +158,16 @@ export const OPEN_POSTER = {
   contactName: "Ujjwal Bajaj",
   contactPhone: "9829063727",
   shuttle: "Yonex Mavis 350",
-  hospitality: "Premium refreshments (snacks + lunch)",
+  hospitality: "Premium hospitality including refreshments, snacks, and lunch",
   prizes:
     "Cash prize, trophy, Evolve gift hamper & exclusive Evolve gift (winners / runners-up)",
   participationGift: "Special gift for every participant",
   maxEntriesNote: `Maximum ${MAX_ENTRIES_PER_CATEGORY} entries per event (first come, first served)`,
   rules: [
-    "Professional players are NOT allowed.",
+    "Professional players can play Young Veteran and Mixed Doubles with a partner aged 30+.",
     "Semi-professional players may partner ONLY with a Club player.",
     "Club players may partner with any eligible category.",
+    "Lists of professional and semi-professional players are available with the organizers.",
     "Women's Doubles pairing is done through a chit system.",
     "Online registration only. Registration closes on 7 August.",
   ],
@@ -233,7 +251,7 @@ export const OPEN_SEMI_PRO_NOTES = [
   "This list is not exhaustive.",
 ];
 
-/** List B — professionals (cannot participate). */
+/** List B — professionals (Young Veteran + Mixed Doubles with partner 30+ only). */
 export const OPEN_PRO_PLAYERS = /** @type {OpenListedPlayer[]} */ ([
   { sn: 1, name: "Aakash", club: "ACE" },
   { sn: 2, name: "KD (Krishna Dutt)", club: "ACE" },
@@ -272,7 +290,7 @@ export function getCategoryById(id, type) {
  * @returns {number | null}
  */
 export function getOpenMinAgeForGender(cat, gender) {
-  if (!cat) return null;
+  if (!cat || isYoungVeteranCategory(cat)) return null;
   if (typeof cat.minAge === "number") return cat.minAge;
   if (gender === "male") {
     return typeof cat.minAgeMale === "number" ? cat.minAgeMale : null;
@@ -281,6 +299,44 @@ export function getOpenMinAgeForGender(cat, gender) {
     return typeof cat.minAgeFemale === "number" ? cat.minAgeFemale : null;
   }
   return null;
+}
+
+/**
+ * @param {OpenCategory | null | undefined} cat
+ */
+export function isYoungVeteranCategory(cat) {
+  return cat?.division === "young_veteran";
+}
+
+/**
+ * Young Veteran: one young (age open) + one veteran (min age).
+ * @param {number} playerAge
+ * @param {number} partnerAge
+ * @param {number} [veteranMinAge]
+ */
+export function validateYoungVeteranAges(
+  playerAge,
+  partnerAge,
+  veteranMinAge = 35
+) {
+  if (playerAge >= veteranMinAge || partnerAge >= veteranMinAge) {
+    return { ok: true };
+  }
+  return {
+    ok: false,
+    message: `Young Veteran requires one player (veteran) aged ${veteranMinAge}+`,
+  };
+}
+
+/**
+ * Professionals may only enter Young Veteran and Mixed Doubles.
+ * @param {OpenCategory | null | undefined} cat
+ * @param {string} playerLevel
+ */
+export function isOpenCategoryAllowedForLevel(cat, playerLevel) {
+  if (!cat) return false;
+  if (playerLevel !== "professional") return true;
+  return OPEN_PRO_ALLOWED_DIVISIONS.includes(cat.division);
 }
 
 /**

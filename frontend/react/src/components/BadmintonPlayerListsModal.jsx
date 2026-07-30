@@ -79,7 +79,7 @@ export default function BadmintonPlayerListsModal({ open, onClose }) {
               List B — Professional
             </h3>
             <p className="badminton-player-list-block__lede">
-              Cannot participate.
+              May play Young Veteran and Mixed Doubles with a partner aged 30+.
             </p>
             <PlayerTable players={OPEN_PRO_PLAYERS} />
           </section>

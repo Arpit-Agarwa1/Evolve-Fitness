@@ -52,8 +52,8 @@ export default function Badminton() {
             <p className="badminton-eyebrow">Poster 2</p>
             <h2>Open Tournament</h2>
             <p>
-              Men&apos;s, Mixed &amp; Women&apos;s Doubles. Pay online — ₹500 /
-              ₹800 / ₹1,000 / ₹1,200 for 1–4 events.
+              Men&apos;s, Mixed &amp; Women&apos;s Doubles plus Young Veteran.
+              Pay online — ₹500 / ₹800 / ₹1,000 / ₹1,200 for 1–4 events.
             </p>
             <Link
               to={BADMINTON_OPEN_PATH}
