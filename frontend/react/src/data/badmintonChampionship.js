@@ -121,10 +121,10 @@ export const OPEN_PLAYER_LEVEL_OPTIONS = [
   { value: "professional", label: "Professional" },
 ];
 
-/** Pros may only enter Young Veteran and Mixed Doubles (partner 30+). */
-export const OPEN_PRO_ALLOWED_DIVISIONS = ["young_veteran", "mixed_doubles"];
+/** Pros may only enter Young Veteran and Mixed Doubles 75+ (partner 30+). */
+export const OPEN_PRO_ALLOWED_CATEGORY_IDS = ["open_yv", "open_xd_75"];
 
-/** Extra partner-age floor when a professional enters Mixed Doubles. */
+/** Extra partner-age floor when a professional enters Mixed Doubles 75+. */
 export const OPEN_PRO_MIXED_PARTNER_MIN_AGE = 30;
 
 /** Poster fee ladder (per participant, by number of events). */
@@ -164,7 +164,7 @@ export const OPEN_POSTER = {
   participationGift: "Special gift for every participant",
   maxEntriesNote: `Maximum ${MAX_ENTRIES_PER_CATEGORY} entries per event (first come, first served)`,
   rules: [
-    "Professional players can play Young Veteran and Mixed Doubles with a partner aged 30+.",
+    "Professional players can play Young Veteran and Mixed Doubles 75+ with a partner aged 30+.",
     "Semi-professional players may partner ONLY with a Club player.",
     "Club players may partner with any eligible category.",
     "Lists of professional and semi-professional players are available with the organizers.",
@@ -251,7 +251,7 @@ export const OPEN_SEMI_PRO_NOTES = [
   "This list is not exhaustive.",
 ];
 
-/** List B — professionals (Young Veteran + Mixed Doubles with partner 30+ only). */
+/** List B — professionals (Young Veteran + Mixed Doubles 75+ with partner 30+ only). */
 export const OPEN_PRO_PLAYERS = /** @type {OpenListedPlayer[]} */ ([
   { sn: 1, name: "Aakash", club: "ACE" },
   { sn: 2, name: "KD (Krishna Dutt)", club: "ACE" },
@@ -329,14 +329,14 @@ export function validateYoungVeteranAges(
 }
 
 /**
- * Professionals may only enter Young Veteran and Mixed Doubles.
+ * Professionals may only enter Young Veteran and Mixed Doubles 75+.
  * @param {OpenCategory | null | undefined} cat
  * @param {string} playerLevel
  */
 export function isOpenCategoryAllowedForLevel(cat, playerLevel) {
   if (!cat) return false;
   if (playerLevel !== "professional") return true;
-  return OPEN_PRO_ALLOWED_DIVISIONS.includes(cat.division);
+  return OPEN_PRO_ALLOWED_CATEGORY_IDS.includes(cat.id);
 }
 
 /**

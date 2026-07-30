@@ -323,7 +323,7 @@ export function parseOpenRegistrationBody(body) {
       return {
         ok: false,
         message:
-          "Professional players may only enter Young Veteran and Mixed Doubles (partner aged 30+)",
+          "Professional players may only enter Young Veteran and Mixed Doubles 75+ (partner aged 30+)",
       };
     }
 
@@ -418,12 +418,12 @@ export function parseOpenRegistrationBody(body) {
 
     if (
       playerLevel === "professional" &&
-      cat.division === "mixed_doubles" &&
+      cat.id === "open_xd_75" &&
       partnerAgeRounded < OPEN_PRO_MIXED_PARTNER_MIN_AGE
     ) {
       return {
         ok: false,
-        message: `Professional players need a partner aged ${OPEN_PRO_MIXED_PARTNER_MIN_AGE}+ for Mixed Doubles`,
+        message: `Professional players need a partner aged ${OPEN_PRO_MIXED_PARTNER_MIN_AGE}+ for Mixed Doubles 75+`,
       };
     }
 

@@ -146,10 +146,10 @@ export const OPEN_PLAYER_LEVELS = [
   "professional",
 ];
 
-/** Pros may only enter Young Veteran and Mixed Doubles (partner 30+). */
-export const OPEN_PRO_ALLOWED_DIVISIONS = ["young_veteran", "mixed_doubles"];
+/** Pros may only enter Young Veteran and Mixed Doubles 75+ (partner 30+). */
+export const OPEN_PRO_ALLOWED_CATEGORY_IDS = ["open_yv", "open_xd_75"];
 
-/** Extra partner-age floor when a professional enters Mixed Doubles. */
+/** Extra partner-age floor when a professional enters Mixed Doubles 75+. */
 export const OPEN_PRO_MIXED_PARTNER_MIN_AGE = 30;
 
 export const ALL_PLAYER_LEVELS = [
@@ -224,14 +224,14 @@ export function validateYoungVeteranAges(
 }
 
 /**
- * Professionals may only enter Young Veteran and Mixed Doubles.
+ * Professionals may only enter Young Veteran and Mixed Doubles 75+.
  * @param {OpenCategory | null | undefined} cat
  * @param {string} playerLevel
  */
 export function isOpenCategoryAllowedForLevel(cat, playerLevel) {
   if (!cat) return false;
   if (playerLevel !== "professional") return true;
-  return OPEN_PRO_ALLOWED_DIVISIONS.includes(cat.division);
+  return OPEN_PRO_ALLOWED_CATEGORY_IDS.includes(cat.id);
 }
 
 /**

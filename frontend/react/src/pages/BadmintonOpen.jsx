@@ -215,7 +215,7 @@ export default function BadmintonOpen() {
     }
     if (!isOpenCategoryAllowedForLevel(cat, details.playerLevel)) {
       setError(
-        "Professionals may only enter Young Veteran and Mixed Doubles (partner aged 30+)."
+        "Professionals may only enter Young Veteran and Mixed Doubles 75+ (partner aged 30+)."
       );
       return;
     }
@@ -292,11 +292,11 @@ export default function BadmintonOpen() {
 
     if (
       details.playerLevel === "professional" &&
-      cat.division === "mixed_doubles" &&
+      cat.id === "open_xd_75" &&
       partnerAgeRounded < OPEN_PRO_MIXED_PARTNER_MIN_AGE
     ) {
       setError(
-        `Professionals need a partner aged ${OPEN_PRO_MIXED_PARTNER_MIN_AGE}+ for Mixed Doubles.`
+        `Professionals need a partner aged ${OPEN_PRO_MIXED_PARTNER_MIN_AGE}+ for Mixed Doubles 75+.`
       );
       return;
     }
@@ -528,9 +528,9 @@ export default function BadmintonOpen() {
                 </label>
               </div>
               <p className="badminton-form__hint">
-                Professionals may enter Young Veteran and Mixed Doubles (partner
-                aged 30+). Semi-professionals may partner only with a Club
-                player.
+                Professionals may enter Young Veteran and Mixed Doubles 75+
+                (partner aged 30+). Semi-professionals may partner only with a
+                Club player.
               </p>
               <div className="badminton-form__actions badminton-form__actions--stack">
                 <button
