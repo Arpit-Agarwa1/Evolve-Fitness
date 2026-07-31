@@ -36,8 +36,9 @@ export default function Badminton() {
             <p className="badminton-eyebrow">Poster 1</p>
             <h2>Members Tournament</h2>
             <p>
-              Free registration. Pairing by <strong>chit system</strong> — no
-              partner at signup.
+              Men&apos;s, Women&apos;s &amp; Mixed Doubles. Pay online — ₹500 /
+              ₹800 / ₹1,000 for 1–3 events. Pairing by{" "}
+              <strong>chit system</strong>.
             </p>
             <Link
               to={BADMINTON_MEMBER_PATH}

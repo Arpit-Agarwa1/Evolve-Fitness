@@ -73,9 +73,9 @@ export async function getBadmintonStatus(req, res, next) {
 }
 
 /**
- * POST /api/badminton/members/register — free, confirmed immediately.
+ * POST /api/badminton/members/checkout — create draft + Cashfree order.
  */
-export async function registerMemberTournament(req, res, next) {
+export async function checkoutMemberTournament(req, res, next) {
   try {
     const parsed = parseMemberRegistrationBody(req.body ?? {});
     if (!parsed.ok) return sendError(res, parsed.message, 422);
@@ -97,21 +97,153 @@ export async function registerMemberTournament(req, res, next) {
       );
     }
 
+    if (!isCashfreeConfigured()) {
+      return sendError(
+        res,
+        "Online payment is temporarily unavailable. Add Cashfree keys to the server and try again.",
+        503
+      );
+    }
+
     const registrationId = await generateRegistrationId();
-    const doc = await BadmintonRegistration.create({
+    const { amountInr, ...fields } = parsed.data;
+    const cashfreeOrderId = registrationId;
+
+    const draft = await BadmintonRegistration.create({
       registrationId,
-      ...parsed.data,
-      paymentStatus: "waived",
-      status: "confirmed",
-      paidAt: new Date(),
+      ...fields,
+      amountInr,
+      paymentStatus: "pending",
+      status: "draft",
+      cashfreeOrderId,
     });
-    invalidateBadmintonStatusCache();
+
+    const returnUrl = `${getPaymentReturnOrigin()}/badminton/members?registrationId=${encodeURIComponent(registrationId)}&order_id={order_id}`;
+
+    let order;
+    try {
+      order = await createCashfreeOrder({
+        amountInr,
+        orderId: cashfreeOrderId,
+        customerId: `member_${fields.mobile}`,
+        customerPhone: fields.mobile,
+        customerName: fields.fullName,
+        customerEmail: fields.email || "",
+        returnUrl,
+        orderNote: `Members badminton ${fields.eventCount} event(s)`,
+      });
+    } catch (err) {
+      await BadmintonRegistration.deleteOne({ _id: draft._id });
+      console.error(
+        "[badminton members] Cashfree order failed:",
+        err?.response?.data || err
+      );
+      return sendError(res, "Could not start payment. Please try again.", 502);
+    }
+
+    const paymentSessionId =
+      order?.payment_session_id || order?.paymentSessionId || "";
+    if (!paymentSessionId) {
+      await BadmintonRegistration.deleteOne({ _id: draft._id });
+      return sendError(res, "Could not start payment. Please try again.", 502);
+    }
+
+    draft.cashfreePaymentSessionId = paymentSessionId;
+    await draft.save();
 
     return sendSuccess(
       res,
-      { registration: toPublicRegistration(doc) },
+      {
+        paymentSessionId,
+        orderId: cashfreeOrderId,
+        amountInr,
+        currency: "INR",
+        mode: getCashfreeMode(),
+        registrationId,
+        draftId: String(draft._id),
+        eventCount: fields.eventCount,
+        events: fields.events,
+      },
       201
     );
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/badminton/members/verify — confirm Cashfree order is PAID.
+ */
+export async function verifyMemberTournamentPayment(req, res, next) {
+  try {
+    const registrationId = String(req.body?.registrationId ?? "")
+      .trim()
+      .toUpperCase();
+    const orderIdBody = String(req.body?.orderId ?? "").trim();
+
+    if (!registrationId) {
+      return sendError(res, "registrationId is required", 422);
+    }
+
+    if (!isCashfreeConfigured()) {
+      return sendError(res, "Payment verification is unavailable", 503);
+    }
+
+    const doc = await BadmintonRegistration.findOne({
+      registrationId,
+      tournamentType: "member",
+    });
+    if (!doc) return sendError(res, "Registration not found", 404);
+    if (doc.status === "confirmed") {
+      return sendSuccess(res, { registration: toPublicRegistration(doc) });
+    }
+
+    const cashfreeOrderId = orderIdBody || doc.cashfreeOrderId || registrationId;
+    if (doc.cashfreeOrderId && doc.cashfreeOrderId !== cashfreeOrderId) {
+      return sendError(res, "Order mismatch for this registration", 400);
+    }
+
+    let order;
+    try {
+      order = await fetchCashfreeOrder(cashfreeOrderId);
+    } catch (err) {
+      console.error(
+        "[badminton members] Cashfree fetch failed:",
+        err?.response?.data || err
+      );
+      return sendError(res, "Could not verify payment. Please try again.", 502);
+    }
+
+    if (!isCashfreeOrderPaid(order)) {
+      return sendError(
+        res,
+        `Payment not completed (status: ${order?.order_status || "unknown"}).`,
+        400
+      );
+    }
+
+    const availability = await assertCategoriesAvailable(doc.categories);
+    if (!availability.ok) {
+      doc.paymentStatus = "failed";
+      await doc.save();
+      return sendError(
+        res,
+        `${availability.message}. Contact Evolve with order ${cashfreeOrderId} for a refund.`,
+        409
+      );
+    }
+
+    doc.paymentStatus = "paid";
+    doc.status = "confirmed";
+    doc.cashfreeOrderId = cashfreeOrderId;
+    doc.cashfreePaymentId = String(
+      order?.cf_payment_id || order?.payment_id || cashfreeOrderId
+    );
+    doc.paidAt = new Date();
+    await doc.save();
+    invalidateBadmintonStatusCache();
+
+    return sendSuccess(res, { registration: toPublicRegistration(doc) });
   } catch (err) {
     next(err);
   }

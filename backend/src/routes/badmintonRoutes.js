@@ -3,7 +3,8 @@ import { asyncHandler } from "../middleware/asyncHandler.js";
 import { apiWriteLimiter } from "../middleware/rateLimits.js";
 import {
   getBadmintonStatus,
-  registerMemberTournament,
+  checkoutMemberTournament,
+  verifyMemberTournamentPayment,
   checkoutOpenTournament,
   verifyOpenTournamentPayment,
 } from "../controllers/badmintonController.js";
@@ -12,9 +13,14 @@ const router = Router();
 
 router.get("/status", asyncHandler(getBadmintonStatus));
 router.post(
-  "/members/register",
+  "/members/checkout",
   apiWriteLimiter,
-  asyncHandler(registerMemberTournament)
+  asyncHandler(checkoutMemberTournament)
+);
+router.post(
+  "/members/verify",
+  apiWriteLimiter,
+  asyncHandler(verifyMemberTournamentPayment)
 );
 router.post(
   "/open/checkout",

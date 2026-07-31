@@ -9,6 +9,7 @@ import {
   OPEN_PLAYER_LEVELS,
   OPEN_PRO_MIXED_PARTNER_MIN_AGE,
   MAX_ENTRIES_PER_CATEGORY,
+  computeMemberFeeInr,
   computeOpenFeeInr,
   getCategoryById,
   getOpenMinAgeForGender,
@@ -16,7 +17,6 @@ import {
   isYoungVeteranCategory,
   openCategoryNeedsPartner,
   validateYoungVeteranAges,
-  ageAsOf,
   isValidIndianMobile,
   normalizeIndianMobile,
   isRegistrationWindowOpen,
@@ -165,7 +165,8 @@ export async function assertCategoriesAvailable(categoryIds) {
 }
 
 /**
- * Member poster — free registration, chit pairing (no partner collected).
+ * Member poster — paid cart (1–3 of MD / WD / Mixed), chit pairing (no partner).
+ * Accepts `cart` / `categories` / legacy single `categoryId`.
  * @param {Record<string, unknown>} body
  */
 export function parseMemberRegistrationBody(body) {
@@ -179,7 +180,24 @@ export function parseMemberRegistrationBody(body) {
   const playerLevel = String(body?.playerLevel ?? "")
     .trim()
     .toLowerCase();
-  const categoryId = String(body?.categoryId ?? body?.category ?? "").trim();
+
+  /** @type {string[]} */
+  let categoryIds = [];
+  if (Array.isArray(body?.cart)) {
+    categoryIds = body.cart.map((item) =>
+      String(item?.categoryId ?? item ?? "").trim()
+    );
+  } else if (Array.isArray(body?.categories)) {
+    categoryIds = body.categories.map((id) => String(id ?? "").trim());
+  } else if (Array.isArray(body?.events)) {
+    categoryIds = body.events.map((item) =>
+      String(item?.categoryId ?? "").trim()
+    );
+  } else {
+    const single = String(body?.categoryId ?? body?.category ?? "").trim();
+    if (single) categoryIds = [single];
+  }
+  categoryIds = categoryIds.filter(Boolean);
 
   if (!fullName || !mobileRaw) {
     return { ok: false, message: "Name and mobile are required" };
@@ -200,10 +218,49 @@ export function parseMemberRegistrationBody(body) {
   if (!MEMBER_PLAYER_LEVELS.includes(playerLevel)) {
     return { ok: false, message: "Select a valid player level" };
   }
-  const cat = getCategoryById(categoryId, "member");
-  if (!cat) {
-    return { ok: false, message: "Select a valid category" };
+  if (categoryIds.length < 1 || categoryIds.length > 3) {
+    return { ok: false, message: "Select 1–3 categories (MD, WD, Mixed Doubles)" };
   }
+
+  /** @type {{ categoryId: string; categoryLabel: string; partnerName: string; partnerAge: null; partnerMobile: string }[]} */
+  const events = [];
+  const seen = new Set();
+
+  for (const categoryId of categoryIds) {
+    if (seen.has(categoryId)) {
+      return { ok: false, message: "Each category can only be selected once" };
+    }
+    seen.add(categoryId);
+
+    const cat = getCategoryById(categoryId, "member");
+    if (!cat) {
+      return { ok: false, message: `Unknown category: ${categoryId}` };
+    }
+
+    if (cat.id === "womens_doubles" && gender !== "female") {
+      return {
+        ok: false,
+        message: "Women's Doubles is for female players only",
+      };
+    }
+    if (cat.id === "mens_doubles" && gender !== "male") {
+      return {
+        ok: false,
+        message: "Men's Doubles is for male players only",
+      };
+    }
+
+    // Chit pairing — no partner collected.
+    events.push({
+      categoryId: cat.id,
+      categoryLabel: cat.label,
+      partnerName: "",
+      partnerAge: null,
+      partnerMobile: "",
+    });
+  }
+
+  const amountInr = computeMemberFeeInr(events.length);
 
   return {
     ok: true,
@@ -215,18 +272,10 @@ export function parseMemberRegistrationBody(body) {
       gender,
       dateOfBirth,
       playerLevel,
-      categories: [cat.id],
-      events: [
-        {
-          categoryId: cat.id,
-          categoryLabel: cat.label,
-          partnerName: "",
-          partnerAge: null,
-          partnerMobile: "",
-        },
-      ],
-      eventCount: 1,
-      amountInr: 0,
+      categories: events.map((e) => e.categoryId),
+      events,
+      eventCount: events.length,
+      amountInr,
     },
   };
 }

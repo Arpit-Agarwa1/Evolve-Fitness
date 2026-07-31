@@ -5,7 +5,7 @@ import {
 } from "../config/badmintonChampionship.js";
 
 /**
- * One championship registration — either member (free) or open (paid cart).
+ * One championship registration — member or open (both paid carts via Cashfree).
  */
 const eventEntrySchema = new mongoose.Schema(
   {

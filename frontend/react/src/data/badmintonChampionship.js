@@ -127,7 +127,14 @@ export const OPEN_PRO_ALLOWED_CATEGORY_IDS = ["open_yv", "open_xd_75"];
 /** Extra partner-age floor when a professional enters Mixed Doubles 75+. */
 export const OPEN_PRO_MIXED_PARTNER_MIN_AGE = 30;
 
-/** Poster fee ladder (per participant, by number of events). */
+/** Members fee ladder (per participant, by number of events; max 3). */
+export const MEMBER_FEE_LADDER = [
+  { events: 1, amountInr: 500 },
+  { events: 2, amountInr: 800 },
+  { events: 3, amountInr: 1000 },
+];
+
+/** Open fee ladder (per participant, by number of events). */
 export const OPEN_FEE_LADDER = [
   { events: 1, amountInr: 500 },
   { events: 2, amountInr: 800 },
@@ -136,6 +143,18 @@ export const OPEN_FEE_LADDER = [
 ];
 
 /**
+ * Members tournament fee ladder (max 3 events).
+ * @param {number} eventCount
+ */
+export function computeMemberFeeInr(eventCount) {
+  if (eventCount <= 0) return 0;
+  if (eventCount === 1) return 500;
+  if (eventCount === 2) return 800;
+  return 1000;
+}
+
+/**
+ * Open tournament fee ladder (max 4 events).
  * @param {number} eventCount
  */
 export function computeOpenFeeInr(eventCount) {
