@@ -165,7 +165,7 @@ export async function assertCategoriesAvailable(categoryIds) {
 }
 
 /**
- * Member poster — paid cart (1–3 of MD / WD / Mixed), chit pairing (no partner).
+ * Member poster — paid cart (1–2 of MD / WD / Mixed), chit pairing (no partner).
  * Accepts `cart` / `categories` / legacy single `categoryId`.
  * @param {Record<string, unknown>} body
  */
@@ -218,8 +218,8 @@ export function parseMemberRegistrationBody(body) {
   if (!MEMBER_PLAYER_LEVELS.includes(playerLevel)) {
     return { ok: false, message: "Select a valid player level" };
   }
-  if (categoryIds.length < 1 || categoryIds.length > 3) {
-    return { ok: false, message: "Select 1–3 categories (MD, WD, Mixed Doubles)" };
+  if (categoryIds.length < 1 || categoryIds.length > 2) {
+    return { ok: false, message: "Select 1–2 categories (MD, WD, Mixed Doubles)" };
   }
 
   /** @type {{ categoryId: string; categoryLabel: string; partnerName: string; partnerAge: null; partnerMobile: string }[]} */

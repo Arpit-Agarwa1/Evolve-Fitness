@@ -157,14 +157,13 @@ export const ALL_PLAYER_LEVELS = [
 ];
 
 /**
- * Members tournament fee ladder (max 3 events).
+ * Members tournament fee ladder (max 2 events).
  * @param {number} eventCount
  */
 export function computeMemberFeeInr(eventCount) {
   if (eventCount <= 0) return 0;
   if (eventCount === 1) return 500;
-  if (eventCount === 2) return 800;
-  return 1000;
+  return 800;
 }
 
 /**

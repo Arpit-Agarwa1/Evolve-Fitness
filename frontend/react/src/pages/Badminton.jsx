@@ -37,8 +37,7 @@ export default function Badminton() {
             <h2>Members Tournament</h2>
             <p>
               Men&apos;s, Women&apos;s &amp; Mixed Doubles. Pay online — ₹500 /
-              ₹800 / ₹1,000 for 1–3 events. Pairing by{" "}
-              <strong>chit system</strong>.
+              ₹800 for 1–2 events. Pairing by <strong>chit system</strong>.
             </p>
             <Link
               to={BADMINTON_MEMBER_PATH}

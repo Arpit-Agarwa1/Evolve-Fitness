@@ -183,8 +183,8 @@ export default function BadmintonMembers() {
       if (prev.includes(categoryId)) {
         return prev.filter((id) => id !== categoryId);
       }
-      if (prev.length >= 3) {
-        setError("Maximum 3 events.");
+      if (prev.length >= 2) {
+        setError("Maximum 2 events.");
         return prev;
       }
       return [...prev, categoryId];
@@ -269,7 +269,7 @@ export default function BadmintonMembers() {
             Evolve Members Tournament
           </h1>
           <p className="badminton-hero__lede">
-            Men&apos;s, Women&apos;s &amp; Mixed Doubles — up to 3 events.
+            Men&apos;s, Women&apos;s &amp; Mixed Doubles — up to 2 events.
             Pairing via <strong>chit system</strong>. Closes{" "}
             {REGISTRATION_CLOSES_LABEL}.
           </p>
@@ -388,7 +388,7 @@ export default function BadmintonMembers() {
             <div className="badminton-form">
               <h2 className="badminton-form__title">Select events</h2>
               <p className="badminton-form__hint">
-                Choose 1–3 categories. Partners are drawn by chit — do not enter
+                Choose 1–2 categories. Partners are drawn by chit — do not enter
                 a partner here.
               </p>
 
@@ -524,8 +524,7 @@ export default function BadmintonMembers() {
                 </div>
               </dl>
               <p className="badminton-form__hint">
-                Fees: 1 event ₹500 · 2 ₹800 · 3 ₹1,000. Pay securely via
-                Cashfree.
+                Fees: 1 event ₹500 · 2 events ₹800. Pay securely via Cashfree.
               </p>
               <p className="badminton-payee-note">
                 Payment will be collected by Tuff Lad Pro Limited (legal
