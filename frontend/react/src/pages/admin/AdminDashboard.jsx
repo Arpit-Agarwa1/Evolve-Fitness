@@ -91,6 +91,10 @@ export default function AdminDashboard() {
             <span className="admin-stat-card__value">{c?.badminton ?? "—"}</span>
             <span className="admin-stat-card__label">Badminton entries</span>
           </Link>
+          <Link to="/admin/pickleball" className="admin-stat-card">
+            <span className="admin-stat-card__value">{c?.pickleball ?? "—"}</span>
+            <span className="admin-stat-card__label">Pickleball entries</span>
+          </Link>
         </div>
         </>
       )}

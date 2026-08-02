@@ -93,6 +93,11 @@ export default function Navbar() {
             </NavLink>
           </li>
           <li>
+            <NavLink to="/pickleball" className={linkClass} onClick={() => setMenuOpen(false)}>
+              Evolve Pickleball Championship
+            </NavLink>
+          </li>
+          <li>
             <NavLink to="/contact" className={linkClass} onClick={() => setMenuOpen(false)}>
               Contact
             </NavLink>

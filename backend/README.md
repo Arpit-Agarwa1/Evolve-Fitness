@@ -252,6 +252,15 @@ Public portal: **`/badminton`** (QR → `https://evolvestudio.fitness/badminton`
 
 - **Members:** ₹500 / ₹800 for 1–2 events (MD / WD / Mixed Doubles, chit pairing) via Cashfree. **Open:** ₹500 / ₹800 / ₹1,000 / ₹1,200 for 1–4 events via Cashfree.
 - **Admin:** `/admin/badminton` — list, CSV export, close categories, force-close registration.
+
+### Pickleball Championship 2026
+
+Public portal: **`/pickleball`** (QR → `https://evolvestudio.fitness/pickleball`).
+
+- **Fees:** ₹500 / ₹800 / ₹1,000 for 1–3 events via Cashfree.
+- **Admin:** `/admin/pickleball` — list, CSV export, close categories, force-close registration.
+- Categories: MD 35+/50+/Open, XD 35+/Open, WD (chit), Men’s / Women’s Singles.
+- Capacity: **16** confirmed entries per category; closes **7 Aug 2026**.
 - Capacity: **16** confirmed entries per category; closes **7 Aug 2026**.
 - Open events: Men’s Doubles 60+/70+/80+/90+, Mixed Doubles 55+/75+, Women’s Doubles (chit pairing), Young Veteran.
 - On-screen receipt + Registration ID (`EVB26-…`). Confirmation email not wired yet.

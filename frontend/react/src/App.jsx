@@ -12,6 +12,7 @@ const Register = lazy(() => import("./pages/Register"));
 const Badminton = lazy(() => import("./pages/Badminton"));
 const BadmintonMembers = lazy(() => import("./pages/BadmintonMembers"));
 const BadmintonOpen = lazy(() => import("./pages/BadmintonOpen"));
+const Pickleball = lazy(() => import("./pages/Pickleball"));
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminMembers = lazy(() => import("./pages/admin/AdminMembers"));
@@ -20,6 +21,7 @@ const AdminContacts = lazy(() => import("./pages/admin/AdminContacts"));
 const AdminLeads = lazy(() => import("./pages/admin/AdminLeads"));
 const AdminTrainers = lazy(() => import("./pages/admin/AdminTrainers"));
 const AdminBadminton = lazy(() => import("./pages/admin/AdminBadminton"));
+const AdminPickleball = lazy(() => import("./pages/admin/AdminPickleball"));
 
 function App() {
   return (
@@ -34,6 +36,7 @@ function App() {
         <Route path="/badminton" element={<Badminton />} />
         <Route path="/badminton/members" element={<BadmintonMembers />} />
         <Route path="/badminton/open" element={<BadmintonOpen />} />
+        <Route path="/pickleball" element={<Pickleball />} />
 
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route
@@ -89,6 +92,14 @@ function App() {
           element={
             <ProtectedAdminRoute>
               <AdminBadminton />
+            </ProtectedAdminRoute>
+          }
+        />
+        <Route
+          path="/admin/pickleball"
+          element={
+            <ProtectedAdminRoute>
+              <AdminPickleball />
             </ProtectedAdminRoute>
           }
         />

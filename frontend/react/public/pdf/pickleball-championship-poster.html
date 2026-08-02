@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Evolve Pickleball Championship Poster</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600;700&family=Barlow:wght@700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --orange: #f36c21;
+      --panel: rgba(6, 6, 6, 0.78);
+      --line: rgba(255, 255, 255, 0.6);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+      background: #000;
+      font-family: "Barlow", "Helvetica Neue", Arial, sans-serif;
+      color: #fff;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .poster {
+      position: relative;
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.1) 16%, rgba(0,0,0,0.14) 58%, rgba(0,0,0,0.58) 100%),
+        url("pickleball-bg-source.jpg") center 18% / cover no-repeat;
+    }
+
+    .poster::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 95% 32% at 50% 0%, rgba(243,108,33,0.2), transparent 58%);
+      pointer-events: none;
+    }
+
+    .inner {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      padding: 28px 40px 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .brand-logo {
+      height: 128px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 16px rgba(0,0,0,0.85));
+      flex-shrink: 0;
+      margin-top: 4px;
+      margin-bottom: 0;
+    }
+
+    /* Headlines + info box — lower, with breathing room from logo */
+    .stack {
+      width: min(980px, 100%);
+      margin-top: 56px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      flex: 1;
+      justify-content: flex-start;
+      padding-top: 8px;
+    }
+
+    .hook {
+      width: 100%;
+      text-align: center;
+      padding: 12px 16px;
+      border-radius: 10px;
+      background: rgba(243,108,33,0.94);
+      box-shadow: 0 8px 22px rgba(0,0,0,0.35);
+    }
+    .hook strong {
+      display: block;
+      font-family: "Oswald", sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: 0.035em;
+      text-transform: uppercase;
+      line-height: 1.05;
+    }
+    .hook span {
+      display: block;
+      margin-top: 3px;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .title {
+      text-align: center;
+      font-family: "Oswald", sans-serif;
+      font-weight: 700;
+      font-size: 78px;
+      letter-spacing: 0.025em;
+      line-height: 0.92;
+      text-transform: uppercase;
+      text-shadow: 0 4px 20px rgba(0,0,0,0.9);
+      margin-top: 2px;
+    }
+
+    .meta {
+      display: inline-flex;
+      background: var(--orange);
+      border-radius: 999px;
+      padding: 12px 24px;
+      font-weight: 900;
+      font-size: 24px;
+      letter-spacing: 0.035em;
+      text-transform: uppercase;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.4);
+      margin-top: 2px;
+      margin-bottom: 6px;
+    }
+
+    .sheet {
+      width: 100%;
+      background: var(--panel);
+      border: 2px solid rgba(255,255,255,0.55);
+      border-radius: 16px;
+      padding: 18px 18px 16px;
+      backdrop-filter: blur(7px);
+      -webkit-backdrop-filter: blur(7px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+      margin-top: 4px;
+    }
+
+    .sheet-title {
+      text-align: center;
+      font-family: "Oswald", sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .label {
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin: 12px 0 7px;
+    }
+    .label:first-of-type { margin-top: 2px; }
+
+    .chips { display: grid; gap: 7px; }
+    .chips-3 { grid-template-columns: repeat(3, 1fr); }
+    .chips-2 { grid-template-columns: repeat(2, 1fr); }
+
+    .chip, .note, .fee {
+      border: 1.5px solid var(--line);
+      border-radius: 8px;
+      background: rgba(0,0,0,0.3);
+      font-weight: 900;
+    }
+
+    .chip {
+      padding: 11px 6px;
+      text-align: center;
+      font-size: 28px;
+      line-height: 1.05;
+    }
+    .chip small {
+      display: block;
+      margin-top: 2px;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+    }
+
+    .note {
+      padding: 11px 12px;
+      font-size: 22px;
+      line-height: 1.2;
+      letter-spacing: 0.015em;
+    }
+
+    .singles, .fees { display: grid; gap: 7px; }
+    .singles { grid-template-columns: 1fr 1fr; }
+    .fees { grid-template-columns: repeat(3, 1fr); }
+
+    .fee {
+      padding: 10px 6px;
+      text-align: center;
+    }
+    .fee .lbl {
+      display: block;
+      font-size: 15px;
+      letter-spacing: 0.05em;
+    }
+    .fee .price {
+      display: block;
+      margin-top: 1px;
+      font-size: 34px;
+      line-height: 1;
+    }
+
+    .bottom-row {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    .rules-block {
+      border: 1.5px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: rgba(0,0,0,0.28);
+    }
+    .rules-block .label { margin-top: 0; margin-bottom: 6px; }
+    .rules {
+      list-style: none;
+      display: grid;
+      gap: 5px;
+    }
+    .rules li {
+      position: relative;
+      padding-left: 18px;
+      font-size: 20px;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+    .rules li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.45em;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--orange);
+    }
+
+    .side-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .prizes {
+      border: 1.5px solid rgba(243,108,33,0.9);
+      border-radius: 10px;
+      padding: 10px;
+      background: rgba(243,108,33,0.18);
+      text-align: center;
+      flex: 1;
+    }
+    .prizes h3 {
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--orange);
+      margin-bottom: 3px;
+    }
+    .prizes p {
+      font-size: 20px;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+
+    .scan {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+      border: 1.5px solid rgba(243,108,33,0.9);
+      border-radius: 10px;
+      padding: 8px;
+      background: rgba(0,0,0,0.28);
+    }
+    .scan h3 {
+      font-family: "Oswald", sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      line-height: 1;
+      margin-bottom: 3px;
+    }
+    .scan p {
+      font-size: 16px;
+      font-weight: 800;
+    }
+    .scan .closes {
+      display: inline-block;
+      margin-top: 5px;
+      background: var(--orange);
+      border-radius: 6px;
+      padding: 5px 8px;
+      font-size: 14px;
+      font-weight: 900;
+    }
+    .qr-frame {
+      padding: 5px;
+      background: #fff;
+      border: 3px solid var(--orange);
+      border-radius: 8px;
+    }
+    .qr-frame img {
+      display: block;
+      width: 118px;
+      height: 118px;
+    }
+
+    .gift {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: linear-gradient(90deg, #ff8a2b, #f36c21 50%, #e85d12);
+      border-radius: 12px;
+      padding: 12px 14px;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.3);
+      margin-top: 4px;
+    }
+    .gift .icon { font-size: 32px; }
+    .gift strong {
+      display: block;
+      font-family: "Oswald", sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+    .gift span {
+      display: block;
+      margin-top: 2px;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .phone {
+      text-align: center;
+      font-size: 36px;
+      font-weight: 900;
+      letter-spacing: 0.03em;
+      text-shadow: 0 2px 14px rgba(0,0,0,0.9);
+      margin-top: 4px;
+      margin-bottom: 4px;
+    }
+
+    @page { size: 1080px 1920px; margin: 0; }
+    @media print {
+      html, body, .poster {
+        width: 1080px;
+        height: 1920px;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="poster">
+    <div class="inner">
+      <img
+        class="brand-logo"
+        src="evolve-logo-footer.png"
+        alt="EVOLVE — The Luxury Fitness"
+      />
+
+      <div class="stack">
+        <div class="hook">
+          <strong>Warm up for States — prove your level here</strong>
+          <span>Your best chance to test the game before the big stage</span>
+        </div>
+
+        <h1 class="title">Pickleball Championship</h1>
+        <div class="meta">9 Aug 2026 &nbsp;|&nbsp; 8:00 AM &nbsp;|&nbsp; Khelcity Jagatpura Jaipur</div>
+
+        <section class="sheet">
+          <h2 class="sheet-title">Open Pickleball Championship</h2>
+
+          <p class="label">Men’s Doubles</p>
+          <div class="chips chips-3">
+            <div class="chip">35+<small>MIN AGE 35</small></div>
+            <div class="chip">50+<small>MIN AGE 50</small></div>
+            <div class="chip">OPEN<small>MIN AGE 19+</small></div>
+          </div>
+
+          <p class="label">Mixed Doubles</p>
+          <div class="chips chips-2">
+            <div class="chip">35+<small>BOTH MIN AGE 35+</small></div>
+            <div class="chip">OPEN<small>MIN AGE 19+</small></div>
+          </div>
+
+          <p class="label">Women’s Doubles</p>
+          <p class="note">OPEN · No age criteria · Pairing via chit system</p>
+
+          <p class="label">Singles</p>
+          <div class="singles">
+            <div class="note">Men’s Singles · OPEN · No age criteria</div>
+            <div class="note">Women’s Singles · OPEN · No age criteria</div>
+          </div>
+
+          <p class="label">Registration Fees (per participant)</p>
+          <div class="fees">
+            <div class="fee"><span class="lbl">1 EVENT</span><span class="price">₹500</span></div>
+            <div class="fee"><span class="lbl">2 EVENTS</span><span class="price">₹800</span></div>
+            <div class="fee"><span class="lbl">3 EVENTS</span><span class="price">₹1,000</span></div>
+          </div>
+
+          <div class="bottom-row">
+            <div class="rules-block">
+              <p class="label">Tournament Rules</p>
+              <ul class="rules">
+                <li>Format: Round Robin + Knockout (preferred; depends on entries).</li>
+                <li>Semi-final &amp; Final: Service point scoring.</li>
+                <li>All other matches: Rally scoring.</li>
+                <li>Women’s Doubles pairing by chit system.</li>
+              </ul>
+            </div>
+
+            <div class="side-stack">
+              <div class="prizes">
+                <h3>🏆 Prizes</h3>
+                <p>Winners / Runners-up<br />Cash Prize · Trophies<br />Exclusive Evolve Gift</p>
+              </div>
+              <div class="scan">
+                <div>
+                  <h3>Scan to register</h3>
+                  <p>Online only</p>
+                  <div class="closes">Closes 7th Aug</div>
+                </div>
+                <div class="qr-frame">
+                  <img src="qr-pickleball.png" alt="QR code to register for pickleball" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="gift">
+          <div class="icon" aria-hidden="true">🎁</div>
+          <div>
+            <strong>Special gift for every participant</strong>
+            <span>Exclusive Evolve gift — win or play</span>
+          </div>
+        </div>
+
+        <p class="phone">9829063727 (UJJWAL BAJAJ)</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -24,6 +24,12 @@ import {
   getAdminBadmintonSettings,
   updateAdminBadmintonSettings,
 } from "../controllers/badmintonController.js";
+import {
+  listAdminPickleballRegistrations,
+  exportAdminPickleballCsv,
+  getAdminPickleballSettings,
+  updateAdminPickleballSettings,
+} from "../controllers/pickleballController.js";
 import { requireAdminAuth } from "../middleware/requireAdminAuth.js";
 import { adminLoginLimiter } from "../middleware/rateLimits.js";
 import { trainerImageUpload } from "../middleware/trainerUpload.js";
@@ -65,5 +71,13 @@ router.get("/badminton", asyncHandler(listAdminBadmintonRegistrations));
 router.get("/badminton/export", asyncHandler(exportAdminBadmintonCsv));
 router.get("/badminton/settings", asyncHandler(getAdminBadmintonSettings));
 router.patch("/badminton/settings", asyncHandler(updateAdminBadmintonSettings));
+
+router.get("/pickleball", asyncHandler(listAdminPickleballRegistrations));
+router.get("/pickleball/export", asyncHandler(exportAdminPickleballCsv));
+router.get("/pickleball/settings", asyncHandler(getAdminPickleballSettings));
+router.patch(
+  "/pickleball/settings",
+  asyncHandler(updateAdminPickleballSettings)
+);
 
 export default router;

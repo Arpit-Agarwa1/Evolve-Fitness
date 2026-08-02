@@ -6,6 +6,7 @@ import memberRoutes from "./memberRoutes.js";
 import adminRoutes from "./adminRoutes.js";
 import trainerRoutes from "./trainerRoutes.js";
 import badmintonRoutes from "./badmintonRoutes.js";
+import pickleballRoutes from "./pickleballRoutes.js";
 import { apiWriteLimiter } from "../middleware/rateLimits.js";
 
 const router = Router();
@@ -15,8 +16,9 @@ router.use("/trainers", trainerRoutes);
 router.use("/contact", apiWriteLimiter, contactRoutes);
 router.use("/membership", apiWriteLimiter, membershipRoutes);
 router.use("/members", apiWriteLimiter, memberRoutes);
-// Badminton GETs (status) stay unlimited; write limiter only on POST register routes.
+// Badminton / pickleball GETs (status) stay unlimited; write limiter on POSTs.
 router.use("/badminton", badmintonRoutes);
+router.use("/pickleball", pickleballRoutes);
 router.use("/admin", adminRoutes);
 
 export default router;

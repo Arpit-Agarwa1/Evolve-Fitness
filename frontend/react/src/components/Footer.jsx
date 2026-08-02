@@ -55,6 +55,9 @@ export default function Footer() {
               <Link to="/badminton">Evolve Badminton Championship</Link>
             </li>
             <li>
+              <Link to="/pickleball">Evolve Pickleball Championship</Link>
+            </li>
+            <li>
               <Link to="/register">Register</Link>
             </li>
             <li>

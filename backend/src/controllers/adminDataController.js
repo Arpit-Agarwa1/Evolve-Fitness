@@ -3,6 +3,7 @@ import ContactMessage from "../models/ContactMessage.js";
 import MembershipLead from "../models/MembershipLead.js";
 import Trainer from "../models/Trainer.js";
 import BadmintonRegistration from "../models/BadmintonRegistration.js";
+import PickleballRegistration from "../models/PickleballRegistration.js";
 import { sendSuccess } from "../views/jsonResponse.js";
 
 /** Legacy members without `isActive` are treated as active everywhere. */
@@ -15,15 +16,23 @@ const activeMemberFilter = {
  */
 export async function getAdminDashboard(req, res, next) {
   try {
-    const [members, membersActive, contacts, leads, trainers, badminton] =
-      await Promise.all([
-        Member.countDocuments(),
-        Member.countDocuments(activeMemberFilter),
-        ContactMessage.countDocuments(),
-        MembershipLead.countDocuments(),
-        Trainer.countDocuments(),
-        BadmintonRegistration.countDocuments({ status: "confirmed" }),
-      ]);
+    const [
+      members,
+      membersActive,
+      contacts,
+      leads,
+      trainers,
+      badminton,
+      pickleball,
+    ] = await Promise.all([
+      Member.countDocuments(),
+      Member.countDocuments(activeMemberFilter),
+      ContactMessage.countDocuments(),
+      MembershipLead.countDocuments(),
+      Trainer.countDocuments(),
+      BadmintonRegistration.countDocuments({ status: "confirmed" }),
+      PickleballRegistration.countDocuments({ status: "confirmed" }),
+    ]);
 
     return sendSuccess(res, {
       counts: {
@@ -33,6 +42,7 @@ export async function getAdminDashboard(req, res, next) {
         leads,
         trainers,
         badminton,
+        pickleball,
       },
       generatedAt: new Date().toISOString(),
     });
