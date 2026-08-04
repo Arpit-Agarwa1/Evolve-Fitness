@@ -97,8 +97,8 @@ export const PICKLEBALL_CATEGORIES = [
 
 export const PICKLEBALL_FEE_LADDER = [
   { events: 1, amountInr: 500 },
-  { events: 2, amountInr: 800 },
-  { events: 3, amountInr: 1000 },
+  { events: 2, amountInr: 1000 },
+  { events: 3, amountInr: 1200 },
 ];
 
 /**
@@ -107,8 +107,8 @@ export const PICKLEBALL_FEE_LADDER = [
 export function computePickleballFeeInr(eventCount) {
   if (eventCount <= 0) return 0;
   if (eventCount === 1) return 500;
-  if (eventCount === 2) return 800;
-  return 1000;
+  if (eventCount === 2) return 1000;
+  return 1200;
 }
 
 export const PICKLEBALL_POSTER = {

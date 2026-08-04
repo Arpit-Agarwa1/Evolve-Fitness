@@ -103,8 +103,8 @@ export const PICKLEBALL_CATEGORY_IDS = PICKLEBALL_CATEGORIES.map((c) => c.id);
 export function computePickleballFeeInr(eventCount) {
   if (eventCount <= 0) return 0;
   if (eventCount === 1) return 500;
-  if (eventCount === 2) return 800;
-  return 1000;
+  if (eventCount === 2) return 1000;
+  return 1200;
 }
 
 /**

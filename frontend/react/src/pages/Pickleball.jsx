@@ -686,7 +686,7 @@ export default function Pickleball() {
                 </div>
               </dl>
               <p className="badminton-form__hint">
-                Fees: 1 event ₹500 · 2 ₹800 · 3 ₹1,000. Pay securely via
+                Fees: 1 event ₹500 · 2 ₹1,000 · 3 ₹1,200. Pay securely via
                 Cashfree.
               </p>
               <p className="badminton-payee-note">
