@@ -129,6 +129,7 @@ export const PICKLEBALL_POSTER = {
   scoringNote: "Semi-final & Final: service point · All other matches: rally",
   maxEntriesNote: `Maximum ${MAX_ENTRIES_PER_CATEGORY} entries per event (first come, first served)`,
   rules: [
+    "This registration is for you only — your partner must register separately and name you as their partner for the team to match.",
     "Format: Round Robin + Knockout (preferred; depends on entries).",
     "Semi-final & Final: service point. All other matches: rally scoring.",
     "Women's Doubles pairing is done through a chit system.",

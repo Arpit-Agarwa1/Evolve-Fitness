@@ -558,6 +558,12 @@ export default function BadmintonOpen() {
                 Men&apos;s Doubles (60+/70+/80+/90+), Mixed Doubles (55+/75+),
                 Women&apos;s Doubles (chit), Young Veteran. Max 4 events.
               </p>
+              <p className="badminton-banner badminton-banner--warn" role="note">
+                <strong>Note:</strong> This registration is for you only. Your
+                partner must register separately and name you as their partner
+                for the team to match. (Women&apos;s Doubles uses chit pairing —
+                no partner registration needed.)
+              </p>
 
               <div className="badminton-form__grid">
                 <label className="badminton-form__span2">
@@ -715,6 +721,11 @@ export default function BadmintonOpen() {
           {step === "checkout" ? (
             <div className="badminton-form badminton-form--review">
               <h2 className="badminton-form__title">Checkout</h2>
+              <p className="badminton-banner badminton-banner--warn" role="note">
+                <strong>Note:</strong> This registration is for you only. Your
+                partner must register separately and name you as their partner
+                for the team to match.
+              </p>
               <dl className="badminton-review">
                 <div>
                   <dt>Name</dt>

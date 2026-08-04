@@ -181,6 +181,7 @@ export const OPEN_POSTER = {
   participationGift: "Special gift for every participant",
   maxEntriesNote: `Maximum ${MAX_ENTRIES_PER_CATEGORY} entries per event (first come, first served)`,
   rules: [
+    "This registration is for you only — your partner must register separately and name you as their partner for the team to match.",
     "Professional players can play Young Veteran and Mixed Doubles 75+ with a partner aged 30+.",
     "Semi-professional players may partner ONLY with a Club player.",
     "Club players may partner with any eligible category.",
