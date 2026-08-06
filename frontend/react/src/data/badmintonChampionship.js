@@ -4,8 +4,8 @@
  */
 
 export const BADMINTON_EVENT_YEAR = 2026;
-export const REGISTRATION_CLOSES_LABEL = "7 August 2026";
-export const REGISTRATION_CLOSES_AT = new Date("2026-08-07T23:59:59+05:30");
+export const REGISTRATION_CLOSES_LABEL = "8 August 2026, 11:45 PM";
+export const REGISTRATION_CLOSES_AT = new Date("2026-08-08T23:45:00+05:30");
 export const MAX_ENTRIES_PER_CATEGORY = 16;
 
 export const MEMBER_CATEGORIES = [
@@ -187,7 +187,7 @@ export const OPEN_POSTER = {
     "Club players may partner with any eligible category.",
     "Lists of professional and semi-professional players are available with the organizers.",
     "Women's Doubles pairing is done through a chit system.",
-    "Online registration only. Registration closes on 7 August.",
+    "Online registration only. Registration closes on 8 August at 11:45 PM.",
   ],
 };
 

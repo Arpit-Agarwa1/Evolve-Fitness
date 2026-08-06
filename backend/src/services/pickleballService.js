@@ -83,7 +83,7 @@ export async function getPublicCategoryStatus() {
 
   const payload = {
     open: windowOpen,
-    closesAt: "2026-08-07T23:59:59+05:30",
+    closesAt: "2026-08-08T23:45:00+05:30",
     forceClosed: settings.registrationForceClosed,
     categories,
   };

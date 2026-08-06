@@ -4,8 +4,8 @@
  */
 
 export const BADMINTON_EVENT_YEAR = 2026;
-/** Poster: registration closes 7 August. */
-export const REGISTRATION_CLOSES_AT = new Date("2026-08-07T23:59:59+05:30");
+/** Poster: registration closes 8 August, 11:45 PM IST. */
+export const REGISTRATION_CLOSES_AT = new Date("2026-08-08T23:45:00+05:30");
 export const MAX_ENTRIES_PER_CATEGORY = 16;
 
 /** @typedef {'member' | 'open'} TournamentType */

@@ -260,7 +260,7 @@ Public portal: **`/pickleball`** (QR → `https://evolvestudio.fitness/picklebal
 - **Fees:** ₹500 / ₹1,000 / ₹1,200 for 1–3 events via Cashfree.
 - **Admin:** `/admin/pickleball` — list, CSV export, close categories, force-close registration.
 - Categories: MD 35+/50+/Open, XD 35+/Open, WD (chit), Men’s / Women’s Singles.
-- Capacity: **16** confirmed entries per category; closes **7 Aug 2026**.
-- Capacity: **16** confirmed entries per category; closes **7 Aug 2026**.
+- Capacity: **16** confirmed entries per category; closes **8 Aug 2026, 11:45 PM IST**.
+- Capacity: **16** confirmed entries per category; closes **8 Aug 2026, 11:45 PM IST**.
 - Open events: Men’s Doubles 60+/70+/80+/90+, Mixed Doubles 55+/75+, Women’s Doubles (chit pairing), Young Veteran.
 - On-screen receipt + Registration ID (`EVB26-…`). Confirmation email not wired yet.

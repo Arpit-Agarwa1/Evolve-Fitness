@@ -4,8 +4,8 @@
  */
 
 export const PICKLEBALL_EVENT_YEAR = 2026;
-export const REGISTRATION_CLOSES_LABEL = "7 August 2026";
-export const REGISTRATION_CLOSES_AT = new Date("2026-08-07T23:59:59+05:30");
+export const REGISTRATION_CLOSES_LABEL = "8 August 2026, 11:45 PM";
+export const REGISTRATION_CLOSES_AT = new Date("2026-08-08T23:45:00+05:30");
 export const MAX_ENTRIES_PER_CATEGORY = 16;
 export const MAX_EVENTS_PER_REGISTRATION = 3;
 
@@ -133,7 +133,7 @@ export const PICKLEBALL_POSTER = {
     "Format: Round Robin + Knockout (preferred; depends on entries).",
     "Semi-final & Final: service point. All other matches: rally scoring.",
     "Women's Doubles pairing is done through a chit system.",
-    "Online registration only. Registration closes on 7 August.",
+    "Online registration only. Registration closes on 8 August at 11:45 PM.",
   ],
 };
 
