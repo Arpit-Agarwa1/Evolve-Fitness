@@ -5,6 +5,7 @@ import Footer from "../components/Footer";
 import SEO from "../components/SEO";
 import BadmintonPlayerListsModal from "../components/BadmintonPlayerListsModal";
 import BadmintonWhatsAppInvite from "../components/BadmintonWhatsAppInvite";
+import TournamentAlreadyRegistered from "../components/TournamentAlreadyRegistered";
 import { apiFetch } from "../services/api";
 import { loadCashfreeScript } from "../utils/loadCashfree";
 import {
@@ -41,6 +42,13 @@ const EMPTY_DETAILS = {
  * MD / XD / WD cart → Cashfree checkout.
  */
 export default function BadmintonOpen() {
+  const [flow, setFlow] = useState(
+    /** @type {'new' | 'amend'} */ (
+      new URLSearchParams(window.location.search).get("amend") === "1"
+        ? "amend"
+        : "new"
+    )
+  );
   const [step, setStep] = useState(
     /** @type {'details' | 'cart' | 'checkout' | 'done'} */ ("details")
   );
@@ -78,6 +86,8 @@ export default function BadmintonOpen() {
       .toUpperCase();
     const orderId = String(params.get("order_id") || "").trim();
     if (!registrationId) return;
+    // Amend return is handled by TournamentAlreadyRegistered.
+    if (params.get("amend") === "1") return;
 
     let cancelled = false;
     (async () => {
@@ -437,7 +447,7 @@ export default function BadmintonOpen() {
         </section>
 
         <section className="badminton-register">
-          {step !== "done" ? (
+          {flow === "new" && step !== "done" ? (
             <ol className="badminton-steps" aria-label="Progress">
               {["Details", "Events", "Pay"].map((label, i) => {
                 const idx = step === "details" ? 0 : step === "cart" ? 1 : 2;
@@ -462,7 +472,99 @@ export default function BadmintonOpen() {
             </p>
           ) : null}
 
-          {step === "details" ? (
+          {flow === "amend" && step !== "done" ? (
+            <TournamentAlreadyRegistered
+              lookupPath="/api/badminton/open/lookup"
+              amendCheckoutPath="/api/badminton/open/amend/checkout"
+              amendVerifyPath="/api/badminton/open/amend/verify"
+              returnPath={BADMINTON_OPEN_PATH}
+              maxEvents={4}
+              categories={OPEN_CATEGORIES}
+              computeFeeInr={computeOpenFeeInr}
+              feeLadderHint="Fees: 1 event ₹500 · 2 ₹800 · 3 ₹1,000 · 4 ₹1,200. You only pay the difference from what you already paid."
+              getCategoryById={(id) => getCategoryById(id, "open")}
+              needsPartner={openCategoryNeedsPartner}
+              isCategoryBlocked={(cat, player) => {
+                const a = Number(player.age);
+                if (!cat || !Number.isFinite(a) || !player.gender) return false;
+                if (!isOpenCategoryAllowedForLevel(cat, String(player.playerLevel || ""))) {
+                  return true;
+                }
+                if (cat.division === "womens_doubles" && player.gender !== "female") {
+                  return true;
+                }
+                if (cat.division === "mens_doubles" && player.gender !== "male") {
+                  return true;
+                }
+                if (isYoungVeteranCategory(cat)) return false;
+                const min = getOpenMinAgeForGender(cat, String(player.gender));
+                return typeof min === "number" && a < min;
+              }}
+              validatePartnerAdd={(cat, player, partner) => {
+                if (!partner.firstName.trim() || !partner.lastName.trim()) {
+                  return "Enter partner first and last name.";
+                }
+                const partnerAgeNum = Number(partner.age);
+                if (
+                  !partner.age.trim() ||
+                  !Number.isFinite(partnerAgeNum) ||
+                  partnerAgeNum < 1 ||
+                  partnerAgeNum > 120
+                ) {
+                  return "Enter a valid partner age.";
+                }
+                const partnerAgeRounded = Math.round(partnerAgeNum);
+                const age = Number(player.age);
+                if (isYoungVeteranCategory(cat)) {
+                  const yv = validateYoungVeteranAges(
+                    age,
+                    partnerAgeRounded,
+                    cat.veteranMinAge ?? 35
+                  );
+                  if (!yv.ok) return yv.message;
+                } else {
+                  const partnerGender =
+                    cat.division === "mixed_doubles"
+                      ? player.gender === "male"
+                        ? "female"
+                        : "male"
+                      : String(player.gender);
+                  const partnerMin = getOpenMinAgeForGender(cat, partnerGender);
+                  if (
+                    typeof partnerMin === "number" &&
+                    partnerAgeRounded < partnerMin
+                  ) {
+                    return `Partner must be age ${partnerMin}+ for ${cat.label}.`;
+                  }
+                }
+                if (
+                  player.playerLevel === "professional" &&
+                  cat.id === "open_xd_75" &&
+                  partnerAgeRounded < OPEN_PRO_MIXED_PARTNER_MIN_AGE
+                ) {
+                  return `Professionals need a partner aged ${OPEN_PRO_MIXED_PARTNER_MIN_AGE}+ for Mixed Doubles 75+.`;
+                }
+                if (partner.mobile.trim() && !isValidIndianMobile(partner.mobile)) {
+                  return "Partner mobile must be a valid 10-digit number.";
+                }
+                return "";
+              }}
+              categoryMeta={categoryMeta}
+              onCancel={() => {
+                setFlow("new");
+                setError("");
+              }}
+              onComplete={async (reg) => {
+                setConfirmed(reg);
+                setStep("done");
+                setFlow("new");
+                setError("");
+                await loadStatus();
+              }}
+            />
+          ) : null}
+
+          {flow === "new" && step === "details" ? (
             <div className="badminton-form">
               <h2 className="badminton-form__title">Your details</h2>
               <div className="badminton-form__grid">
@@ -547,11 +649,21 @@ export default function BadmintonOpen() {
                 >
                   Continue to categories
                 </button>
+                <button
+                  type="button"
+                  className="badminton-btn badminton-btn--ghost"
+                  onClick={() => {
+                    setFlow("amend");
+                    setError("");
+                  }}
+                >
+                  Already registered? Edit or add events
+                </button>
               </div>
             </div>
           ) : null}
 
-          {step === "cart" ? (
+          {flow === "new" && step === "cart" ? (
             <div className="badminton-form">
               <h2 className="badminton-form__title">Add events to cart</h2>
               <p className="badminton-form__hint">
@@ -718,7 +830,7 @@ export default function BadmintonOpen() {
             </div>
           ) : null}
 
-          {step === "checkout" ? (
+          {flow === "new" && step === "checkout" ? (
             <div className="badminton-form badminton-form--review">
               <h2 className="badminton-form__title">Checkout</h2>
               <p className="badminton-banner badminton-banner--warn" role="note">
@@ -792,7 +904,11 @@ export default function BadmintonOpen() {
           {step === "done" && confirmed ? (
             <div className="badminton-confirm" role="status">
               <p className="badminton-eyebrow">Paid & confirmed</p>
-              <h2 className="badminton-confirm__title">Registration complete</h2>
+              <h2 className="badminton-confirm__title">
+                {(confirmed.eventCount ?? 0) > 0
+                  ? "Registration saved"
+                  : "Registration complete"}
+              </h2>
               <p className="badminton-confirm__id">
                 Registration ID: <strong>{confirmed.registrationId}</strong>
               </p>

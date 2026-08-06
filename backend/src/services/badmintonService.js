@@ -123,22 +123,193 @@ export async function generateRegistrationId() {
 
 /**
  * @param {string} mobile10
- * @param {'member' | 'open'} tournamentType
  */
-export async function findConfirmedDuplicate(mobile10, tournamentType) {
-  const phoneVariants = [
+function phoneVariantsFor(mobile10) {
+  return [
     mobile10,
     `+91${mobile10}`,
     `91${mobile10}`,
     `0${mobile10}`,
   ];
+}
+
+/**
+ * Match lookup first name against stored fullName (first token).
+ * @param {string} fullName
+ * @param {string} firstName
+ */
+export function matchesRegistrationFirstName(fullName, firstName) {
+  const stored = String(fullName ?? "")
+    .trim()
+    .split(/\s+/)[0]
+    ?.toLowerCase();
+  const given = String(firstName ?? "")
+    .trim()
+    .toLowerCase();
+  return Boolean(stored && given && stored === given);
+}
+
+/**
+ * @param {string} mobile10
+ * @param {'member' | 'open'} tournamentType
+ */
+export async function findConfirmedDuplicate(mobile10, tournamentType) {
   return BadmintonRegistration.findOne({
     status: "confirmed",
     tournamentType,
-    mobile: { $in: phoneVariants },
+    mobile: { $in: phoneVariantsFor(mobile10) },
   })
     .select("registrationId mobile")
     .lean();
+}
+
+/**
+ * Full confirmed registration for lookup / amend (mobile + optional name gate in controller).
+ * @param {string} mobile10
+ * @param {'member' | 'open'} tournamentType
+ */
+export async function findConfirmedRegistration(mobile10, tournamentType) {
+  return BadmintonRegistration.findOne({
+    status: "confirmed",
+    tournamentType,
+    mobile: { $in: phoneVariantsFor(mobile10) },
+  });
+}
+
+/**
+ * Unique Cashfree order id for an amendment payment.
+ * @param {string} registrationId
+ */
+export function generateAmendOrderId(registrationId) {
+  const suffix = crypto.randomBytes(2).toString("hex").toUpperCase();
+  return `${registrationId}-A${suffix}`;
+}
+
+/**
+ * Only newly added categories need an availability check (existing ones already count).
+ * @param {string[]} categoryIds
+ * @param {string[]} alreadyRegisteredIds
+ */
+export async function assertNewCategoriesAvailable(
+  categoryIds,
+  alreadyRegisteredIds = []
+) {
+  const existing = new Set(alreadyRegisteredIds);
+  const newIds = categoryIds.filter((id) => !existing.has(id));
+  if (newIds.length === 0) return { ok: true };
+  return assertCategoriesAvailable(newIds);
+}
+
+/**
+ * Build open amend payload from existing confirmed doc + new cart.
+ * Keeps identity fields from the registration; rejects removed events.
+ * @param {Record<string, unknown>} body
+ * @param {import("mongoose").Document | Record<string, unknown>} existing
+ */
+export function buildOpenAmendFromExisting(body, existing) {
+  const o =
+    typeof existing.toObject === "function" ? existing.toObject() : existing;
+  const nameParts = String(o.fullName ?? "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  const firstName = nameParts[0] || "Player";
+  const lastName = nameParts.slice(1).join(" ") || firstName;
+
+  const parsed = parseOpenRegistrationBody({
+    firstName,
+    lastName,
+    fullName: o.fullName,
+    mobile: o.mobile,
+    email: o.email || "",
+    gender: o.gender,
+    age: o.age,
+    playerLevel: o.playerLevel,
+    cart: body?.cart ?? body?.events ?? [],
+  });
+  if (!parsed.ok) return parsed;
+
+  const existingIds = Array.isArray(o.categories) ? o.categories : [];
+  for (const id of existingIds) {
+    if (!parsed.data.categories.includes(id)) {
+      return {
+        ok: false,
+        message:
+          "You cannot remove events that are already paid. Contact Evolve if you need a change.",
+      };
+    }
+  }
+
+  const alreadyPaid = Number(o.amountInr) || 0;
+  const newTotal = parsed.data.amountInr;
+  const deltaInr = Math.max(0, newTotal - alreadyPaid);
+
+  return {
+    ok: true,
+    data: {
+      events: parsed.data.events,
+      categories: parsed.data.categories,
+      eventCount: parsed.data.eventCount,
+      amountInr: newTotal,
+      deltaInr,
+      alreadyPaid,
+      addedCategoryIds: parsed.data.categories.filter(
+        (id) => !existingIds.includes(id)
+      ),
+    },
+  };
+}
+
+/**
+ * Build member amend payload (category ids only — chit pairing).
+ * @param {Record<string, unknown>} body
+ * @param {import("mongoose").Document | Record<string, unknown>} existing
+ */
+export function buildMemberAmendFromExisting(body, existing) {
+  const o =
+    typeof existing.toObject === "function" ? existing.toObject() : existing;
+
+  const parsed = parseMemberRegistrationBody({
+    fullName: o.fullName,
+    mobile: o.mobile,
+    gender: o.gender,
+    dateOfBirth: o.dateOfBirth
+      ? new Date(o.dateOfBirth).toISOString().slice(0, 10)
+      : body?.dateOfBirth,
+    playerLevel: o.playerLevel,
+    cart: body?.cart ?? body?.categories ?? body?.events ?? [],
+  });
+  if (!parsed.ok) return parsed;
+
+  const existingIds = Array.isArray(o.categories) ? o.categories : [];
+  for (const id of existingIds) {
+    if (!parsed.data.categories.includes(id)) {
+      return {
+        ok: false,
+        message:
+          "You cannot remove events that are already paid. Contact Evolve if you need a change.",
+      };
+    }
+  }
+
+  const alreadyPaid = Number(o.amountInr) || 0;
+  const newTotal = parsed.data.amountInr;
+  const deltaInr = Math.max(0, newTotal - alreadyPaid);
+
+  return {
+    ok: true,
+    data: {
+      events: parsed.data.events,
+      categories: parsed.data.categories,
+      eventCount: parsed.data.eventCount,
+      amountInr: newTotal,
+      deltaInr,
+      alreadyPaid,
+      addedCategoryIds: parsed.data.categories.filter(
+        (id) => !existingIds.includes(id)
+      ),
+    },
+  };
 }
 
 /**

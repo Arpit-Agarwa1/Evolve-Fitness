@@ -1253,6 +1253,46 @@
   flex-wrap: wrap;
 }
 
+.badminton-form--amend .badminton-cart-item--amend {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.badminton-form--amend .badminton-cart-item--amend > div {
+  width: 100%;
+}
+
+.badminton-amend-partner {
+  margin-top: 0.65rem;
+}
+
+.badminton-member-cats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin: 1rem 0;
+}
+
+.badminton-member-cat {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--bd-ink, #1a1a1a) 18%, transparent);
+  border-radius: 0.35rem;
+  cursor: pointer;
+}
+
+.badminton-member-cat.is-selected {
+  border-color: var(--bd-gold, #c4a35a);
+  background: color-mix(in srgb, var(--bd-gold, #c4a35a) 10%, transparent);
+}
+
+.badminton-member-cat input {
+  margin-top: 0.2rem;
+}
+
 .badminton-rules .badminton-btn {
   margin-top: 0.25rem;
 }

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import SEO from "../components/SEO";
+import TournamentAlreadyRegistered from "../components/TournamentAlreadyRegistered";
 import { apiFetch } from "../services/api";
 import { loadCashfreeScript } from "../utils/loadCashfree";
 import {
@@ -34,6 +35,13 @@ const EMPTY_DETAILS = {
  * Cart (max 3) → Cashfree checkout.
  */
 export default function Pickleball() {
+  const [flow, setFlow] = useState(
+    /** @type {'new' | 'amend'} */ (
+      new URLSearchParams(window.location.search).get("amend") === "1"
+        ? "amend"
+        : "new"
+    )
+  );
   const [step, setStep] = useState(
     /** @type {'details' | 'cart' | 'checkout' | 'done'} */ ("details")
   );
@@ -70,6 +78,7 @@ export default function Pickleball() {
       .toUpperCase();
     const orderId = String(params.get("order_id") || "").trim();
     if (!registrationId) return;
+    if (params.get("amend") === "1") return;
 
     let cancelled = false;
     (async () => {
@@ -381,7 +390,7 @@ export default function Pickleball() {
         </section>
 
         <section className="badminton-register">
-          {step !== "done" ? (
+          {flow === "new" && step !== "done" ? (
             <ol className="badminton-steps" aria-label="Progress">
               {["Details", "Events", "Pay"].map((label, i) => {
                 const idx = step === "details" ? 0 : step === "cart" ? 1 : 2;
@@ -406,7 +415,75 @@ export default function Pickleball() {
             </p>
           ) : null}
 
-          {step === "details" ? (
+          {flow === "amend" && step !== "done" ? (
+            <TournamentAlreadyRegistered
+              lookupPath="/api/pickleball/lookup"
+              amendCheckoutPath="/api/pickleball/amend/checkout"
+              amendVerifyPath="/api/pickleball/amend/verify"
+              returnPath={PICKLEBALL_PATH}
+              maxEvents={MAX_EVENTS_PER_REGISTRATION}
+              categories={PICKLEBALL_CATEGORIES}
+              computeFeeInr={computePickleballFeeInr}
+              feeLadderHint="Fees: 1 event ₹500 · 2 ₹1,000 · 3 ₹1,200. You only pay the difference from what you already paid."
+              getCategoryById={getPickleballCategoryById}
+              needsPartner={pickleballCategoryNeedsPartner}
+              isCategoryBlocked={(cat, player) => {
+                const a = Number(player.age);
+                if (!cat || !Number.isFinite(a) || !player.gender) return false;
+                if (
+                  !isPickleballCategoryAllowedForGender(
+                    cat,
+                    String(player.gender)
+                  )
+                ) {
+                  return true;
+                }
+                if (typeof cat.minAge === "number" && a < cat.minAge) {
+                  return true;
+                }
+                return false;
+              }}
+              validatePartnerAdd={(cat, player, partner) => {
+                if (!partner.firstName.trim() || !partner.lastName.trim()) {
+                  return "Enter partner first and last name.";
+                }
+                const partnerAgeNum = Number(partner.age);
+                if (
+                  !partner.age.trim() ||
+                  !Number.isFinite(partnerAgeNum) ||
+                  partnerAgeNum < 1 ||
+                  partnerAgeNum > 120
+                ) {
+                  return "Enter a valid partner age.";
+                }
+                const partnerAgeRounded = Math.round(partnerAgeNum);
+                if (
+                  typeof cat.minAge === "number" &&
+                  partnerAgeRounded < cat.minAge
+                ) {
+                  return `Partner must be age ${cat.minAge}+ for ${cat.label}.`;
+                }
+                if (partner.mobile.trim() && !isValidIndianMobile(partner.mobile)) {
+                  return "Partner mobile must be a valid 10-digit number.";
+                }
+                return "";
+              }}
+              categoryMeta={categoryMeta}
+              onCancel={() => {
+                setFlow("new");
+                setError("");
+              }}
+              onComplete={async (reg) => {
+                setConfirmed(reg);
+                setStep("done");
+                setFlow("new");
+                setError("");
+                await loadStatus();
+              }}
+            />
+          ) : null}
+
+          {flow === "new" && step === "details" ? (
             <div className="badminton-form">
               <h2 className="badminton-form__title">Your details</h2>
               <p className="badminton-form__hint">{PICKLEBALL_POSTER.hookSub}</p>
@@ -459,7 +536,7 @@ export default function Pickleball() {
                   </select>
                 </label>
               </div>
-              <div className="badminton-form__actions">
+              <div className="badminton-form__actions badminton-form__actions--stack">
                 <button
                   type="button"
                   className="badminton-btn badminton-btn--primary"
@@ -467,11 +544,21 @@ export default function Pickleball() {
                 >
                   Continue to categories
                 </button>
+                <button
+                  type="button"
+                  className="badminton-btn badminton-btn--ghost"
+                  onClick={() => {
+                    setFlow("amend");
+                    setError("");
+                  }}
+                >
+                  Already registered? Edit or add events
+                </button>
               </div>
             </div>
           ) : null}
 
-          {step === "cart" ? (
+          {flow === "new" && step === "cart" ? (
             <div className="badminton-form">
               <h2 className="badminton-form__title">Add events to cart</h2>
               <p className="badminton-form__hint">
@@ -642,7 +729,7 @@ export default function Pickleball() {
             </div>
           ) : null}
 
-          {step === "checkout" ? (
+          {flow === "new" && step === "checkout" ? (
             <div className="badminton-form badminton-form--review">
               <h2 className="badminton-form__title">Checkout</h2>
               <p className="badminton-banner badminton-banner--warn" role="note">

@@ -144,6 +144,25 @@ const pickleballRegistrationSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    /** Pending add-events / partner-edit payment (confirmed registrations only). */
+    pendingAmend: {
+      type: new mongoose.Schema(
+        {
+          events: { type: [eventEntrySchema], default: [] },
+          categories: {
+            type: [{ type: String, enum: PICKLEBALL_CATEGORY_IDS }],
+            default: [],
+          },
+          eventCount: { type: Number, default: 0, min: 0 },
+          amountInr: { type: Number, default: 0, min: 0 },
+          deltaInr: { type: Number, default: 0, min: 0 },
+          cashfreeOrderId: { type: String, trim: true, default: "" },
+          cashfreePaymentSessionId: { type: String, trim: true, default: "" },
+        },
+        { _id: false }
+      ),
+      default: null,
+    },
   },
   { timestamps: true }
 );

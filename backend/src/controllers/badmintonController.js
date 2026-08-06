@@ -3,11 +3,17 @@ import BadmintonSettings from "../models/BadmintonSettings.js";
 import { sendError, sendSuccess } from "../views/jsonResponse.js";
 import {
   assertCategoriesAvailable,
+  assertNewCategoriesAvailable,
+  buildMemberAmendFromExisting,
+  buildOpenAmendFromExisting,
   findConfirmedDuplicate,
+  findConfirmedRegistration,
+  generateAmendOrderId,
   generateRegistrationId,
   getBadmintonSettings,
   getPublicCategoryStatus,
   invalidateBadmintonStatusCache,
+  matchesRegistrationFirstName,
   parseMemberRegistrationBody,
   parseOpenRegistrationBody,
 } from "../services/badmintonService.js";
@@ -19,7 +25,7 @@ import {
   isCashfreeConfigured,
   isCashfreeOrderPaid,
 } from "../services/cashfreeService.js";
-import { CATEGORY_IDS } from "../config/badmintonChampionship.js";
+import { CATEGORY_IDS, isValidIndianMobile, normalizeIndianMobile } from "../config/badmintonChampionship.js";
 
 /**
  * @param {import("mongoose").Document | Record<string, unknown>} doc
@@ -92,7 +98,7 @@ export async function checkoutMemberTournament(req, res, next) {
     if (duplicate) {
       return sendError(
         res,
-        `This mobile is already registered for the Members tournament (${duplicate.registrationId}).`,
+        `This mobile is already registered for the Members tournament (${duplicate.registrationId}). Use “Already registered?” on this page to add another event.`,
         409
       );
     }
@@ -266,7 +272,7 @@ export async function checkoutOpenTournament(req, res, next) {
     if (duplicate) {
       return sendError(
         res,
-        `This mobile is already registered for the Open tournament (${duplicate.registrationId}).`,
+        `This mobile is already registered for the Open tournament (${duplicate.registrationId}). Use “Already registered?” on this page to edit or add events.`,
         409
       );
     }
@@ -411,6 +417,468 @@ export async function verifyOpenTournamentPayment(req, res, next) {
     doc.paidAt = new Date();
     await doc.save();
     invalidateBadmintonStatusCache();
+
+    return sendSuccess(res, { registration: toPublicRegistration(doc) });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * Apply a paid (or free) pending amend onto a confirmed registration.
+ * @param {import("mongoose").Document} doc
+ * @param {{ events: unknown[]; categories: string[]; eventCount: number; amountInr: number }} amend
+ * @param {string} [cashfreeOrderId]
+ * @param {string} [cashfreePaymentId]
+ */
+async function applyAmendToRegistration(
+  doc,
+  amend,
+  cashfreeOrderId = "",
+  cashfreePaymentId = ""
+) {
+  doc.events = amend.events;
+  doc.categories = amend.categories;
+  doc.eventCount = amend.eventCount;
+  doc.amountInr = amend.amountInr;
+  doc.pendingAmend = null;
+  if (cashfreeOrderId) {
+    doc.cashfreeOrderId = cashfreeOrderId;
+  }
+  if (cashfreePaymentId) {
+    doc.cashfreePaymentId = cashfreePaymentId;
+  }
+  await doc.save();
+  invalidateBadmintonStatusCache();
+}
+
+/**
+ * Validate lookup credentials and return confirmed registration or error payload.
+ * @param {Record<string, unknown>} body
+ * @param {'member' | 'open'} tournamentType
+ */
+async function resolveLookupRegistration(body, tournamentType) {
+  const firstName = String(body?.firstName ?? "").trim();
+  const mobileRaw = String(body?.mobile ?? "").trim();
+
+  if (!firstName || !mobileRaw) {
+    return { ok: false, status: 422, message: "First name and mobile are required" };
+  }
+  if (!isValidIndianMobile(mobileRaw)) {
+    return {
+      ok: false,
+      status: 422,
+      message: "Enter a valid 10-digit Indian mobile number",
+    };
+  }
+
+  const mobile = normalizeIndianMobile(mobileRaw);
+  const doc = await findConfirmedRegistration(mobile, tournamentType);
+  if (!doc || !matchesRegistrationFirstName(doc.fullName, firstName)) {
+    return {
+      ok: false,
+      status: 404,
+      message: "No matching registration found. Check first name and mobile.",
+    };
+  }
+  return { ok: true, doc, firstName, mobile };
+}
+
+/**
+ * POST /api/badminton/open/lookup — already registered (phone + first name).
+ */
+export async function lookupOpenRegistration(req, res, next) {
+  try {
+    const resolved = await resolveLookupRegistration(req.body ?? {}, "open");
+    if (!resolved.ok) {
+      return sendError(res, resolved.message, resolved.status);
+    }
+    return sendSuccess(res, {
+      registration: toPublicRegistration(resolved.doc),
+      maxEvents: 4,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/badminton/open/amend/checkout — add events / edit partners; pay delta only.
+ */
+export async function checkoutOpenAmend(req, res, next) {
+  try {
+    const resolved = await resolveLookupRegistration(req.body ?? {}, "open");
+    if (!resolved.ok) {
+      return sendError(res, resolved.message, resolved.status);
+    }
+    const doc = resolved.doc;
+
+    const built = buildOpenAmendFromExisting(req.body ?? {}, doc);
+    if (!built.ok) return sendError(res, built.message, 422);
+
+    const availability = await assertNewCategoriesAvailable(
+      built.data.categories,
+      doc.categories || []
+    );
+    if (!availability.ok) return sendError(res, availability.message, 409);
+
+    // Partner-only edits (or same events) — no payment.
+    if (built.data.deltaInr <= 0) {
+      await applyAmendToRegistration(doc, built.data);
+      return sendSuccess(res, {
+        paymentRequired: false,
+        deltaInr: 0,
+        alreadyPaid: built.data.alreadyPaid,
+        newTotalInr: built.data.amountInr,
+        registration: toPublicRegistration(doc),
+      });
+    }
+
+    if (!isCashfreeConfigured()) {
+      return sendError(
+        res,
+        "Online payment is temporarily unavailable. Add Cashfree keys to the server and try again.",
+        503
+      );
+    }
+
+    const cashfreeOrderId = generateAmendOrderId(doc.registrationId);
+    const returnUrl = `${getPaymentReturnOrigin()}/badminton/open?registrationId=${encodeURIComponent(doc.registrationId)}&order_id={order_id}&amend=1`;
+
+    let order;
+    try {
+      order = await createCashfreeOrder({
+        amountInr: built.data.deltaInr,
+        orderId: cashfreeOrderId,
+        customerId: `open_amd_${doc.mobile}`,
+        customerPhone: doc.mobile,
+        customerName: doc.fullName,
+        customerEmail: doc.email || "",
+        returnUrl,
+        orderNote: `Open badminton amend +${built.data.addedCategoryIds.length} event(s)`,
+      });
+    } catch (err) {
+      console.error("[badminton open amend] Cashfree order failed:", err?.response?.data || err);
+      return sendError(res, "Could not start payment. Please try again.", 502);
+    }
+
+    const paymentSessionId =
+      order?.payment_session_id || order?.paymentSessionId || "";
+    if (!paymentSessionId) {
+      return sendError(res, "Could not start payment. Please try again.", 502);
+    }
+
+    doc.pendingAmend = {
+      events: built.data.events,
+      categories: built.data.categories,
+      eventCount: built.data.eventCount,
+      amountInr: built.data.amountInr,
+      deltaInr: built.data.deltaInr,
+      cashfreeOrderId,
+      cashfreePaymentSessionId: paymentSessionId,
+    };
+    await doc.save();
+
+    return sendSuccess(
+      res,
+      {
+        paymentRequired: true,
+        paymentSessionId,
+        orderId: cashfreeOrderId,
+        amountInr: built.data.deltaInr,
+        deltaInr: built.data.deltaInr,
+        alreadyPaid: built.data.alreadyPaid,
+        newTotalInr: built.data.amountInr,
+        currency: "INR",
+        mode: getCashfreeMode(),
+        registrationId: doc.registrationId,
+        eventCount: built.data.eventCount,
+        events: built.data.events,
+      },
+      201
+    );
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/badminton/open/amend/verify — confirm amend Cashfree payment and merge events.
+ */
+export async function verifyOpenAmendPayment(req, res, next) {
+  try {
+    const registrationId = String(req.body?.registrationId ?? "")
+      .trim()
+      .toUpperCase();
+    const orderIdBody = String(req.body?.orderId ?? "").trim();
+
+    if (!registrationId) {
+      return sendError(res, "registrationId is required", 422);
+    }
+    if (!isCashfreeConfigured()) {
+      return sendError(res, "Payment verification is unavailable", 503);
+    }
+
+    const doc = await BadmintonRegistration.findOne({
+      registrationId,
+      tournamentType: "open",
+      status: "confirmed",
+    });
+    if (!doc) return sendError(res, "Registration not found", 404);
+
+    const pending = doc.pendingAmend;
+    if (!pending?.cashfreeOrderId) {
+      // Already applied or never started — return current registration.
+      return sendSuccess(res, { registration: toPublicRegistration(doc) });
+    }
+
+    const cashfreeOrderId = orderIdBody || pending.cashfreeOrderId;
+    if (pending.cashfreeOrderId !== cashfreeOrderId) {
+      return sendError(res, "Order mismatch for this amendment", 400);
+    }
+
+    let order;
+    try {
+      order = await fetchCashfreeOrder(cashfreeOrderId);
+    } catch (err) {
+      console.error("[badminton open amend] Cashfree fetch failed:", err?.response?.data || err);
+      return sendError(res, "Could not verify payment. Please try again.", 502);
+    }
+
+    if (!isCashfreeOrderPaid(order)) {
+      return sendError(
+        res,
+        `Payment not completed (status: ${order?.order_status || "unknown"}).`,
+        400
+      );
+    }
+
+    const availability = await assertNewCategoriesAvailable(
+      pending.categories || [],
+      doc.categories || []
+    );
+    if (!availability.ok) {
+      return sendError(
+        res,
+        `${availability.message}. Contact Evolve with order ${cashfreeOrderId} for a refund.`,
+        409
+      );
+    }
+
+    await applyAmendToRegistration(
+      doc,
+      {
+        events: pending.events,
+        categories: pending.categories,
+        eventCount: pending.eventCount,
+        amountInr: pending.amountInr,
+      },
+      cashfreeOrderId,
+      String(order?.cf_payment_id || order?.payment_id || cashfreeOrderId)
+    );
+
+    return sendSuccess(res, { registration: toPublicRegistration(doc) });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/badminton/members/lookup
+ */
+export async function lookupMemberRegistration(req, res, next) {
+  try {
+    const resolved = await resolveLookupRegistration(req.body ?? {}, "member");
+    if (!resolved.ok) {
+      return sendError(res, resolved.message, resolved.status);
+    }
+    return sendSuccess(res, {
+      registration: toPublicRegistration(resolved.doc),
+      maxEvents: 2,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/badminton/members/amend/checkout
+ */
+export async function checkoutMemberAmend(req, res, next) {
+  try {
+    const resolved = await resolveLookupRegistration(req.body ?? {}, "member");
+    if (!resolved.ok) {
+      return sendError(res, resolved.message, resolved.status);
+    }
+    const doc = resolved.doc;
+
+    const built = buildMemberAmendFromExisting(req.body ?? {}, doc);
+    if (!built.ok) return sendError(res, built.message, 422);
+
+    const availability = await assertNewCategoriesAvailable(
+      built.data.categories,
+      doc.categories || []
+    );
+    if (!availability.ok) return sendError(res, availability.message, 409);
+
+    if (built.data.deltaInr <= 0) {
+      await applyAmendToRegistration(doc, built.data);
+      return sendSuccess(res, {
+        paymentRequired: false,
+        deltaInr: 0,
+        alreadyPaid: built.data.alreadyPaid,
+        newTotalInr: built.data.amountInr,
+        registration: toPublicRegistration(doc),
+      });
+    }
+
+    if (!isCashfreeConfigured()) {
+      return sendError(
+        res,
+        "Online payment is temporarily unavailable. Add Cashfree keys to the server and try again.",
+        503
+      );
+    }
+
+    const cashfreeOrderId = generateAmendOrderId(doc.registrationId);
+    const returnUrl = `${getPaymentReturnOrigin()}/badminton/members?registrationId=${encodeURIComponent(doc.registrationId)}&order_id={order_id}&amend=1`;
+
+    let order;
+    try {
+      order = await createCashfreeOrder({
+        amountInr: built.data.deltaInr,
+        orderId: cashfreeOrderId,
+        customerId: `member_amd_${doc.mobile}`,
+        customerPhone: doc.mobile,
+        customerName: doc.fullName,
+        customerEmail: doc.email || "",
+        returnUrl,
+        orderNote: `Members badminton amend +${built.data.addedCategoryIds.length} event(s)`,
+      });
+    } catch (err) {
+      console.error(
+        "[badminton members amend] Cashfree order failed:",
+        err?.response?.data || err
+      );
+      return sendError(res, "Could not start payment. Please try again.", 502);
+    }
+
+    const paymentSessionId =
+      order?.payment_session_id || order?.paymentSessionId || "";
+    if (!paymentSessionId) {
+      return sendError(res, "Could not start payment. Please try again.", 502);
+    }
+
+    doc.pendingAmend = {
+      events: built.data.events,
+      categories: built.data.categories,
+      eventCount: built.data.eventCount,
+      amountInr: built.data.amountInr,
+      deltaInr: built.data.deltaInr,
+      cashfreeOrderId,
+      cashfreePaymentSessionId: paymentSessionId,
+    };
+    await doc.save();
+
+    return sendSuccess(
+      res,
+      {
+        paymentRequired: true,
+        paymentSessionId,
+        orderId: cashfreeOrderId,
+        amountInr: built.data.deltaInr,
+        deltaInr: built.data.deltaInr,
+        alreadyPaid: built.data.alreadyPaid,
+        newTotalInr: built.data.amountInr,
+        currency: "INR",
+        mode: getCashfreeMode(),
+        registrationId: doc.registrationId,
+        eventCount: built.data.eventCount,
+        events: built.data.events,
+      },
+      201
+    );
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/badminton/members/amend/verify
+ */
+export async function verifyMemberAmendPayment(req, res, next) {
+  try {
+    const registrationId = String(req.body?.registrationId ?? "")
+      .trim()
+      .toUpperCase();
+    const orderIdBody = String(req.body?.orderId ?? "").trim();
+
+    if (!registrationId) {
+      return sendError(res, "registrationId is required", 422);
+    }
+    if (!isCashfreeConfigured()) {
+      return sendError(res, "Payment verification is unavailable", 503);
+    }
+
+    const doc = await BadmintonRegistration.findOne({
+      registrationId,
+      tournamentType: "member",
+      status: "confirmed",
+    });
+    if (!doc) return sendError(res, "Registration not found", 404);
+
+    const pending = doc.pendingAmend;
+    if (!pending?.cashfreeOrderId) {
+      return sendSuccess(res, { registration: toPublicRegistration(doc) });
+    }
+
+    const cashfreeOrderId = orderIdBody || pending.cashfreeOrderId;
+    if (pending.cashfreeOrderId !== cashfreeOrderId) {
+      return sendError(res, "Order mismatch for this amendment", 400);
+    }
+
+    let order;
+    try {
+      order = await fetchCashfreeOrder(cashfreeOrderId);
+    } catch (err) {
+      console.error(
+        "[badminton members amend] Cashfree fetch failed:",
+        err?.response?.data || err
+      );
+      return sendError(res, "Could not verify payment. Please try again.", 502);
+    }
+
+    if (!isCashfreeOrderPaid(order)) {
+      return sendError(
+        res,
+        `Payment not completed (status: ${order?.order_status || "unknown"}).`,
+        400
+      );
+    }
+
+    const availability = await assertNewCategoriesAvailable(
+      pending.categories || [],
+      doc.categories || []
+    );
+    if (!availability.ok) {
+      return sendError(
+        res,
+        `${availability.message}. Contact Evolve with order ${cashfreeOrderId} for a refund.`,
+        409
+      );
+    }
+
+    await applyAmendToRegistration(
+      doc,
+      {
+        events: pending.events,
+        categories: pending.categories,
+        eventCount: pending.eventCount,
+        amountInr: pending.amountInr,
+      },
+      cashfreeOrderId,
+      String(order?.cf_payment_id || order?.payment_id || cashfreeOrderId)
+    );
 
     return sendSuccess(res, { registration: toPublicRegistration(doc) });
   } catch (err) {

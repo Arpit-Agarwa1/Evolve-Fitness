@@ -185,6 +185,27 @@ const badmintonRegistrationSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    /** Pending add-events / partner-edit payment (confirmed registrations only). */
+    pendingAmend: {
+      type: new mongoose.Schema(
+        {
+          events: { type: [eventEntrySchema], default: [] },
+          categories: {
+            type: [{ type: String, enum: CATEGORY_IDS }],
+            default: [],
+          },
+          eventCount: { type: Number, default: 0, min: 0 },
+          /** New total fee after amendment. */
+          amountInr: { type: Number, default: 0, min: 0 },
+          /** Amount to charge now (new total − already paid). */
+          deltaInr: { type: Number, default: 0, min: 0 },
+          cashfreeOrderId: { type: String, trim: true, default: "" },
+          cashfreePaymentSessionId: { type: String, trim: true, default: "" },
+        },
+        { _id: false }
+      ),
+      default: null,
+    },
   },
   { timestamps: true }
 );

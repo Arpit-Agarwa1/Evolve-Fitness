@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import SEO from "../components/SEO";
 import BadmintonWhatsAppInvite from "../components/BadmintonWhatsAppInvite";
+import MembersAlreadyRegistered from "../components/MembersAlreadyRegistered";
 import { apiFetch } from "../services/api";
 import { loadCashfreeScript } from "../utils/loadCashfree";
 import {
@@ -44,6 +45,13 @@ function isCategoryBlockedForGender(cat, gender) {
  * MD / WD / Mixed Doubles cart (chit pairing) → Cashfree checkout.
  */
 export default function BadmintonMembers() {
+  const [flow, setFlow] = useState(
+    /** @type {'new' | 'amend'} */ (
+      new URLSearchParams(window.location.search).get("amend") === "1"
+        ? "amend"
+        : "new"
+    )
+  );
   const [step, setStep] = useState(
     /** @type {'details' | 'cart' | 'checkout' | 'done'} */ ("details")
   );
@@ -76,6 +84,7 @@ export default function BadmintonMembers() {
       .toUpperCase();
     const orderId = String(params.get("order_id") || "").trim();
     if (!registrationId) return;
+    if (params.get("amend") === "1") return;
 
     let cancelled = false;
     (async () => {
@@ -276,7 +285,7 @@ export default function BadmintonMembers() {
         </section>
 
         <section className="badminton-register">
-          {step !== "done" ? (
+          {flow === "new" && step !== "done" ? (
             <ol className="badminton-steps" aria-label="Progress">
               {["Details", "Events", "Pay"].map((label, i) => {
                 const idx = step === "details" ? 0 : step === "cart" ? 1 : 2;
@@ -301,7 +310,25 @@ export default function BadmintonMembers() {
             </p>
           ) : null}
 
-          {step === "details" ? (
+          {flow === "amend" && step !== "done" ? (
+            <MembersAlreadyRegistered
+              returnPath={BADMINTON_MEMBER_PATH}
+              categoryMeta={categoryMeta}
+              onCancel={() => {
+                setFlow("new");
+                setError("");
+              }}
+              onComplete={async (reg) => {
+                setConfirmed(reg);
+                setStep("done");
+                setFlow("new");
+                setError("");
+                await loadStatus();
+              }}
+            />
+          ) : null}
+
+          {flow === "new" && step === "details" ? (
             <form
               className="badminton-form"
               onSubmit={(e) => {
@@ -373,18 +400,28 @@ export default function BadmintonMembers() {
                 </label>
               </div>
 
-              <div className="badminton-form__actions">
+              <div className="badminton-form__actions badminton-form__actions--stack">
                 <button
                   type="submit"
                   className="badminton-btn badminton-btn--primary"
                 >
                   Continue to events
                 </button>
+                <button
+                  type="button"
+                  className="badminton-btn badminton-btn--ghost"
+                  onClick={() => {
+                    setFlow("amend");
+                    setError("");
+                  }}
+                >
+                  Already registered? Add another event
+                </button>
               </div>
             </form>
           ) : null}
 
-          {step === "cart" ? (
+          {flow === "new" && step === "cart" ? (
             <div className="badminton-form">
               <h2 className="badminton-form__title">Select events</h2>
               <p className="badminton-form__hint">
@@ -481,7 +518,7 @@ export default function BadmintonMembers() {
             </div>
           ) : null}
 
-          {step === "checkout" ? (
+          {flow === "new" && step === "checkout" ? (
             <div className="badminton-form badminton-form--review">
               <h2 className="badminton-form__title">Checkout</h2>
               <dl className="badminton-review">

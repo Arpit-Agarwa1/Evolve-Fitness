@@ -3,11 +3,16 @@ import PickleballSettings from "../models/PickleballSettings.js";
 import { sendError, sendSuccess } from "../views/jsonResponse.js";
 import {
   assertCategoriesAvailable,
+  assertNewCategoriesAvailable,
+  buildPickleballAmendFromExisting,
   findConfirmedDuplicate,
+  findConfirmedRegistration,
+  generateAmendOrderId,
   generateRegistrationId,
   getPickleballSettings,
   getPublicCategoryStatus,
   invalidatePickleballStatusCache,
+  matchesRegistrationFirstName,
   parsePickleballRegistrationBody,
 } from "../services/pickleballService.js";
 import {
@@ -18,7 +23,12 @@ import {
   isCashfreeConfigured,
   isCashfreeOrderPaid,
 } from "../services/cashfreeService.js";
-import { PICKLEBALL_CATEGORY_IDS } from "../config/pickleballChampionship.js";
+import {
+  MAX_EVENTS_PER_REGISTRATION,
+  PICKLEBALL_CATEGORY_IDS,
+  isValidIndianMobile,
+  normalizeIndianMobile,
+} from "../config/pickleballChampionship.js";
 
 /**
  * @param {import("mongoose").Document | Record<string, unknown>} doc
@@ -81,7 +91,7 @@ export async function checkoutPickleball(req, res, next) {
     if (duplicate) {
       return sendError(
         res,
-        `This mobile is already registered for Pickleball (${duplicate.registrationId}).`,
+        `This mobile is already registered for Pickleball (${duplicate.registrationId}). Use “Already registered?” on this page to edit or add events.`,
         409
       );
     }
@@ -228,6 +238,265 @@ export async function verifyPickleballPayment(req, res, next) {
     doc.paidAt = new Date();
     await doc.save();
     invalidatePickleballStatusCache();
+
+    return sendSuccess(res, { registration: toPublicRegistration(doc) });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * @param {import("mongoose").Document} doc
+ * @param {{ events: unknown[]; categories: string[]; eventCount: number; amountInr: number }} amend
+ * @param {string} [cashfreeOrderId]
+ * @param {string} [cashfreePaymentId]
+ */
+async function applyAmendToRegistration(
+  doc,
+  amend,
+  cashfreeOrderId = "",
+  cashfreePaymentId = ""
+) {
+  doc.events = amend.events;
+  doc.categories = amend.categories;
+  doc.eventCount = amend.eventCount;
+  doc.amountInr = amend.amountInr;
+  doc.pendingAmend = null;
+  if (cashfreeOrderId) {
+    doc.cashfreeOrderId = cashfreeOrderId;
+  }
+  if (cashfreePaymentId) {
+    doc.cashfreePaymentId = cashfreePaymentId;
+  }
+  await doc.save();
+  invalidatePickleballStatusCache();
+}
+
+/**
+ * @param {Record<string, unknown>} body
+ */
+async function resolveLookupRegistration(body) {
+  const firstName = String(body?.firstName ?? "").trim();
+  const mobileRaw = String(body?.mobile ?? "").trim();
+
+  if (!firstName || !mobileRaw) {
+    return { ok: false, status: 422, message: "First name and mobile are required" };
+  }
+  if (!isValidIndianMobile(mobileRaw)) {
+    return {
+      ok: false,
+      status: 422,
+      message: "Enter a valid 10-digit Indian mobile number",
+    };
+  }
+
+  const mobile = normalizeIndianMobile(mobileRaw);
+  const doc = await findConfirmedRegistration(mobile);
+  if (!doc || !matchesRegistrationFirstName(doc.fullName, firstName)) {
+    return {
+      ok: false,
+      status: 404,
+      message: "No matching registration found. Check first name and mobile.",
+    };
+  }
+  return { ok: true, doc, firstName, mobile };
+}
+
+/**
+ * POST /api/pickleball/lookup
+ */
+export async function lookupPickleballRegistration(req, res, next) {
+  try {
+    const resolved = await resolveLookupRegistration(req.body ?? {});
+    if (!resolved.ok) {
+      return sendError(res, resolved.message, resolved.status);
+    }
+    return sendSuccess(res, {
+      registration: toPublicRegistration(resolved.doc),
+      maxEvents: MAX_EVENTS_PER_REGISTRATION,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/pickleball/amend/checkout
+ */
+export async function checkoutPickleballAmend(req, res, next) {
+  try {
+    const resolved = await resolveLookupRegistration(req.body ?? {});
+    if (!resolved.ok) {
+      return sendError(res, resolved.message, resolved.status);
+    }
+    const doc = resolved.doc;
+
+    const built = buildPickleballAmendFromExisting(req.body ?? {}, doc);
+    if (!built.ok) return sendError(res, built.message, 422);
+
+    const availability = await assertNewCategoriesAvailable(
+      built.data.categories,
+      doc.categories || []
+    );
+    if (!availability.ok) return sendError(res, availability.message, 409);
+
+    if (built.data.deltaInr <= 0) {
+      await applyAmendToRegistration(doc, built.data);
+      return sendSuccess(res, {
+        paymentRequired: false,
+        deltaInr: 0,
+        alreadyPaid: built.data.alreadyPaid,
+        newTotalInr: built.data.amountInr,
+        registration: toPublicRegistration(doc),
+      });
+    }
+
+    if (!isCashfreeConfigured()) {
+      return sendError(
+        res,
+        "Online payment is temporarily unavailable. Add Cashfree keys to the server and try again.",
+        503
+      );
+    }
+
+    const cashfreeOrderId = generateAmendOrderId(doc.registrationId);
+    const returnUrl = `${getPaymentReturnOrigin()}/pickleball?registrationId=${encodeURIComponent(doc.registrationId)}&order_id={order_id}&amend=1`;
+
+    let order;
+    try {
+      order = await createCashfreeOrder({
+        amountInr: built.data.deltaInr,
+        orderId: cashfreeOrderId,
+        customerId: `pickleball_amd_${doc.mobile}`,
+        customerPhone: doc.mobile,
+        customerName: doc.fullName,
+        customerEmail: doc.email || "",
+        returnUrl,
+        orderNote: `Pickleball amend +${built.data.addedCategoryIds.length} event(s)`,
+      });
+    } catch (err) {
+      console.error(
+        "[pickleball amend] Cashfree order failed:",
+        err?.response?.data || err
+      );
+      return sendError(res, "Could not start payment. Please try again.", 502);
+    }
+
+    const paymentSessionId =
+      order?.payment_session_id || order?.paymentSessionId || "";
+    if (!paymentSessionId) {
+      return sendError(res, "Could not start payment. Please try again.", 502);
+    }
+
+    doc.pendingAmend = {
+      events: built.data.events,
+      categories: built.data.categories,
+      eventCount: built.data.eventCount,
+      amountInr: built.data.amountInr,
+      deltaInr: built.data.deltaInr,
+      cashfreeOrderId,
+      cashfreePaymentSessionId: paymentSessionId,
+    };
+    await doc.save();
+
+    return sendSuccess(
+      res,
+      {
+        paymentRequired: true,
+        paymentSessionId,
+        orderId: cashfreeOrderId,
+        amountInr: built.data.deltaInr,
+        deltaInr: built.data.deltaInr,
+        alreadyPaid: built.data.alreadyPaid,
+        newTotalInr: built.data.amountInr,
+        currency: "INR",
+        mode: getCashfreeMode(),
+        registrationId: doc.registrationId,
+        eventCount: built.data.eventCount,
+        events: built.data.events,
+      },
+      201
+    );
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/pickleball/amend/verify
+ */
+export async function verifyPickleballAmendPayment(req, res, next) {
+  try {
+    const registrationId = String(req.body?.registrationId ?? "")
+      .trim()
+      .toUpperCase();
+    const orderIdBody = String(req.body?.orderId ?? "").trim();
+
+    if (!registrationId) {
+      return sendError(res, "registrationId is required", 422);
+    }
+    if (!isCashfreeConfigured()) {
+      return sendError(res, "Payment verification is unavailable", 503);
+    }
+
+    const doc = await PickleballRegistration.findOne({
+      registrationId,
+      status: "confirmed",
+    });
+    if (!doc) return sendError(res, "Registration not found", 404);
+
+    const pending = doc.pendingAmend;
+    if (!pending?.cashfreeOrderId) {
+      return sendSuccess(res, { registration: toPublicRegistration(doc) });
+    }
+
+    const cashfreeOrderId = orderIdBody || pending.cashfreeOrderId;
+    if (pending.cashfreeOrderId !== cashfreeOrderId) {
+      return sendError(res, "Order mismatch for this amendment", 400);
+    }
+
+    let order;
+    try {
+      order = await fetchCashfreeOrder(cashfreeOrderId);
+    } catch (err) {
+      console.error(
+        "[pickleball amend] Cashfree fetch failed:",
+        err?.response?.data || err
+      );
+      return sendError(res, "Could not verify payment. Please try again.", 502);
+    }
+
+    if (!isCashfreeOrderPaid(order)) {
+      return sendError(
+        res,
+        `Payment not completed (status: ${order?.order_status || "unknown"}).`,
+        400
+      );
+    }
+
+    const availability = await assertNewCategoriesAvailable(
+      pending.categories || [],
+      doc.categories || []
+    );
+    if (!availability.ok) {
+      return sendError(
+        res,
+        `${availability.message}. Contact Evolve with order ${cashfreeOrderId} for a refund.`,
+        409
+      );
+    }
+
+    await applyAmendToRegistration(
+      doc,
+      {
+        events: pending.events,
+        categories: pending.categories,
+        eventCount: pending.eventCount,
+        amountInr: pending.amountInr,
+      },
+      cashfreeOrderId,
+      String(order?.cf_payment_id || order?.payment_id || cashfreeOrderId)
+    );
 
     return sendSuccess(res, { registration: toPublicRegistration(doc) });
   } catch (err) {
