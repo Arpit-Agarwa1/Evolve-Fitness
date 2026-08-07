@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import SEO from "../components/SEO";
@@ -948,14 +947,6 @@ export default function BadmintonOpen() {
             </div>
           ) : null}
 
-          {step !== "done" ? (
-            <p className="badminton-form__hint" style={{ marginTop: "1.25rem" }}>
-              Evolve member?{" "}
-              <Link to="/badminton/members">
-                Members tournament registration
-              </Link>
-            </p>
-          ) : null}
         </section>
 
         <section className="badminton-details" aria-label="Tournament details">
