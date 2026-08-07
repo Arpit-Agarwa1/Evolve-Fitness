@@ -250,7 +250,7 @@ Public portal: **`/badminton`** (QR → `https://evolvestudio.fitness/badminton`
 | `CASHFREE_ENV` | `sandbox` (local) or `production` (live) |
 | `PUBLIC_SITE_ORIGIN` | Site origin for payment return URL |
 
-- **Members:** ₹500 / ₹800 for 1–2 events (MD / WD / Mixed Doubles, chit pairing) via Cashfree. **Open:** ₹500 / ₹800 / ₹1,000 / ₹1,200 for 1–4 events via Cashfree.
+- **Open only:** ₹500 / ₹800 / ₹1,000 / ₹1,200 for 1–4 events via Cashfree (`/badminton/open`). Legacy `/badminton/members` redirects to open.
 - **Admin:** `/admin/badminton` — list, CSV export, close categories, force-close registration.
 
 ### Pickleball Championship 2026

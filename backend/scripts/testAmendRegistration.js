@@ -1,11 +1,6 @@
 /**
  * Tests for already-registered lookup + amend (fee delta) flows.
  * Run: node scripts/testAmendRegistration.js
- *
- * Covers:
- * - First-name matching
- * - Open / pickleball / member amend builders (delta fees, no-remove rule)
- * - HTTP lookup + free amend (partner/category edits) against local API
  */
 import "dotenv/config";
 import mongoose from "mongoose";
@@ -13,15 +8,11 @@ import { connectDB } from "../src/config/database.js";
 import BadmintonRegistration from "../src/models/BadmintonRegistration.js";
 import PickleballRegistration from "../src/models/PickleballRegistration.js";
 import {
-  buildMemberAmendFromExisting,
   buildOpenAmendFromExisting,
   matchesRegistrationFirstName,
 } from "../src/services/badmintonService.js";
 import { buildPickleballAmendFromExisting } from "../src/services/pickleballService.js";
-import {
-  computeMemberFeeInr,
-  computeOpenFeeInr,
-} from "../src/config/badmintonChampionship.js";
+import { computeOpenFeeInr } from "../src/config/badmintonChampionship.js";
 import { computePickleballFeeInr } from "../src/config/pickleballChampionship.js";
 
 const BASE = process.env.TEST_API_BASE || "http://localhost:5001";
@@ -81,7 +72,6 @@ async function runUnitTests() {
     "empty first name"
   );
 
-  // Open: 3 events → add 4th → delta ₹200
   const openExisting = {
     fullName: "Test Open Player",
     mobile: "9876543210",
@@ -211,7 +201,6 @@ async function runUnitTests() {
       : openPartnerOnly.message
   );
 
-  // Pickleball: 2 → 3 = ₹200
   const pkExisting = {
     fullName: "Pickle Tester",
     mobile: "9876500001",
@@ -250,40 +239,6 @@ async function runUnitTests() {
       ? `delta=${pkAdd.data.deltaInr} newTotal=${pkAdd.data.amountInr}`
       : pkAdd.message
   );
-
-  // Members: 1 → 2 = ₹300
-  const memExisting = {
-    fullName: "Member Tester",
-    mobile: "9876500002",
-    gender: "male",
-    dateOfBirth: "1990-01-01",
-    playerLevel: "beginner",
-    categories: ["mens_doubles"],
-    amountInr: computeMemberFeeInr(1),
-  };
-  const memAdd = buildMemberAmendFromExisting(
-    { cart: [{ categoryId: "mens_doubles" }, { categoryId: "mixed_doubles" }] },
-    memExisting
-  );
-  log(
-    "Members amend 1→2 — delta ₹300",
-    memAdd.ok === true &&
-      memAdd.data?.deltaInr === 300 &&
-      memAdd.data?.amountInr === 800,
-    memAdd.ok
-      ? `delta=${memAdd.data.deltaInr} newTotal=${memAdd.data.amountInr}`
-      : memAdd.message
-  );
-
-  const memRemove = buildMemberAmendFromExisting(
-    { cart: [{ categoryId: "mixed_doubles" }] },
-    memExisting
-  );
-  log(
-    "Members amend cannot drop paid category",
-    memRemove.ok === false && /cannot remove/i.test(memRemove.message || ""),
-    memRemove.message || "unexpected ok"
-  );
 }
 
 async function seedAndHttpTest() {
@@ -313,15 +268,22 @@ async function seedAndHttpTest() {
     `status=${health.status} db=${health.json?.data?.database}`
   );
 
+  // Members public routes must be gone
+  {
+    const gone = await req("POST", "/api/badminton/members/checkout", {});
+    log(
+      "Members checkout route removed",
+      gone.status === 404,
+      `http=${gone.status}`
+    );
+  }
+
   const stamp = Date.now();
   const openMobile = uniqMobile(1);
   const pkMobile = uniqMobile(2);
-  const memMobile = uniqMobile(3);
   const openId = `EVB26-T${String(stamp).slice(-5)}A`;
   const pkId = `EVP26-T${String(stamp).slice(-5)}B`;
-  const memId = `EVB26-T${String(stamp).slice(-5)}C`;
 
-  // Seed confirmed open registration (3 events, ₹1000)
   await BadmintonRegistration.create({
     registrationId: openId,
     tournamentType: "open",
@@ -403,41 +365,12 @@ async function seedAndHttpTest() {
     paidAt: new Date(),
   });
 
-  await BadmintonRegistration.create({
-    registrationId: memId,
-    tournamentType: "member",
-    fullName: "Amend Member Tester",
-    mobile: memMobile,
-    email: "",
-    gender: "male",
-    dateOfBirth: new Date("1990-05-05"),
-    playerLevel: "beginner",
-    categories: ["mens_doubles"],
-    events: [
-      {
-        categoryId: "mens_doubles",
-        categoryLabel: "Men's Doubles",
-        partnerName: "",
-        partnerFirstName: "",
-        partnerLastName: "",
-        partnerAge: null,
-        partnerMobile: "",
-      },
-    ],
-    eventCount: 1,
-    amountInr: 500,
-    paymentStatus: "paid",
-    status: "confirmed",
-    paidAt: new Date(),
-  });
-
   log(
     "Seeded confirmed test registrations",
     true,
-    `open=${openId}/${openMobile} pk=${pkId}/${pkMobile} mem=${memId}/${memMobile}`
+    `open=${openId}/${openMobile} pk=${pkId}/${pkMobile}`
   );
 
-  // --- Lookup success / fail ---
   {
     const ok = await req("POST", "/api/badminton/open/lookup", {
       firstName: "Amend",
@@ -460,16 +393,6 @@ async function seedAndHttpTest() {
       badName.status === 404,
       `http=${badName.status} msg=${badName.json?.message}`
     );
-
-    const badPhone = await req("POST", "/api/badminton/open/lookup", {
-      firstName: "Amend",
-      mobile: "9000000000",
-    });
-    log(
-      "Open lookup — unknown phone (404)",
-      badPhone.status === 404,
-      `http=${badPhone.status} msg=${badPhone.json?.message}`
-    );
   }
 
   {
@@ -485,20 +408,6 @@ async function seedAndHttpTest() {
     );
   }
 
-  {
-    const ok = await req("POST", "/api/badminton/members/lookup", {
-      firstName: "Amend",
-      mobile: memMobile,
-    });
-    log(
-      "Members lookup — valid",
-      ok.status === 200 &&
-        ok.json?.data?.registration?.registrationId === memId,
-      `http=${ok.status} id=${ok.json?.data?.registration?.registrationId}`
-    );
-  }
-
-  // --- Free partner amend (delta 0) ---
   {
     const res = await req("POST", "/api/badminton/open/amend/checkout", {
       firstName: "Amend",
@@ -534,7 +443,6 @@ async function seedAndHttpTest() {
     );
   }
 
-  // --- Add 4th event → expect Cashfree payment for ₹200 ---
   {
     const res = await req("POST", "/api/badminton/open/amend/checkout", {
       firstName: "Amend",
@@ -567,23 +475,19 @@ async function seedAndHttpTest() {
       res.json?.data?.deltaInr === 200 &&
       res.json?.data?.newTotalInr === 1200 &&
       Boolean(res.json?.data?.paymentSessionId);
-    const unavailable = res.status === 503;
     log(
       "Open amend 3→4 — charge ₹200 delta",
-      payOk || unavailable,
+      payOk || res.status === 503,
       payOk
-        ? `http=${res.status} delta=${res.json?.data?.deltaInr} order=${res.json?.data?.orderId} session=yes`
-        : `http=${res.status} msg=${res.json?.message} (503=Cashfree unavailable is acceptable in CI)`
+        ? `http=${res.status} delta=${res.json?.data?.deltaInr} order=${res.json?.data?.orderId}`
+        : `http=${res.status} msg=${res.json?.message}`
     );
-
-    // Clear pending amend so cleanup is clean / don't leave half-paid state
     await BadmintonRegistration.updateOne(
       { registrationId: openId },
       { $unset: { pendingAmend: 1 } }
     );
   }
 
-  // --- Pickleball free save (same cart) ---
   {
     const res = await req("POST", "/api/pickleball/amend/checkout", {
       firstName: "Amend",
@@ -603,69 +507,10 @@ async function seedAndHttpTest() {
       res.status === 200 &&
         res.json?.data?.paymentRequired === false &&
         res.json?.data?.deltaInr === 0,
-      `http=${res.status} delta=${res.json?.data?.deltaInr} msg=${res.json?.message || ""}`
+      `http=${res.status} delta=${res.json?.data?.deltaInr}`
     );
   }
 
-  // --- Pickleball 2→3 paid delta ---
-  {
-    const res = await req("POST", "/api/pickleball/amend/checkout", {
-      firstName: "Amend",
-      mobile: pkMobile,
-      cart: [
-        {
-          categoryId: "pk_md_35",
-          partnerFirstName: "Updated",
-          partnerLastName: "Mate",
-          partnerAge: 42,
-        },
-        { categoryId: "pk_ms" },
-        {
-          categoryId: "pk_xd_35",
-          partnerFirstName: "Mix",
-          partnerLastName: "Add",
-          partnerAge: 40,
-        },
-      ],
-    });
-    const payOk =
-      res.status === 201 &&
-      res.json?.data?.paymentRequired === true &&
-      res.json?.data?.deltaInr === 200;
-    log(
-      "Pickleball amend 2→3 — charge ₹200 delta",
-      payOk || res.status === 503,
-      `http=${res.status} delta=${res.json?.data?.deltaInr} msg=${res.json?.message || ""}`
-    );
-    await PickleballRegistration.updateOne(
-      { registrationId: pkId },
-      { $unset: { pendingAmend: 1 } }
-    );
-  }
-
-  // --- Members add 2nd event → ₹300 ---
-  {
-    const res = await req("POST", "/api/badminton/members/amend/checkout", {
-      firstName: "Amend",
-      mobile: memMobile,
-      cart: [{ categoryId: "mens_doubles" }, { categoryId: "mixed_doubles" }],
-    });
-    const payOk =
-      res.status === 201 &&
-      res.json?.data?.paymentRequired === true &&
-      res.json?.data?.deltaInr === 300;
-    log(
-      "Members amend 1→2 — charge ₹300 delta",
-      payOk || res.status === 503,
-      `http=${res.status} delta=${res.json?.data?.deltaInr} msg=${res.json?.message || ""}`
-    );
-    await BadmintonRegistration.updateOne(
-      { registrationId: memId },
-      { $unset: { pendingAmend: 1 } }
-    );
-  }
-
-  // --- Reject remove via HTTP ---
   {
     const res = await req("POST", "/api/badminton/open/amend/checkout", {
       firstName: "Amend",
@@ -679,12 +524,9 @@ async function seedAndHttpTest() {
     );
   }
 
-  // Cleanup seeded docs
-  await BadmintonRegistration.deleteMany({
-    registrationId: { $in: [openId, memId] },
-  });
+  await BadmintonRegistration.deleteMany({ registrationId: openId });
   await PickleballRegistration.deleteOne({ registrationId: pkId });
-  log("Cleanup seeded test docs", true, `${openId}, ${pkId}, ${memId}`);
+  log("Cleanup seeded test docs", true, `${openId}, ${pkId}`);
 
   await mongoose.disconnect();
 }

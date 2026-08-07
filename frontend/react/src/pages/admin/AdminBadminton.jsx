@@ -28,7 +28,7 @@ function categoryLabel(id) {
 }
 
 /**
- * Admin — Badminton Members + Open registrations.
+ * Admin — Badminton Open registrations (legacy members filter kept for old rows).
  */
 export default function AdminBadminton() {
   const { request } = useAdminApi();
@@ -39,7 +39,7 @@ export default function AdminBadminton() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("confirmed");
-  const [typeFilter, setTypeFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("open");
   const [settings, setSettings] = useState(null);
   const [categoryStatus, setCategoryStatus] = useState(null);
   const [savingSettings, setSavingSettings] = useState(false);
@@ -196,8 +196,8 @@ export default function AdminBadminton() {
           }}
         >
           <option value="all">All</option>
-          <option value="member">Members</option>
           <option value="open">Open</option>
+          <option value="member">Members (legacy)</option>
         </select>
         <label className="admin-member-toolbar__label" htmlFor="bd-status">
           Status

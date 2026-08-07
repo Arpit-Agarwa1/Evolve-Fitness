@@ -1,5 +1,5 @@
 import React, { lazy, Suspense } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import PageLoader from "./components/PageLoader";
 import ProtectedAdminRoute from "./components/admin/ProtectedAdminRoute";
@@ -9,8 +9,6 @@ const Trainers = lazy(() => import("./pages/Trainers"));
 const Membership = lazy(() => import("./pages/Membership"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Register = lazy(() => import("./pages/Register"));
-const Badminton = lazy(() => import("./pages/Badminton"));
-const BadmintonMembers = lazy(() => import("./pages/BadmintonMembers"));
 const BadmintonOpen = lazy(() => import("./pages/BadmintonOpen"));
 const Pickleball = lazy(() => import("./pages/Pickleball"));
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
@@ -33,8 +31,12 @@ function App() {
         <Route path="/membership" element={<Membership />} />
         <Route path="/register" element={<Register />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/badminton" element={<Badminton />} />
-        <Route path="/badminton/members" element={<BadmintonMembers />} />
+        {/* Only open badminton registration — old members QR URLs redirect here */}
+        <Route path="/badminton" element={<Navigate to="/badminton/open" replace />} />
+        <Route
+          path="/badminton/members"
+          element={<Navigate to="/badminton/open" replace />}
+        />
         <Route path="/badminton/open" element={<BadmintonOpen />} />
         <Route path="/pickleball" element={<Pickleball />} />
 
