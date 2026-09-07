@@ -5,6 +5,7 @@ import Footer from "../components/Footer";
 import { evolveProgramImages } from "../assets/evolveMagazine";
 import EvolveImage from "../components/EvolveImage";
 import SEO from "../components/SEO";
+import AdSlot from "../components/AdSlot";
 
 /**
  * Training programs — each card uses Evolve magazine photography.
@@ -72,6 +73,8 @@ export default function Programs() {
           expert coaching — so results feel as good as they look.
         </p>
       </section>
+
+      <AdSlot className="ad-slot--band" />
 
       <section className="programs-section">
         <div className="programs-grid">

@@ -10,20 +10,23 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
 const dist = join(root, "dist");
 
+function readEnvFileValue(envPath, key) {
+  if (!existsSync(envPath)) return "";
+  const text = readFileSync(envPath, "utf8");
+  const m = text.match(new RegExp(`^\\s*${key}\\s*=\\s*(.+)$`, "m"));
+  if (!m) return "";
+  return m[1]
+    .trim()
+    .replace(/^["']|["']$/g, "");
+}
+
 function resolveBaseUrl() {
   if (process.env.VITE_SITE_URL?.trim()) {
     return process.env.VITE_SITE_URL.trim().replace(/\/$/, "");
   }
-  const envPath = join(root, ".env.production");
-  if (existsSync(envPath)) {
-    const text = readFileSync(envPath, "utf8");
-    const m = text.match(/^\s*VITE_SITE_URL\s*=\s*(.+)$/m);
-    if (m) {
-      return m[1]
-        .trim()
-        .replace(/\/$/, "")
-        .replace(/^["']|["']$/g, "");
-    }
+  const fromFile = readEnvFileValue(join(root, ".env.production"), "VITE_SITE_URL");
+  if (fromFile) {
+    return fromFile.replace(/\/$/, "");
   }
   const vu = process.env.VERCEL_URL?.trim();
   if (vu) {
@@ -80,4 +83,27 @@ Sitemap: ${base}/sitemap.xml
 `;
 
 writeFileSync(join(dist, "robots.txt"), robots, "utf8");
+
+function resolveAdsensePublisherId() {
+  const raw = (
+    process.env.VITE_ADSENSE_CLIENT?.trim() ||
+    readEnvFileValue(join(root, ".env.production"), "VITE_ADSENSE_CLIENT") ||
+    readEnvFileValue(join(root, ".env"), "VITE_ADSENSE_CLIENT")
+  ).replace(/^["']|["']$/g, "");
+  if (/^ca-pub-\d+$/i.test(raw)) return raw.replace(/^ca-/i, "");
+  if (/^pub-\d+$/i.test(raw)) return raw;
+  return "";
+}
+
+const adsPub = resolveAdsensePublisherId();
+if (adsPub) {
+  const adsTxt = `google.com, ${adsPub}, DIRECT, f08c47fec0942fa0\n`;
+  writeFileSync(join(dist, "ads.txt"), adsTxt, "utf8");
+  console.log(`[write-sitemap-robots] wrote ads.txt for ${adsPub}`);
+} else {
+  console.log(
+    "[write-sitemap-robots] skipped ads.txt (set VITE_ADSENSE_CLIENT to enable AdSense)"
+  );
+}
+
 console.log(`[write-sitemap-robots] wrote sitemap + robots for ${base}`);

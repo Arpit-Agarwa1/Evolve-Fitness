@@ -14,6 +14,7 @@ import { INSTAGRAM_URL } from "../config/socialLinks";
 import EvolveImage from "../components/EvolveImage";
 import SEO from "../components/SEO";
 import JsonLdLocalBusiness from "../components/JsonLdLocalBusiness";
+import AdSlot from "../components/AdSlot";
 
 /**
  * Landing page — hero uses HD gym photography + glass panel for readable type.
@@ -123,6 +124,8 @@ export default function Home() {
             ))}
           </div>
         </section>
+
+        <AdSlot className="ad-slot--band" />
 
         <section id="experience" className="experience">
           <header className="experience-header">

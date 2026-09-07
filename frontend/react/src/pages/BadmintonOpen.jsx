@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import SEO from "../components/SEO";
+import AdSlot from "../components/AdSlot";
 import BadmintonPlayerListsModal from "../components/BadmintonPlayerListsModal";
 import BadmintonWhatsAppInvite from "../components/BadmintonWhatsAppInvite";
 import TournamentAlreadyRegistered from "../components/TournamentAlreadyRegistered";
@@ -1016,6 +1017,8 @@ export default function BadmintonOpen() {
             </li>
           </ul>
         </section>
+
+        <AdSlot className="ad-slot--band" />
 
         <section className="badminton-rules" aria-label="Categories and rules">
           <h2 className="badminton-section-title">Categories &amp; rules</h2>

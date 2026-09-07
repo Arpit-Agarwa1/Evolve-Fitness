@@ -8,6 +8,7 @@ import {
 } from "../assets/evolveMagazine";
 import EvolveImage from "../components/EvolveImage";
 import SEO from "../components/SEO";
+import AdSlot from "../components/AdSlot";
 import { apiFetch } from "../services/api";
 import { trainerDisplayPhotoUrl } from "../utils/trainerImageUrl";
 
@@ -79,6 +80,8 @@ export default function Trainers() {
           </p>
         </div>
       </section>
+
+      <AdSlot className="ad-slot--band" />
 
       <section className="trainers-section">
         {errorMessage ? (

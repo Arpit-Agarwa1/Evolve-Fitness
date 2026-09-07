@@ -6,6 +6,7 @@ import {
 } from "../config/brand";
 import { GYM_HOURS_LINE } from "../data/membershipPlans";
 import { CONTACT_EMAIL, INSTAGRAM_URL } from "../config/socialLinks";
+import AdSlot from "./AdSlot";
 import "../styles/footer.css";
 
 /**
@@ -14,6 +15,7 @@ import "../styles/footer.css";
 export default function Footer() {
   return (
     <footer className="footer">
+      <AdSlot className="ad-slot--footer" />
       <div className="footer-container">
         <div className="footer-col">
           <div className="footer-brand">

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import SEO from "../components/SEO";
+import AdSlot from "../components/AdSlot";
 import TournamentAlreadyRegistered from "../components/TournamentAlreadyRegistered";
 import { apiFetch } from "../services/api";
 import { loadCashfreeScript } from "../utils/loadCashfree";
@@ -919,6 +920,8 @@ export default function Pickleball() {
             </li>
           </ul>
         </section>
+
+        <AdSlot className="ad-slot--band" />
 
         <section className="badminton-rules" aria-label="Categories and rules">
           <h2 className="badminton-section-title">Categories &amp; rules</h2>
