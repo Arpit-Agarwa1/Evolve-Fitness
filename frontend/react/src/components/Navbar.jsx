@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { EVOLVE_LOGO_ALT, EVOLVE_LOGO_NAV_SRC } from "../config/brand";
+import { SHOW_PUBLIC_TOURNAMENTS } from "../config/tournaments";
 import "../styles/navbar.css";
 
 /**
@@ -87,16 +88,20 @@ export default function Navbar() {
               Membership
             </NavLink>
           </li>
-          <li>
-            <NavLink to="/badminton" className={linkClass} onClick={() => setMenuOpen(false)}>
-              Evolve Badminton Championship
-            </NavLink>
-          </li>
-          <li>
-            <NavLink to="/pickleball" className={linkClass} onClick={() => setMenuOpen(false)}>
-              Evolve Pickleball Championship
-            </NavLink>
-          </li>
+          {SHOW_PUBLIC_TOURNAMENTS ? (
+            <>
+              <li>
+                <NavLink to="/badminton" className={linkClass} onClick={() => setMenuOpen(false)}>
+                  Evolve Badminton Championship
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="/pickleball" className={linkClass} onClick={() => setMenuOpen(false)}>
+                  Evolve Pickleball Championship
+                </NavLink>
+              </li>
+            </>
+          ) : null}
           <li>
             <NavLink to="/contact" className={linkClass} onClick={() => setMenuOpen(false)}>
               Contact

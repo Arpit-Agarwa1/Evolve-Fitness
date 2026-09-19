@@ -47,7 +47,6 @@ const entries = [
   { loc: "/trainers", priority: "0.9", changefreq: "weekly" },
   { loc: "/membership", priority: "0.9", changefreq: "weekly" },
   { loc: "/register", priority: "0.85", changefreq: "monthly" },
-  { loc: "/badminton/open", priority: "0.95", changefreq: "daily" },
   { loc: "/contact", priority: "0.9", changefreq: "monthly" },
 ];
 

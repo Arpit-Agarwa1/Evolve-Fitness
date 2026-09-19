@@ -6,6 +6,7 @@ import {
 } from "../config/brand";
 import { GYM_HOURS_LINE } from "../data/membershipPlans";
 import { CONTACT_EMAIL, INSTAGRAM_URL } from "../config/socialLinks";
+import { SHOW_PUBLIC_TOURNAMENTS } from "../config/tournaments";
 import AdSlot from "./AdSlot";
 import "../styles/footer.css";
 
@@ -53,12 +54,16 @@ export default function Footer() {
             <li>
               <Link to="/membership">Membership</Link>
             </li>
-            <li>
-              <Link to="/badminton">Evolve Badminton Championship</Link>
-            </li>
-            <li>
-              <Link to="/pickleball">Evolve Pickleball Championship</Link>
-            </li>
+            {SHOW_PUBLIC_TOURNAMENTS ? (
+              <>
+                <li>
+                  <Link to="/badminton">Evolve Badminton Championship</Link>
+                </li>
+                <li>
+                  <Link to="/pickleball">Evolve Pickleball Championship</Link>
+                </li>
+              </>
+            ) : null}
             <li>
               <Link to="/register">Register</Link>
             </li>

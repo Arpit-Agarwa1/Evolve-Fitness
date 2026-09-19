@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import PageLoader from "./components/PageLoader";
 import ProtectedAdminRoute from "./components/admin/ProtectedAdminRoute";
+import { SHOW_PUBLIC_TOURNAMENTS } from "./config/tournaments";
 
 const Programs = lazy(() => import("./pages/Programs"));
 const Trainers = lazy(() => import("./pages/Trainers"));
@@ -31,14 +32,24 @@ function App() {
         <Route path="/membership" element={<Membership />} />
         <Route path="/register" element={<Register />} />
         <Route path="/contact" element={<Contact />} />
-        {/* Only open badminton registration — old members QR URLs redirect here */}
-        <Route path="/badminton" element={<Navigate to="/badminton/open" replace />} />
-        <Route
-          path="/badminton/members"
-          element={<Navigate to="/badminton/open" replace />}
-        />
-        <Route path="/badminton/open" element={<BadmintonOpen />} />
-        <Route path="/pickleball" element={<Pickleball />} />
+        {SHOW_PUBLIC_TOURNAMENTS ? (
+          <>
+            <Route path="/badminton" element={<Navigate to="/badminton/open" replace />} />
+            <Route
+              path="/badminton/members"
+              element={<Navigate to="/badminton/open" replace />}
+            />
+            <Route path="/badminton/open" element={<BadmintonOpen />} />
+            <Route path="/pickleball" element={<Pickleball />} />
+          </>
+        ) : (
+          <>
+            <Route path="/badminton" element={<Navigate to="/" replace />} />
+            <Route path="/badminton/members" element={<Navigate to="/" replace />} />
+            <Route path="/badminton/open" element={<Navigate to="/" replace />} />
+            <Route path="/pickleball" element={<Navigate to="/" replace />} />
+          </>
+        )}
 
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route
