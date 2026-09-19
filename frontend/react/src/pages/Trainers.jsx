@@ -1,53 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import "../styles/trainers.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import {
-  evolveTrainerCardImages,
-  evolveTrainersHeroImage,
-} from "../assets/evolveMagazine";
+import { evolveTrainersHeroImage } from "../assets/evolveMagazine";
 import EvolveImage from "../components/EvolveImage";
 import SEO from "../components/SEO";
 import AdSlot from "../components/AdSlot";
-import { apiFetch } from "../services/api";
-import { trainerDisplayPhotoUrl } from "../utils/trainerImageUrl";
-
-/** Fallback card image when a trainer has no uploaded photo yet */
-const PLACEHOLDER_IMG = evolveTrainerCardImages[0];
+import { trainerPortraits } from "../assets/trainerPortraits.generated";
 
 /**
- * Trainers page — hero uses facility photography; cards load from the API (owner-managed).
+ * Trainers page — hero uses facility photography; cards use studio portraits.
  */
 export default function Trainers() {
-  const [trainers, setTrainers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState("");
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      setErrorMessage("");
-      try {
-        const res = await apiFetch("/api/trainers");
-        if (!cancelled) {
-          setTrainers(res.data?.items ?? []);
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setErrorMessage(
-            err instanceof Error ? err.message : "Could not load trainers."
-          );
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
   return (
     <div className="trainers-page">
       <SEO
@@ -84,41 +48,22 @@ export default function Trainers() {
       <AdSlot className="ad-slot--band" />
 
       <section className="trainers-section">
-        {errorMessage ? (
-          <p className="trainers-api-error" role="alert">
-            {errorMessage}
-          </p>
-        ) : null}
-        {loading ? (
-          <p className="trainers-loading">Loading coaches…</p>
-        ) : trainers.length === 0 ? (
-          <p className="trainers-empty">
-            Our coaching team will appear here soon. Check back or contact the
-            front desk.
-          </p>
-        ) : (
-          <div className="trainers-grid">
-            {trainers.map((trainer) => {
-              const uploaded = trainerDisplayPhotoUrl(trainer);
-              const src = uploaded ?? PLACEHOLDER_IMG;
-              return (
-                <article key={trainer._id} className="trainer-card">
-                  <EvolveImage
-                    src={src}
-                    alt={`${trainer.name}, ${trainer.role} — Evolve Fitness`}
-                    sizes="(max-width: 640px) 100vw, 380px"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                  <div className="trainer-info">
-                    <h3>{trainer.name}</h3>
-                    <span>{trainer.role}</span>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        )}
+        <div className="trainers-grid">
+          {trainerPortraits.map((photo, i) => (
+            <article key={`portrait-${i}`} className="trainer-card">
+              <EvolveImage
+                src={photo}
+                alt="Evolve Fitness personal trainer"
+                sizes="(max-width: 640px) 100vw, 380px"
+                loading={i < 2 ? "eager" : "lazy"}
+                decoding="async"
+              />
+              <div className="trainer-info">
+                <span>Personal trainer</span>
+              </div>
+            </article>
+          ))}
+        </div>
       </section>
       <Footer />
     </div>
