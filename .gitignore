@@ -1,0 +1,3 @@
+# Local scratch (Drive downloads, reports, tooling) — not for deploy
+tmp/
+.DS_Store

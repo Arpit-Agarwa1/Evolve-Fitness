@@ -9,15 +9,8 @@
 }
 
 .programs-hero {
-  text-align: center;
-  padding: clamp(5rem, 12vw, 7rem) clamp(1.25rem, 4vw, 2.5rem)
-    clamp(3rem, 6vw, 4rem);
-  background: linear-gradient(
-    180deg,
-    var(--ev-bg-elevated) 0%,
-    var(--ev-bg) 100%
-  );
-  border-bottom: 1px solid var(--ev-border);
+  /* Video treatment comes from .video-hero in evolve-video.css */
+  background: none;
 }
 
 .programs-eyebrow {
@@ -73,7 +66,8 @@
   overflow: hidden;
 }
 
-.program-card .evolve-image {
+.program-card .evolve-image,
+.program-card .evolve-video {
   width: 100%;
   height: 100%;
   object-fit: cover;

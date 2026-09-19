@@ -33,8 +33,8 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 32%;
-  transform: scale(1.02);
+  object-position: center 45%;
+  transform: scale(1.04);
 }
 
 .trainers-hero-scrim {

@@ -7,6 +7,8 @@ import ContactMap from "../components/ContactMap";
 import { apiFetch } from "../services/api";
 import SEO from "../components/SEO";
 import { CONTACT_EMAIL } from "../config/socialLinks";
+import { evolveVideos } from "../assets/evolveVideos";
+import EvolveVideo from "../components/EvolveVideo";
 
 /**
  * Contact page — submits enquiries to the MVC API (MongoDB).
@@ -71,13 +73,23 @@ export default function Contact() {
       />
       <Navbar />
 
-      <section className="contact-hero">
-        <p className="contact-eyebrow">Contact</p>
-        <h1 className="contact-title">Let&apos;s talk</h1>
-        <p className="contact-lede">
-          Questions about membership, corporate plans, or your first visit —
-          we&apos;re here to help.
-        </p>
+      <section className="contact-hero video-hero">
+        <div className="video-hero-bg" aria-hidden="true">
+          <EvolveVideo
+            src={evolveVideos.hero.src}
+            poster={evolveVideos.hero.poster}
+            preload="auto"
+          />
+          <div className="video-hero-scrim" />
+        </div>
+        <div className="video-hero-content">
+          <p className="contact-eyebrow">Contact</p>
+          <h1 className="contact-title">Let&apos;s talk</h1>
+          <p className="contact-lede">
+            Questions about membership, corporate plans, or your first visit —
+            we&apos;re here to help.
+          </p>
+        </div>
       </section>
 
       <section className="contact-section">

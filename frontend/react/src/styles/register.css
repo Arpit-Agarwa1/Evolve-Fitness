@@ -9,15 +9,8 @@
 }
 
 .register-hero {
-  text-align: center;
-  padding: clamp(5rem, 12vw, 7rem) clamp(1.25rem, 4vw, 2.5rem)
-    clamp(2.5rem, 5vw, 3.5rem);
-  background: linear-gradient(
-    180deg,
-    var(--ev-bg-elevated) 0%,
-    var(--ev-bg) 100%
-  );
-  border-bottom: 1px solid var(--ev-border);
+  /* Video treatment comes from .video-hero in evolve-video.css */
+  background: none;
 }
 
 .register-eyebrow {

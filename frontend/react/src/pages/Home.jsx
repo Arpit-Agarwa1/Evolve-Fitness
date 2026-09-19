@@ -7,17 +7,24 @@ import Footer from "../components/Footer";
 import {
   evolveGalleryImageAlts,
   evolveGalleryImages,
-  evolveHeroImage,
 } from "../assets/evolveMagazine";
+import { evolveVideos } from "../assets/evolveVideos";
 import { evolveServices } from "../data/services";
 import { INSTAGRAM_URL } from "../config/socialLinks";
 import EvolveImage from "../components/EvolveImage";
+import EvolveVideo from "../components/EvolveVideo";
 import SEO from "../components/SEO";
 import JsonLdLocalBusiness from "../components/JsonLdLocalBusiness";
 import AdSlot from "../components/AdSlot";
 
+/** Motion clips matched to service cards */
+const SERVICE_VIDEOS = {
+  space: evolveVideos.hero,
+  training: evolveVideos.inside,
+};
+
 /**
- * Landing page — hero uses HD gym photography + glass panel for readable type.
+ * Landing page — hero uses a looping facility film + glass panel for readable type.
  */
 export default function Home() {
   return (
@@ -31,9 +38,7 @@ export default function Home() {
         <link
           rel="preload"
           as="image"
-          href={evolveHeroImage.src}
-          imageSrcSet={evolveHeroImage.srcSet}
-          imageSizes="100vw"
+          href={evolveVideos.hero.poster}
           fetchPriority="high"
         />
       </Helmet>
@@ -41,17 +46,12 @@ export default function Home() {
       <Navbar />
       <div className="home">
         <section className="hero" aria-labelledby="hero-heading">
-          {/* Background stack: sharp photo + overlays + light motion (no baked-in poster text). */}
           <div className="hero-bg" aria-hidden="true">
-            <EvolveImage
-              className="hero-bg-img"
-              src={evolveHeroImage}
-              alt=""
-              sizes="100vw"
-              loading="eager"
-              fetchPriority="high"
-              decoding="async"
-              fadeIn={false}
+            <EvolveVideo
+              className="hero-bg-video"
+              src={evolveVideos.hero.src}
+              poster={evolveVideos.hero.poster}
+              preload="auto"
             />
             <div className="hero-bg-vignette" />
             <div className="hero-bg-mesh" />
@@ -108,14 +108,23 @@ export default function Home() {
             </p>
           </header>
           <div className="evolve-gallery-grid">
-            {evolveGalleryImages.map((photo, i) => (
+            <figure className="evolve-gallery-cell evolve-gallery-cell--0 evolve-gallery-cell--video">
+              <EvolveVideo
+                src={evolveVideos.inside.src}
+                poster={evolveVideos.inside.poster}
+              />
+            </figure>
+            {evolveGalleryImages.slice(1).map((photo, i) => (
               <figure
                 key={photo.src}
-                className={`evolve-gallery-cell evolve-gallery-cell--${i}`}
+                className={`evolve-gallery-cell evolve-gallery-cell--${i + 1}`}
               >
                 <EvolveImage
                   src={photo}
-                  alt={evolveGalleryImageAlts[i] ?? "Evolve Fitness facility photo"}
+                  alt={
+                    evolveGalleryImageAlts[i + 1] ??
+                    "Evolve Fitness facility photo"
+                  }
                   sizes="(max-width: 767px) 48vw, (max-width: 1199px) 32vw, 600px"
                   loading="lazy"
                   decoding="async"
@@ -144,13 +153,20 @@ export default function Home() {
                 className={`service-card ${index === 0 ? "service-card--wide" : ""}`}
               >
                 <div className="service-card-media">
-                  <EvolveImage
-                    src={service.image}
-                    alt={service.alt}
-                    sizes="(max-width: 767px) 100vw, (max-width: 1099px) 50vw, 400px"
-                    loading="lazy"
-                    decoding="async"
-                  />
+                  {SERVICE_VIDEOS[service.id] ? (
+                    <EvolveVideo
+                      src={SERVICE_VIDEOS[service.id].src}
+                      poster={SERVICE_VIDEOS[service.id].poster}
+                    />
+                  ) : (
+                    <EvolveImage
+                      src={service.image}
+                      alt={service.alt}
+                      sizes="(max-width: 767px) 100vw, (max-width: 1099px) 50vw, 400px"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  )}
                   <div className="service-card-media-overlay" />
                 </div>
                 <div className="service-card-body">
@@ -199,6 +215,13 @@ export default function Home() {
         </section>
 
         <section className="cta-band">
+          <div className="cta-band-bg" aria-hidden="true">
+            <EvolveVideo
+              src={evolveVideos.inside.src}
+              poster={evolveVideos.inside.poster}
+            />
+            <div className="cta-band-scrim" />
+          </div>
           <div className="cta-band-inner">
             <p className="cta-eyebrow">Ready when you are</p>
             <h2 className="cta-title">Step into Evolve</h2>

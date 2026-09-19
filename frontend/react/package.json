@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "optimize:images": "node scripts/optimize-magazine-images.mjs",
+    "optimize:videos": "bash scripts/optimize-videos.sh",
     "prebuild": "npm run optimize:images",
     "build": "vite build",
     "postbuild": "node scripts/write-sitemap-robots.mjs",

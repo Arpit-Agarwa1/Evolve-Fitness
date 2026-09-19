@@ -3,7 +3,9 @@ import "../styles/programs.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { evolveProgramImages } from "../assets/evolveMagazine";
+import { evolveVideos } from "../assets/evolveVideos";
 import EvolveImage from "../components/EvolveImage";
+import EvolveVideo from "../components/EvolveVideo";
 import SEO from "../components/SEO";
 import AdSlot from "../components/AdSlot";
 
@@ -16,6 +18,7 @@ const programs = [
     body:
       "Structured strength and conditioning with certified coaches and data-informed progressions.",
     image: evolveProgramImages[0],
+    video: evolveVideos.inside,
     alt: "Evolve Fitness — digital class board, cardio, and smart training zone",
   },
   {
@@ -65,13 +68,23 @@ export default function Programs() {
       />
       <Navbar />
 
-      <section className="programs-hero">
-        <p className="programs-eyebrow">Programs</p>
-        <h1 className="programs-title">Train with purpose</h1>
-        <p className="programs-lede">
-          Every program is built around our luxury floor, elite equipment, and
-          expert coaching — so results feel as good as they look.
-        </p>
+      <section className="programs-hero video-hero">
+        <div className="video-hero-bg" aria-hidden="true">
+          <EvolveVideo
+            src={evolveVideos.inside.src}
+            poster={evolveVideos.inside.poster}
+            preload="auto"
+          />
+          <div className="video-hero-scrim" />
+        </div>
+        <div className="video-hero-content">
+          <p className="programs-eyebrow">Programs</p>
+          <h1 className="programs-title">Train with purpose</h1>
+          <p className="programs-lede">
+            Every program is built around our luxury floor, elite equipment, and
+            expert coaching — so results feel as good as they look.
+          </p>
+        </div>
       </section>
 
       <AdSlot className="ad-slot--band" />
@@ -81,13 +94,20 @@ export default function Programs() {
           {programs.map((program) => (
             <article key={program.title} className="program-card">
               <div className="program-card-image-wrap">
-                <EvolveImage
-                  src={program.image}
-                  alt={program.alt}
-                  sizes="(max-width: 640px) 100vw, (max-width: 960px) 50vw, 440px"
-                  loading="lazy"
-                  decoding="async"
-                />
+                {program.video ? (
+                  <EvolveVideo
+                    src={program.video.src}
+                    poster={program.video.poster}
+                  />
+                ) : (
+                  <EvolveImage
+                    src={program.image}
+                    alt={program.alt}
+                    sizes="(max-width: 640px) 100vw, (max-width: 960px) 50vw, 440px"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                )}
               </div>
               <div className="program-content">
                 <h3>{program.title}</h3>

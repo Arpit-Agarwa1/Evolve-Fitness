@@ -23,5 +23,5 @@ dist-ssr
 *.sln
 *.sw?
 
-# Large unused reel media — host on a CDN if you add video later
-public/videos/
+# Raw Drive downloads stay in repo tmp/ (not this folder)
+# Optimized web clips in public/videos/ are committed.

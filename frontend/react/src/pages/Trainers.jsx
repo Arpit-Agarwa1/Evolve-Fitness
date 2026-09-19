@@ -2,14 +2,15 @@ import React from "react";
 import "../styles/trainers.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { evolveTrainersHeroImage } from "../assets/evolveMagazine";
+import { evolveVideos } from "../assets/evolveVideos";
 import EvolveImage from "../components/EvolveImage";
+import EvolveVideo from "../components/EvolveVideo";
 import SEO from "../components/SEO";
 import AdSlot from "../components/AdSlot";
 import { trainerPortraits } from "../assets/trainerPortraits.generated";
 
 /**
- * Trainers page — hero uses facility photography; cards use studio portraits.
+ * Trainers page — hero uses training-floor film; cards use studio portraits.
  */
 export default function Trainers() {
   return (
@@ -23,15 +24,11 @@ export default function Trainers() {
 
       <section className="trainers-hero">
         <div className="trainers-hero-bg" aria-hidden="true">
-          <EvolveImage
+          <EvolveVideo
             className="trainers-hero-img"
-            src={evolveTrainersHeroImage}
-            alt=""
-            loading="eager"
-            fetchPriority="high"
-            decoding="async"
-            sizes="100vw"
-            fadeIn={false}
+            src={evolveVideos.inside.src}
+            poster={evolveVideos.inside.poster}
+            preload="auto"
           />
           <div className="trainers-hero-scrim" />
         </div>

@@ -7,6 +7,8 @@ import { apiFetch } from "../services/api";
 import SEO from "../components/SEO";
 import { GENDER_OPTIONS } from "../constants/memberFields";
 import { MEMBERSHIP_PLANS } from "../data/membershipPlans";
+import { evolveVideos } from "../assets/evolveVideos";
+import EvolveVideo from "../components/EvolveVideo";
 
 const PLANS = [
   ...MEMBERSHIP_PLANS.map((p) => ({
@@ -106,13 +108,23 @@ export default function Register() {
       />
       <Navbar />
 
-      <section className="register-hero">
-        <p className="register-eyebrow">Join Evolve</p>
-        <h1 className="register-title">Create your membership</h1>
-        <p className="register-lede">
-          Register your details to get started. Our team will confirm your plan
-          and next steps.
-        </p>
+      <section className="register-hero video-hero">
+        <div className="video-hero-bg" aria-hidden="true">
+          <EvolveVideo
+            src={evolveVideos.hero.src}
+            poster={evolveVideos.hero.poster}
+            preload="auto"
+          />
+          <div className="video-hero-scrim" />
+        </div>
+        <div className="video-hero-content">
+          <p className="register-eyebrow">Join Evolve</p>
+          <h1 className="register-title">Create your membership</h1>
+          <p className="register-lede">
+            Register your details to get started. Our team will confirm your plan
+            and next steps.
+          </p>
+        </div>
       </section>
 
       <section className="register-section">

@@ -4,8 +4,10 @@ import "../styles/membership.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { MEMBERSHIP_PLANS, GYM_HOURS_LINE } from "../data/membershipPlans";
+import { evolveVideos } from "../assets/evolveVideos";
 import SEO from "../components/SEO";
 import MembershipInterestForm from "../components/MembershipInterestForm";
+import EvolveVideo from "../components/EvolveVideo";
 
 /**
  * Membership — duration-based plans and gym hours.
@@ -24,14 +26,24 @@ export default function Membership() {
       />
       <Navbar />
 
-      <section className="membership-hero">
-        <p className="membership-eyebrow">Membership</p>
-        <h1 className="membership-title">Choose your plan</h1>
-        <p className="membership-lede">
-          Full floor access, premium equipment, and luxury amenities — train on
-          your schedule.{" "}
-          <strong className="membership-hours-inline">{GYM_HOURS_LINE}</strong>.
-        </p>
+      <section className="membership-hero video-hero">
+        <div className="video-hero-bg" aria-hidden="true">
+          <EvolveVideo
+            src={evolveVideos.hero.src}
+            poster={evolveVideos.hero.poster}
+            preload="auto"
+          />
+          <div className="video-hero-scrim" />
+        </div>
+        <div className="video-hero-content">
+          <p className="membership-eyebrow">Membership</p>
+          <h1 className="membership-title">Choose your plan</h1>
+          <p className="membership-lede">
+            Full floor access, premium equipment, and luxury amenities — train on
+            your schedule.{" "}
+            <strong className="membership-hours-inline">{GYM_HOURS_LINE}</strong>.
+          </p>
+        </div>
       </section>
 
       <section className="membership-hours-banner" aria-label="Gym hours">
