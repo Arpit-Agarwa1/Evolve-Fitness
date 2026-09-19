@@ -18,7 +18,7 @@ const programs = [
     body:
       "Structured strength and conditioning with certified coaches and data-informed progressions.",
     image: evolveProgramImages[0],
-    video: evolveVideos.inside,
+    video: evolveVideos.training,
     alt: "Evolve Fitness — digital class board, cardio, and smart training zone",
   },
   {
@@ -70,11 +70,7 @@ export default function Programs() {
 
       <section className="programs-hero video-hero">
         <div className="video-hero-bg" aria-hidden="true">
-          <EvolveVideo
-            src={evolveVideos.inside.src}
-            poster={evolveVideos.inside.poster}
-            preload="auto"
-          />
+          <EvolveVideo preload="auto" {...evolveVideos.programs} />
           <div className="video-hero-scrim" />
         </div>
         <div className="video-hero-content">
@@ -95,10 +91,7 @@ export default function Programs() {
             <article key={program.title} className="program-card">
               <div className="program-card-image-wrap">
                 {program.video ? (
-                  <EvolveVideo
-                    src={program.video.src}
-                    poster={program.video.poster}
-                  />
+                  <EvolveVideo {...program.video} />
                 ) : (
                   <EvolveImage
                     src={program.image}

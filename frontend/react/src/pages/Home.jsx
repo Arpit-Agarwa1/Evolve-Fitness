@@ -19,8 +19,8 @@ import AdSlot from "../components/AdSlot";
 
 /** Motion clips matched to service cards */
 const SERVICE_VIDEOS = {
-  space: evolveVideos.hero,
-  training: evolveVideos.inside,
+  space: evolveVideos.space,
+  training: evolveVideos.training,
 };
 
 /**
@@ -38,7 +38,7 @@ export default function Home() {
         <link
           rel="preload"
           as="image"
-          href={evolveVideos.hero.poster}
+          href={evolveVideos.homeHero.poster}
           fetchPriority="high"
         />
       </Helmet>
@@ -49,9 +49,8 @@ export default function Home() {
           <div className="hero-bg" aria-hidden="true">
             <EvolveVideo
               className="hero-bg-video"
-              src={evolveVideos.hero.src}
-              poster={evolveVideos.hero.poster}
               preload="auto"
+              {...evolveVideos.homeHero}
             />
             <div className="hero-bg-vignette" />
             <div className="hero-bg-mesh" />
@@ -109,10 +108,7 @@ export default function Home() {
           </header>
           <div className="evolve-gallery-grid">
             <figure className="evolve-gallery-cell evolve-gallery-cell--0 evolve-gallery-cell--video">
-              <EvolveVideo
-                src={evolveVideos.inside.src}
-                poster={evolveVideos.inside.poster}
-              />
+              <EvolveVideo {...evolveVideos.gallery} />
             </figure>
             {evolveGalleryImages.slice(1).map((photo, i) => (
               <figure
@@ -154,10 +150,7 @@ export default function Home() {
               >
                 <div className="service-card-media">
                   {SERVICE_VIDEOS[service.id] ? (
-                    <EvolveVideo
-                      src={SERVICE_VIDEOS[service.id].src}
-                      poster={SERVICE_VIDEOS[service.id].poster}
-                    />
+                    <EvolveVideo {...SERVICE_VIDEOS[service.id]} />
                   ) : (
                     <EvolveImage
                       src={service.image}
@@ -216,10 +209,7 @@ export default function Home() {
 
         <section className="cta-band">
           <div className="cta-band-bg" aria-hidden="true">
-            <EvolveVideo
-              src={evolveVideos.inside.src}
-              poster={evolveVideos.inside.poster}
-            />
+            <EvolveVideo {...evolveVideos.cta} />
             <div className="cta-band-scrim" />
           </div>
           <div className="cta-band-inner">

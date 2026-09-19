@@ -26,9 +26,8 @@ export default function Trainers() {
         <div className="trainers-hero-bg" aria-hidden="true">
           <EvolveVideo
             className="trainers-hero-img"
-            src={evolveVideos.inside.src}
-            poster={evolveVideos.inside.poster}
             preload="auto"
+            {...evolveVideos.trainers}
           />
           <div className="trainers-hero-scrim" />
         </div>

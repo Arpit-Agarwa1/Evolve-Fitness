@@ -28,11 +28,7 @@ export default function Membership() {
 
       <section className="membership-hero video-hero">
         <div className="video-hero-bg" aria-hidden="true">
-          <EvolveVideo
-            src={evolveVideos.hero.src}
-            poster={evolveVideos.hero.poster}
-            preload="auto"
-          />
+          <EvolveVideo preload="auto" {...evolveVideos.membership} />
           <div className="video-hero-scrim" />
         </div>
         <div className="video-hero-content">

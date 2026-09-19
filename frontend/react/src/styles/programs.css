@@ -62,6 +62,7 @@
 }
 
 .program-card-image-wrap {
+  position: relative;
   aspect-ratio: 16 / 10;
   overflow: hidden;
 }
@@ -73,6 +74,11 @@
   object-fit: cover;
   object-position: center;
   transition: transform 0.5s ease;
+}
+
+.program-card .evolve-video {
+  position: absolute;
+  inset: 0;
 }
 
 .program-content {

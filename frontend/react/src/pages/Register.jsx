@@ -110,11 +110,7 @@ export default function Register() {
 
       <section className="register-hero video-hero">
         <div className="video-hero-bg" aria-hidden="true">
-          <EvolveVideo
-            src={evolveVideos.hero.src}
-            poster={evolveVideos.hero.poster}
-            preload="auto"
-          />
+          <EvolveVideo preload="auto" {...evolveVideos.register} />
           <div className="video-hero-scrim" />
         </div>
         <div className="video-hero-content">
