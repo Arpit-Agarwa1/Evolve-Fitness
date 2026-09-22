@@ -15,10 +15,8 @@ const outDir = join(root, "src/assets/trainer-portraits");
 const outModule = join(root, "src/assets/trainerPortraits.generated.js");
 
 const picks = [
-  "DSC05275.jpg",
   "DSC05277.jpg",
   "DSC05281.jpg",
-  "DSC05282.jpg",
   "DSC05293.jpg",
   "DSC05295.jpg",
   "DSC05299.jpg",
